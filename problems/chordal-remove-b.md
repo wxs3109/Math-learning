@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪；中心部分已精确化为迹链 Green 界（§13）；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪；整个 K 已精确化为单一迹链 Green 范数（§14）；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -217,7 +217,9 @@ $$t_{\mathrm{rel}}(P)\ \le\ 4\tau+6n(1+\lambda)+2K,\qquad K:=\sup_f\frac{\mathrm
 ### 7.3 恒等式：中心部分与叶子部分 **[已证]**
 
 由 $\mathrm{Var}_w(m)=\sum_y w_yd_y^2-(\sum_y w_yd_y)^2$ 直接整理得到
-$$\mathrm{Var}_w(m)=\underbrace{\pi_\emptyset\sum_y w_y d_y^2}_{\text{中心部分}}+\underbrace{\sum_y w_y\,(m_y-m_L)^2}_{\text{叶子部分}},\qquad m_L=\frac{\sum_y w_ym_y}{W}.$$
+$$\mathrm{Var}_w(m)=\underbrace{\pi_\emptyset\sum_y w_y d_y^2}_{\text{中心部分}}+\underbrace{W\sum_y w_y\,(m_y-m_L)^2}_{\text{叶子部分}},\qquad m_L=\frac{\sum_y w_ym_y}{W}.$$
+
+> ⚠️ **更正（§14）**：最初写的叶子部分漏了因子 $W=1-\pi_\emptyset\le1$，上式已改正。§7.6、§12 等处按旧公式算出的"叶子部分"和 $K$ 因此都偏大，是保守的上界，结论不受影响。
 
 要点：中心部分多了一个因子 $\pi_\emptyset$。旧的论证用 $\sum_y w_yd_y^2$ 而不是这个精确恒等式，正是这里丢了 $\pi_\emptyset$。
 
@@ -698,7 +700,36 @@ $$\mathcal E_{\mathrm{tr}}\ \succeq\ \pi_\emptyset\mathcal E_{P_\emptyset}+\sum_
 
 ---
 
-## 14. 参考资料
+## 14. 统一刻画：整个 $K$ 就是一个迹链 Green 范数（2026-11-22）
+
+代码：[`code/chordal_trace_full_K.py`](../code/chordal_trace_full_K.py)
+
+**观察**：$\mathrm{Var}_w(m)$ 里的每个 $m_x=\mathbb E_{\mu_x}F$（$x\in\{\emptyset\}\cup R$）都只依赖 $F=f|_{\Omega_\emptyset}$。所以命题 T 的论证（对 $F$ 的所有延拓取最小能量，得到 Schur 补）**对整个 $K$ 都适用**，不只是中心部分。
+
+**命题 T′** **[已证 + 数值核对]**：
+$$K=\sup_f\frac{\mathrm{Var}_w(m)}{\mathcal E(f,f)}=\sup_F\frac{\sum_xw_x\big(\langle F,a_x\rangle-\langle F,\bar a\rangle\big)^2}{\mathcal E_{\mathrm{tr}}(F,F)},\qquad a_x=\mu_x,\ \ \bar a=\sum_xw_xa_x,$$
+也就是迹链几何下以 $\{\sqrt{w_x}(a_x-\bar a)\}_{x\in\{\emptyset\}\cup R}$ 为列的 Green 矩阵的算子范数。
+
+**数值核对**（单位 $n(1+\lambda)$；左边用迹链，右边按改正后的恒等式在全空间上计算）：
+
+| 实例 | $\lambda=4$ | $\lambda=16$ |
+|---|---|---|
+| whiskers $r=4,m=3$ | 0.3639 / 0.3639 | 0.3442 / 0.3442 |
+| blocker $u=32$ | 1.4912 / 1.4912 | 5.2834 / 5.2834 |
+| twin+blocker $s=16,u=32$ | 2.7550 / 2.7550 | 4.4787 / 4.4787 |
+
+完全一致。这个核对同时暴露出 §7.3 恒等式漏掉的因子 $W$，已更正。
+
+**意义**：
+- **引理 G 和引理 L 合并成一个不等式**，不再需要分开处理中心部分和叶子部分：
+  $$\boxed{\ K=\big\|\Gamma^{\mathrm{tr}}_{\text{full}}\big\|\ \le\ \mathrm{poly}(\bar\lambda)\,\big(n(1+\lambda)+\tau\big)\ }$$
+  ⇒（命题 1）$(\star)$ ⇒（§4.6）任意弦图上 $n^{O(\log\bar\lambda)}$。
+- 数值上，所有实例中 $K\le 5.3\,n(1+\lambda)$（$\lambda\le16$）。
+- 证明的对象从此是**一条具体的链**，即 Glauber 在 $\Omega_\emptyset$ 上的迹链；要证的是**一个具体的量**，即一族固定向量在这条链下的 Green 矩阵范数。
+
+---
+
+## 15. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.

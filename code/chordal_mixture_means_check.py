@@ -91,7 +91,7 @@ def parts(n, adj, R, lam):
     W = sum(wy for wy, _ in leaves)
     Qc = sum(wy * np.outer(a - a0, a - a0) for wy, a in leaves) * pi0          # 中心部分
     aL = sum(wy * a for wy, a in leaves) / W
-    Ql = sum(wy * np.outer(a - aL, a - aL) for wy, a in leaves)                 # 叶子部分 (=W·Var_leaves)
+    Ql = W * sum(wy * np.outer(a - aL, a - aL) for wy, a in leaves)             # 叶子部分 = W·Σ w_y (m_y - m_L)²（§14 更正：原先漏了因子 W）
     s = n * (1 + lam)
     return sup_ratio(Qc + Ql, Lm) / s, sup_ratio(Qc, Lm) / s, sup_ratio(Ql, Lm) / s
 
