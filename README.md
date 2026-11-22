@@ -30,4 +30,4 @@
 | 类型 | 标题 | 状态 | 更新日期 |
 |---|---|---|---|
 | 问题 | [弦图上 hardcore model 的快速混合：能否去掉 bounded separator 限制？](problems/chordal-hardcore-mixing.md) | 文献梳理 + 小规模实验 | 2026-11-22 |
-| 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | 归约到两个待证引理 + 数值证据 | 2026-11-22 |
+| 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | 归约到引理 G′、L；常数须依赖 λ | 2026-11-22 |

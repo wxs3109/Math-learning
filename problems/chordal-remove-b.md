@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：归约到两个待证引理（G、L）+ 数值证据 · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：归约到两个待证引理（G′、L）；发现常数必须依赖 λ · 目标改为 n^{O(log λ)} · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -147,6 +147,8 @@ $|R|$ 从 4 增大到 8 时，$L$ 和 $M$ 完全不变；$\lambda$ 从 1 增大�
 
 **[猜想] 团分解不等式**：存在绝对常数 $C$，使得对所有弦图 $G$、团 $R$ 和 $\lambda>0$，$(\star)$ 成立。
 
+> ⚠️ **更正（见 §8.4）**：这个"绝对常数"版本是错的。公共阻挡点结构给出 $C=\Omega(\lambda)$。正确的目标是 $C=\mathrm{poly}(\bar\lambda)$，与 $|R|$ 无关，由此得到 $n^{O(\log\bar\lambda)}$。下面"$O(n^{3.3})$"的说法相应作废。
+
 ⇒ 由 §4.6，任意弦图上 Glauber 的 relaxation time 是 $\mathrm{poly}(n)(1+\lambda)$。混合时间再乘 $\log\pi_{\min}^{-1}\le n\log(1+\lambda)$，仍然是多项式。
 
 **这把开放问题变成了一个"单层"的问题**：只需要处理一个团和它挂着的若干个独立子问题，不再有递归深度的事。
@@ -279,7 +281,97 @@ $$t_{\mathrm{rel}}(P)\le(4+2\lambda\|\Gamma\|)\,\tau+6n(1+\lambda).$$
 
 ---
 
-## 8. 参考资料
+## 8. 引理 G 的尝试：修正与反例（2026-11-22）
+
+代码：[`code/chordal_lemma_g_check.py`](../code/chordal_lemma_g_check.py)
+
+### 8.1 结论速览
+
+1. **§7 的引理 G（迹的形式）是错的**：它会随 $|R|$ 增长，而真正要控制的中心部分不会。
+2. **改用算子范数（引理 2′）**：严格成立，数值上几乎是紧的。
+3. **常数不可能与 $\lambda$ 无关**："公共阻挡点"结构里，真实的 relaxation time 会多出一个约为 $\lambda$ 的因子。
+4. **修正后的目标**：$\|\Gamma^Z\|\le C\bar\lambda\,(n(1+\lambda)+\tau)$。数值上 $C\le0.45$，与图的大小无关。递归后得到 $n^{O(\log\bar\lambda)}$，对固定 $\lambda$ 是多项式。
+
+### 8.2 反例 1：迹的形式不成立
+
+图：$r$-团 $R$，每个点挂 $m$ 个叶子。此时各个 $A_y$ 依赖的是不相交的叶子，所以相互独立。对角元 $w_yG_y$ 每个都不小，迹 $\sum_yw_yG_y$ 随 $r$ 线性增长；但真实的中心部分并不增长。
+
+| $r$ | $m$ | $\lambda$ | 迹 $\sum w_yG_y$ | $\|\Gamma^Z\|$ | 真实中心部分 |
+|---|---|---|---|---|---|
+| 2 | 3 | 16 | 0.684 | 0.342 | 0.342 |
+| 4 | 3 | 16 | 1.360 | 0.340 | 0.340 |
+| 5 | 2 | 16 | 2.041 | 0.409 | 0.406 |
+| 9 | 1 | 16 | 0.842 | 0.094 | 0.076 |
+
+（单位都是 $n(1+\lambda)$。）
+
+### 8.3 引理 2′（算子范数版） **[已证]**
+
+令 $\varphi_y=h_y-1$，$Z=(I-P_\emptyset)^+$（在均值为零的子空间上），
+$$\Gamma^Z_{yy'}=\sqrt{w_yw_{y'}}\;\langle\varphi_y,\,Z\varphi_{y'}\rangle_{\mu_0}.$$
+则
+$$\pi_\emptyset\sum_yw_yd_y^2\ \le\ \|\Gamma^Z\|_{\mathrm{op}}\ \mathcal E(f,f).$$
+
+**证明**：heat-bath Glauber 是半正定的，所以 $I-P_\emptyset\succeq0$。
+1. 令 $a=(I-P_\emptyset)^{1/2}\tilde F$、$b_y=Z^{1/2}\varphi_y$，则 $d_y=\langle \tilde F,\varphi_y\rangle=\langle a,b_y\rangle$，并且 $\|a\|^2=\mathcal E_{P_\emptyset}(F,F)$。
+2. 由此
+   $$\sum_yw_y\langle a,b_y\rangle^2=a^{\!\top}\Big(\sum_yw_yb_yb_y^{\!\top}\Big)a\le\Big\|\sum_yw_yb_yb_y^{\!\top}\Big\|\,\|a\|^2 .$$
+3. 而 $\big\|\sum_yw_yb_yb_y^{\!\top}\big\|=\|\Gamma^Z\|$：对 $B=[\sqrt{w_y}b_y]$，$BB^{\!\top}$ 和 $B^{\!\top}B$ 的非零特征值相同。
+4. 再用 $\pi_\emptyset\mathcal E_{P_\emptyset}\le\mathcal E$。$\blacksquare$
+
+它同时推广了前面两个结果：
+- 由 $\|\Gamma^Z\|\le\mathrm{tr}\,\Gamma^Z$ 得到引理 2；
+- 由 $Z\preceq\tau I$ 得到 $\|\Gamma^Z\|\le\tau\lambda\pi_\emptyset\|\Gamma\|$，即推论 3。
+
+所以在 whiskers 例子（Gram 矩阵好、迹不好）和孪生例子（迹好、Gram 矩阵不好）上，它都是好的。
+
+### 8.4 反例 2：公共阻挡点 → 常数必须依赖 $\lambda$
+
+**图**：$R=\{y,r\}$（$r$ 挂一个叶子）；$U=K_u$，全部连到 $y$；另有一个点 $v$ 连到 $U$ 的全部（$U\cup\{v\}$ 是团）。
+
+**机制**：
+- $v$ 被占时，$U$ 全被挡住，$y$ 可以被占。
+- 从"$v$ 占"切换到"$U$ 中某点占"，需要先清空 $v$ 和 $y$。
+- 反方向：从"$U$ 中某点占"出发，空位产生后，$U$ 以约 $u/(u+1)$ 的概率把空位"抢回来"，链又回到原来那一侧。
+- 这是**熵陷阱**。慢化因子约为 $\min(u,\lambda)$。
+
+**数值**（单位 $n(1+\lambda)$）：
+
+| $\lambda$ | $u=1$ | $u=4$ | $u=16$ | $u=64$ | $u=256$ |
+|---|---|---|---|---|---|
+| 真实 $t_{\mathrm{rel}}$，$\lambda=16$ | 2.36 | 3.71 | 5.76 | 7.27 | 7.85 |
+| 真实 $t_{\mathrm{rel}}$，$\lambda=64$ | 2.59 | 4.74 | 10.41 | 19.10 | 25.07 |
+
+- 对 $R=\{y,r\}$，$(\star)$ 的经验常数 $M$ 随 $u$ 增长（$\lambda=1024,u=12$ 时 $M=5.9$），最终饱和在 $\Theta(\lambda)$。**所以"对所有团 $R$，$C$ 是绝对常数"是错的。**
+- 换一个团做分块时 $M\le1.5$：慢化被吸收进了子问题的 $\tau$。这说明递归时**选哪个团**有影响。
+- 这个结构的慢化对固定 $\lambda$ 是有界的（约 $\lambda/2$），所以它**不能**直接构造出超多项式下界：逐层叠加只给出 $\lambda^{O(\log n)}=n^{O(\log\lambda)}$。
+
+### 8.5 修正后的目标 **[猜想]**
+
+**引理 G′**：存在绝对常数 $C_1$，使得对所有弦图、所有团 $R$ 和 $\lambda>0$，
+$$\|\Gamma^Z\|_{\mathrm{op}}\ \le\ C_1\,\bar\lambda\,\big(n(1+\lambda)+\tau\big).$$
+
+数值上 $\|\Gamma^Z\|/(\bar\lambda\,n(1+\lambda))$ 的最大值：
+- 公共阻挡点族：0.42（$u\to\infty$ 时趋近约 0.5）；
+- 随机弦图 / split 图：0.33。
+
+**如果 G′ 和引理 L 的 $\mathrm{poly}(\lambda)$ 版本都成立**：$(\star)$ 对 $C=O(\mathrm{poly}(\bar\lambda))$ 成立，由 §4.6 得到 $t_{\mathrm{rel}}=n^{O(\log\bar\lambda)}$。这去掉了 $b$，也去掉了 $\omega$。
+
+### 8.6 证明 G′ 的思路（草稿）
+
+- **对角元**：用 Thomson 原理（Green 能量 = 最小流能量）。以 $U=N(y)\setminus R$ 是团的情形为例：
+  - 把每个 $J\in A^c$ 的质量沿"删掉 $U$ 中那个点"这一条边送回 $J\setminus U\in A$。这部分能量是 $p^2(1-p)\,n(1+\lambda)$。
+  - 剩下的残差 $\mu(1-pZ_U)\mathbf 1_A$ 用 $\tau$ 路由，其中 $Z_U=1+\lambda N_U$，$N_U$ 是 $U$ 中可插入点的个数。
+  - 合起来得到
+    $$w_yG_y\le w_y\big[\,2n(1+\lambda)+2\tau\,D_y\big],\qquad D_y=\frac{\mathrm{Var}_{\nu_{A_y}}(Z_U)}{\mathbb E_{\nu_{A_y}}Z_U}\ (\text{离散指数}).$$
+  - 在公共阻挡点例子里，$D_y\approx\lambda u$ 但 $w_y\approx\lambda\pi_\emptyset/u$，乘积是 $\mathrm{poly}(\lambda)$。但这只是对角元。
+- **非对角元**：$\langle\varphi_y,Z\varphi_{y'}\rangle$。$P_\emptyset$ 是 $G-R$ 各连通分量上链的乘积，所以只依赖不相交分量的 $\varphi_y,\varphi_{y'}$ 的交叉项为 0。需要处理的是共享分量的 $y,y'$。
+  - 在 clique tree 里，这对应 $R$ 的同一个子树。可以按子树分组，把 $\Gamma^Z$ 写成分块矩阵。块之间的耦合来自 $h_y=\prod_i h_y^{(i)}$ 的乘积结构。
+- **难点**：一般 $U$ 不是团（$y$ 的外部邻居可以分布在多个子树里），这时 $Z_U$ 是多元的配分函数，残差的离散指数可能很大。
+
+---
+
+## 9. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.
