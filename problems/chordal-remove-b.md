@@ -348,6 +348,8 @@ $$\pi_\emptyset\sum_yw_yd_y^2\ \le\ \|\Gamma^Z\|_{\mathrm{op}}\ \mathcal E(f,f).
 
 ### 8.5 修正后的目标 **[猜想]**
 
+> ⚠️ **更正（见 §12）**：下面的引理 G′ 已被"孪生 + 阻挡"组合证伪。真正需要的中心部分界仍然成立，但必须同时用上叶子块的 Dirichlet 能量。
+
 **引理 G′**：存在绝对常数 $C_1$，使得对所有弦图、所有团 $R$ 和 $\lambda>0$，
 $$\|\Gamma^Z\|_{\mathrm{op}}\ \le\ C_1\,\bar\lambda\,\big(n(1+\lambda)+\tau\big).$$
 
