@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：G′ 的难点在非对角元；证伪实验支持猜想；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪（引理 2′ 丢了叶子能量），正在修正；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -556,7 +556,66 @@ $$\|\Gamma_{\text{core}}\|\ \le\ 2(1+\kappa_B)\,n(1+\lambda)+2\,\kappa_B\,\tau .
 
 ---
 
-## 12. 参考资料
+## 12. G′ 被证伪；问题出在引理 2′ 丢掉了叶子的能量（2026-11-22）
+
+代码：[`code/chordal_core_env_check.py`](../code/chordal_core_env_check.py)、[`code/chordal_twin_blocker_combo.py`](../code/chordal_twin_blocker_combo.py)
+
+### 12.1 核心事件的 Green 能量拆解
+
+在公共阻挡点族里取 $B=\{D=U\text{ 全空}\}$，用命题 D′ 把 $G_B$ 拆成纤维部分 $E_1$ 和环境部分 $E_2$，单位是 $n(1+\lambda)$：
+
+| 实例 | $\lambda$ | $p_B$ | $\kappa_B$ | $G_B$ | $E_1$ | $E_2$ | 平凡界 $\tau_\emptyset\kappa_B$ |
+|---|---|---|---|---|---|---|---|
+| blocker $u=2$ | 4 | 0.385 | 1.14 | 1.40 | 0.05 | 1.10 | 1.14 |
+| blocker $u=32$ | 4 | 0.038 | 20.3 | 20.7 | 0.04 | 20.3 | 20.3 |
+| blocker $u=32$ | 64 | 0.031 | 31.0 | 31.0 | 0.00 | 31.0 | 31.0 |
+| twin-nested d2 $u=8$ | 16 | 0.206 | 3.71 | 7.72 | 0.00 | 7.66 | 8.82 |
+
+- 纤维部分可以忽略，**$G_B$ 几乎全部来自环境部分**。
+- 在 blocker 族里，平凡界 $\tau_\emptyset\kappa_B$ 是**紧的**，而且 $\kappa_B\approx0.76/p_B$ 随 $u$ 增长。所以 $G_B$ 本身确实很大。
+- 核心部分之所以小，只是因为它前面的权重 $\sum_y w_y$ 小。§9.4 用 $\sum_yw_y\le1$ 这一步太粗了。
+
+### 12.2 反例：G′ 不成立
+
+**"孪生 + 阻挡"组合**：$R=S\cup\{r\}$，其中 $S$ 是 $s$-团；$D$ 是 $u$-团，与 $S$ 全部相连；$v$ 与 $D$ 全部相连。
+
+| $s$ | $u$ | $\lambda$ | 真实 $t_{\mathrm{rel}}/(n(1+\lambda))$ | $\|\Gamma^Z\|/(\bar\lambda(n(1+\lambda)+\tau_\emptyset))$ | 真实 $K$（中心 / 叶子） | $M(\star)$ |
+|---|---|---|---|---|---|---|
+| 1 | 32 | 4 | 2.87 | 0.20 | 2.22（0.82 / 1.43） | 1.43 |
+| 4 | 32 | 4 | 3.80 | 0.65 | 3.53（1.43 / 2.20） | 1.90 |
+| 16 | 32 | 4 | 3.67 | **1.48** | 3.19（1.45 / 1.93） | 1.84 |
+| 32 | 32 | 4 | — | — | 2.77（1.30 / 1.69） | 1.68 |
+| 16 | 32 | 16 | 5.28 | 0.72 | 4.75（2.15 / 2.94） | 2.64 |
+
+- **$\|\Gamma^Z\|$ 随 $s$ 和 $u$ 一起增长**：$\lambda=4$、$s=16$ 时，$u=2,8,32$ 对应 $0.16,0.55,1.48$。所以 G′ 在现在的写法下是错的。
+- **但真正要控制的量都有界**：真实 $t_{\mathrm{rel}}$、真实的 $K$（包括中心部分）、$(\star)$ 的常数 $M$ 都不随 $s,u$ 增长。$s$ 从 16 加到 32 时，它们甚至略微下降。
+- ⇒ **猜想 $(\star)$ 仍然成立；失效的是引理 2′ 这个证明工具。**
+
+### 12.3 诊断
+
+引理 2′ 的第 4 步用的是 $\pi_\emptyset\,\mathcal E_{P_\emptyset}(F,F)\le\mathcal E(f,f)$。也就是说，它只用中心块 $\Omega_\emptyset$ 上的 Dirichlet 能量来"支付" $F$ 的变化，而**丢掉了叶子块的能量** $\sum_yw_y\mathcal E_{P_y}$。
+
+在孪生 + 阻挡例子里，$s$ 个孪生点让叶子的总质量 $W=1-\pi_\emptyset$ 接近 1，于是 $\pi_\emptyset$ 很小。可是在 $A_y$ 上，$F(J)\approx f(J\cup\{y\})$，所以 $F$ 在 $A_y$ 内部的变化本来可以由叶子链 $P_y$ 的能量来支付，权重是 $w_y$，而不是 $\pi_\emptyset$。引理 2′ 没有用到这部分，损失大约是 $W/\pi_\emptyset$ 量级。
+
+### 12.4 修正方向
+
+真正需要的不等式就是
+$$\pi_\emptyset\sum_yw_yd_y^2\ \le\ C\,\big(n(1+\lambda)+\tau\big)\cdot\Big[\pi_\emptyset\mathcal E_{P_\emptyset}(F)+\sum_yw_y\,\mathcal E_{P_y}\big(f(\cdot\cup\{y\})\big)+\frac{D(f)}{n(1+\lambda)}\Big],$$
+其中右边方括号里的量 $\lesssim\mathcal E(f,f)$。数值上这就是 §7.6 和本节算出的"真实中心部分"，在所有实例里都 $\le 2.7\,n(1+\lambda)$。
+
+两个候选做法：
+1. **"坍缩链"几何**：按投影 $\mathrm{pr}$ 把每颗星 $\{J\}\cup\{J\cup\{y\}\}$ 压成一个点。坍缩后的链 $Q$ 在 $\Omega_\emptyset$ 上，平稳分布是 $\nu$，边权是 $\pi(J)P_\emptyset(J,J')\,(1+\lambda N(J,J'))$，这同时包含了中心和叶子的能量。在 $Q$ 的几何下重新定义 $\Gamma^Z$，用 $Z_Q$ 代替 $Z$。
+   - 已知的障碍：把 $f$ 换成纤维平均 $\bar F$ 时，相邻纤维的大小 $1+\lambda N$ 不同，会多出 $\delta$ 项。粗略处理会损失一个因子 $n(1+\lambda)$，需要更细的比较。
+2. **按核心事件分组时用精确权重**：核心部分的范数精确地是 $(\sum_{y\in\text{块}}w_y)\,G_B$，并且 $G_B\approx\tau\kappa_B$ 是紧的。所以要证明的是 $(\sum_{y}w_y)\,\kappa_B\lesssim\mathrm{poly}(\lambda)$ 这一类"权重乘以环境波动"的量有界。孪生 + 阻挡例子说明，单靠中心能量做不到，必须同时用叶子能量。
+
+**状态更新**：
+- 引理 2′ 本身仍然成立，只是太松。
+- G′（用 $\|\Gamma^Z\|$ 表述的版本）是错的。
+- 真正的目标（中心部分 $\lesssim\mathrm{poly}(\lambda)(n(1+\lambda)+\tau)\,\mathcal E$）在所有实例上数值成立。
+
+---
+
+## 13. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.
