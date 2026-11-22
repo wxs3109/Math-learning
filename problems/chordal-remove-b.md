@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪；整个 K 已精确化为单一迹链 Green 范数（§14）；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪；整个 K 已精确化为单一迹链 Green 范数（§14）；迹链有精确的远足分解，孪生 + 阻挡族已严格证明 K ≤ 6(1+λ)n(1+λ)（§15）；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -729,7 +729,140 @@ $$K=\sup_f\frac{\mathrm{Var}_w(m)}{\mathcal E(f,f)}=\sup_F\frac{\sum_xw_x\big(\l
 
 ---
 
-## 15. 参考资料
+## 15. 远足分解与"孪生 + 阻挡"的显式计算（2026-11-22）
+
+代码：[`code/chordal_trace_excursion.py`](../code/chordal_trace_excursion.py)
+
+### 15.1 结论速览
+
+1. **引理 X（远足分解）[已证 + 数值核对]**：迹链的 Dirichlet 形式可以按 $y\in R$ **精确**拆开，每个叶子贡献一个显式的"截断"形式。证明只用到 $R$ 是团。
+2. **孪生 + 阻挡族上 $K\le 6(1+\lambda)\,n(1+\lambda)$，对所有 $s,u$ 一致成立 [已证]。** 被杀死的链在同一族上给出的 $K$ 约为 $\lambda\min(u,s\lambda)\,n(1+\lambda)$，没有上界。
+3. **抵消机制看清了**：被杀死链的极值函数恰好是 $F=\mathbf 1_v$。它只在 $A_y$ **内部**变化，也就是 D 块空时阻挡点 $v$ 占没占，这正是空位竞争的那个坐标。中心块里这个坐标的电导只有 $\lambda(1+\lambda)c/Z$，但 $s$ 个叶子各提供一份放大 $\lambda$ 倍、再乘截断因子 $\frac1{2+\lambda}$ 的副本。两者相乘，$s$ 正好抵消。
+4. **$\lambda$ 因子是真实的**：$s=1$、$u$ 很大时数值上 $K\approx0.4\lambda\,n(1+\lambda)$，和 §8.4 一致。所以这里的界已经紧到常数。
+
+记号：$c=\frac1{n(1+\lambda)}$ 是单个点的删除速率。本节所有能量都按未归一化的电导 $\pi(I)P(I,I')$ 计。
+
+### 15.2 引理 X：远足分解 **[已证]**
+
+$$\mathcal E_{\mathrm{tr}}(F)=\mathcal E_\emptyset(F)+\lambda\sum_{y\in R}\mathcal M^{(y)}_c\big(F|_{A_y}\big),\qquad \mathcal M^{(y)}_c(F)=\inf_g\Big\{c\sum_{J\in A_y}\pi(J)\big(F(J)-g(J)\big)^2+\mathcal E_{A_y}(g)\Big\}.$$
+
+- $\mathcal E_\emptyset$ 是中心块内部边的能量，即被杀死的链。
+- $\mathcal E_{A_y}$ 是 $A_y$ 的**诱导子图**上的能量，边权和中心块里一样。
+- 写成矩阵形式：$\mathcal M^{(y)}_c=c\Pi_y(c\Pi_y+L_y)^{-1}L_y$。对 $L_y$ 关于 $\pi|_{A_y}$ 的特征值 $\theta$，权重是 $\varphi_c(\theta)=\dfrac{c\theta}{c+\theta}\approx\min(c,\theta)$：慢模按 $\theta$ 计，快模被截断在 $c$。
+
+**证明**：
+1. $R$ 是团，所以一个独立集最多含 $R$ 的一个点。单点翻转不可能把 $y$ 换成 $y'$，因此**不同叶子块之间没有边**，叶子部分的 Laplacian 按 $y$ 分块对角。于是 Schur 补等于中心块加上各个 $y$ 的 Schur 补之和。
+2. 叶子块 $\Omega_y=\{J\cup\{y\}:J\in A_y\}$ 和 $A_y$ 一一对应，权重是 $\pi(J\cup\{y\})=\lambda\pi(J)$。
+3. 叶子内部的转移 $J\cup\{y\}\to J'\cup\{y\}$ 翻转的是某个 $x\ne y$。如果 $x$ 被插入，那么 $x\in J'\in A_y$，所以 $x\notin N(y)$，转移概率和 $J\to J'$ 相同。删除的情形是平凡的。所以叶子内部的电导恰好是 $\lambda\times$（$A_y$ 诱导子图的电导）。
+4. 从 $J\cup\{y\}$ 出发，除了删掉 $y$（辐条，电导 $\lambda\pi(J)c$），其它转移都留在 $\Omega_y$ 里：$N(y)$ 中的点不能插入，删掉 $J$ 中的点仍在 $A_y$ 里。
+5. 所以第 $y$ 块是 $\lambda(c\Pi_y+L_y)$，和中心的耦合是 $-\lambda c\Pi_y$。它的 Schur 补是 $\lambda\big[c\Pi_y-c\Pi_y(c\Pi_y+L_y)^{-1}c\Pi_y\big]=\lambda\,c\Pi_y(c\Pi_y+L_y)^{-1}L_y$，这就是 $\lambda\mathcal M^{(y)}_c$。$\blacksquare$
+
+**数值核对**：4 个随机弦图 × $\lambda\in\{0.5,4,16\}$，以及两个孪生 + 阻挡实例，相对误差都 $\le7\times10^{-15}$。
+
+**与 §13.5 的关系**：§13.5 只猜了一个下界"$\succeq$"，这里是**等式**。坍缩链 $Q$ 的边权因子 $1+\lambda N(J,J')$ 相当于把每个叶子的贡献都按慢模计，即 $\varphi_c(\theta)\approx\theta$。§13.1 里坍缩链低估真实值，原因正是快模被截断在 $c$。
+
+### 15.3 合并后的孪生 + 阻挡
+
+图：$R=S\cup\{r\}$，$S$ 是 $s$-团；$D$ 是 $u$-团，与 $S$ 全连；$v$ 与 $D$ 全连；$r$ 挂一个叶子 $q$。$G-R$ 有两个分量：$\{D,v\}$ 和 $\{q\}$。
+
+按 $S$ 内、$D$ 内的置换对称性合并。取对称化不改变 $\mathrm{Var}_w(m)$，也不增加 $\mathcal E_{\mathrm{tr}}$，所以极值 $F$ 可以取为对称的。中心块只剩 6 个状态 $(b,q)$：
+- $b\in\{e,v,d\}$：$e$ = D 块和 $v$ 全空，$v$ = $v$ 被占，$d$ = $D$ 中某点被占（合并 $u$ 个状态）；
+- $\mu_0$ 是乘积测度：$b$ 的权重 $(1,\lambda,u\lambda)/Z_b$，其中 $Z_b=1+\lambda+u\lambda$；$q$ 的权重 $(1,\lambda)/(1+\lambda)$。
+
+两类叶子：
+- $A_y=\{b\in\{e,v\}\}$（$y\in S$，共 $s$ 个相同的事件），总权重 $W_S=s\lambda(1+\lambda)^2/Z$；
+- $A_r=\{q=0\}$，权重 $w_r=\lambda Z_b/Z$；
+- 中心 $w_0=\pi_\emptyset=Z_b(1+\lambda)/Z$，其中 $Z=Z_b(1+2\lambda)+s\lambda(1+\lambda)^2$。
+
+**每个事件只限制一个分量。** 这是后面的方差分解能干净进行的原因。
+
+### 15.4 被杀死的链为什么失效
+
+取 $F=\mathbf 1_v$：
+- $m_0=m_r=\lambda/Z_b$，$m_S=\lambda/(1+\lambda)$，所以 $\mathrm{Var}_w(m)=W_S(1-W_S)\Big(\dfrac{u\lambda^2}{(1+\lambda)Z_b}\Big)^2$；
+- 中心块里只有 $e$–$v$ 边在付钱，电导 $\lambda(1+\lambda)c/Z$。
+
+所以被杀死链下
+$$K_{\text{kill}}\ \ge\ \frac{s\,u^2\lambda^4(1+2\lambda)}{Z\,Z_b\,(1+\lambda)}\cdot n(1+\lambda)\ \approx\ \lambda\min\!\big(u,\ s\lambda\big)\cdot n(1+\lambda).$$
+数值上这正是 $K_{\text{kill}}$ 的精确值：$s=u=10^4$、$\lambda=4$ 时闭式 $8470.8$，计算值 $8470.8$。
+
+**直观**：$\mathbf 1_v$ 在 $\mu_0$ 下几乎不动（$A_S$ 的概率只有 $p_S=(1+\lambda)/Z_b$），所以中心为它付的能量很小。但 $m_S$ 是对 $A_S$ 取的条件期望，把它放大了 $1/p_S$ 倍，权重 $W_S$ 又接近 1。
+
+### 15.5 迹链怎样补回来
+
+由引理 X，$s$ 个 $S$-叶子各贡献 $\lambda\mathcal M_c$。$\mathbf 1_v$ 只依赖 $b$，在 $A_S$ 上是两状态链 $e\rightleftarrows v$ 的特征向量，特征值 $\theta=c(1+\lambda)$。所以
+$$\lambda s\,\mathcal M_c(\mathbf 1_v)=\lambda s\cdot\frac{c}{c+\theta}\cdot\frac{\lambda(1+\lambda)c}{Z}=\frac{s\lambda}{2+\lambda}\cdot\frac{\lambda(1+\lambda)c}{Z}.$$
+也就是说，**$e$–$v$ 方向的电导被放大了 $1+\dfrac{s\lambda}{2+\lambda}$ 倍**：
+- 因子 $s$：每个孪生点都提供一份 $A_S$ 的副本；
+- 因子 $\lambda$：叶子的质量是对应中心状态的 $\lambda$ 倍；
+- 因子 $\frac1{2+\lambda}$：截断。$v$ 在叶子里的翻转速率约为 $c(1+\lambda)$，而远足的平均长度只有 $1/c$。
+
+损失是 $W_S/(\ldots)\propto s$，补偿是 $\propto s$，正好抵消。剩下一个 $\frac{2+\lambda}{\cdots}$，就是最终界里的 $(1+\lambda)$。
+
+### 15.6 定理：孪生 + 阻挡族上 $K\le6(1+\lambda)\,n(1+\lambda)$ **[已证]**
+
+对 $\mu_0$（乘积测度）做方差分解：$F(b,q)=\bar F+g(b)+h(q)+k(b,q)$，其中 $g,h$ 均值为零，$k$ 的两个边缘都为零。
+
+**第 1 步：$m_x$ 只依赖主效应。**
+- $A_S$ 只限制 $b$，$A_r$ 只限制 $q$，所以 $k$ 和"另一个分量"的主效应在条件期望里都消失：
+$$m_S-m_0=\gamma:=\mathbb E[g\mid A_S],\qquad m_r-m_0=h(0).$$
+- 用成对形式 $\mathrm{Var}_w(m)=\tfrac12\sum_{x,x'}w_xw_{x'}(m_x-m_{x'})^2$ 和 $(a-b)^2\le2a^2+2b^2$：
+$$\mathrm{Var}_w(m)\le W_S(w_0+2w_r)\,\gamma^2+2w_r\,h(0)^2,\qquad w_0+2w_r\le3\pi_\emptyset.$$
+
+**第 2 步：能量也只看主效应。**
+- 被杀死的链是 $b$-链与 $q$-链的乘积。由凸性（对另一个坐标取平均不增加能量），$\mathcal E_\emptyset(F)\ge\pi_\emptyset\big[\mathcal E_b(g)+\mathcal E_q(h)\big]$。
+- 在 $A_S=\{e,v\}\times\{0,1\}$ 上，"对 $q$ 取平均"是一个与 $L$ 交换的正交投影，所以 $\mathcal M_c(F)\ge\mathcal M_c(g)$。
+- 丢掉 $r$-叶子的贡献：
+$$\mathcal E_{\mathrm{tr}}(F)\ \ge\ \underbrace{\pi_\emptyset\mathcal E_b(g)+\lambda s\,\mathcal M_c(g)}_{\text{管 }\gamma}+\underbrace{\pi_\emptyset\mathcal E_q(h)}_{\text{管 }h(0)}.$$
+
+**第 3 步：逐项比较。** 记 $\Delta_{ed}=g_e-g_d$，$\Delta_{ev}=g_v-g_e$，$1-p_S=u\lambda/Z_b$。
+- $\gamma=(1-p_S)\big[\Delta_{ed}+\tfrac{\lambda}{1+\lambda}\Delta_{ev}\big]$，所以 $\gamma^2\le2(1-p_S)^2\big[\Delta_{ed}^2+(\tfrac{\lambda}{1+\lambda})^2\Delta_{ev}^2\big]$。
+- 能量：$\pi_\emptyset\mathcal E_b(g)=\frac{(1+\lambda)c}{Z}\big[u\lambda\Delta_{ed}^2+\lambda\Delta_{ev}^2\big]$，$\lambda s\mathcal M_c(g)=\frac{s\lambda}{2+\lambda}\cdot\frac{(1+\lambda)\lambda c}{Z}\Delta_{ev}^2$。
+
+| 方向 | 谁付钱 | 比值（× $n(1+\lambda)$） | 界 |
+|---|---|---|---|
+| $\Delta_{ed}$（跨过 $\partial A_S$） | 中心的 $e$–$d$ 边 | $\dfrac{6\,s\lambda(1+\lambda)^2\cdot u\lambda}{Z\,Z_b}$ | $\le6$ |
+| $\Delta_{ev}$（$A_S$ 内部，空位竞争） | $s$ 个叶子的远足 | $\dfrac{6\,s\,u^2\lambda^4}{Z\,Z_b\,(1+s\lambda/(2+\lambda))}$ | $\le6(1+\lambda)$ |
+| $h(0)$（$q$ 方向） | 中心的 $q$ 翻转 | $\dfrac{2\lambda^2}{(1+\lambda)^2}$ | $\le2$ |
+
+- 第一行用 $s\lambda(1+\lambda)^2\le Z$、$u\lambda\le Z_b$。
+- 第二行用 $Z\ge Z_b(1+\lambda)$、$Z_b\ge u\lambda$、$\lambda(2+\lambda)\le(1+\lambda)^2$。**这一行如果没有远足项（分母里的 $s\lambda/(2+\lambda)$），就只能得到 $\approx\lambda\min(u,s\lambda)$，正是 §15.4 的失效。**
+
+二次型之比不超过各项比值的最大值，所以 $K\le6(1+\lambda)\,n(1+\lambda)$。再由命题 1，
+$$t_{\mathrm{rel}}\le4\tau+\big(6+12(1+\lambda)\big)\,n(1+\lambda)\quad\text{对所有 }s,u\text{ 一致成立。}\ \blacksquare$$
+
+### 15.7 数值（单位 $n(1+\lambda)$；合并计算与全空间计算在小实例上一致到 4 位）
+
+| $\lambda$ | $(s,u)$ | 迹链 $K$ | 杀死链 $K$ | $K/(1+\lambda)$ |
+|---|---|---|---|---|
+| 4 | $(10^4,10^4)$ | 2.81 | 8471 | 0.56 |
+| 4 | $(10^5,10^5)$ | 2.81 | 84706 | 0.56 |
+| 64 | $(10^2,10^4)$ | 48.8 | 4747 | 0.75 |
+| 64 | $(10^5,10^5)$ | 4.37 | 186702 | 0.07 |
+| 1024 | $(1,10^4)$ | 405.8 | 973 | 0.40 |
+| 1024 | $(10^5,10^5)$ | 4.55 | 199125 | 0.004 |
+
+- 所有实例都满足 $K/(1+\lambda)\le0.93$，定理的常数 6 有余量。
+- $\lambda$ 增长只出现在 $u\gg s\lambda$ 的"纯阻挡"区域，这是真实的减速（§8.4）。孪生点多时 $K$ 反而趋于常数。
+
+### 15.8 对第 2 步（一般引理）的启示
+
+这个例子的证明结构可以直接推广，但有两处需要补：
+
+1. **乘积结构是一般的。** $G-R$ 的各个分量在 $\Omega_\emptyset$ 上独立（引理 E），被杀死的链是乘积链，每个 $A_y$ 都是乘积事件 $\prod_CA_y^C$。所以总可以按分量做方差分解。
+   - **缺口 1**：一般情况下一个 $y$ 会同时限制多个分量，交互项 $k$ 不再从 $m_y$ 里消失。需要证明交互项可以用"每个分量各付一份"的方式控制，或者损失只有 $\mathrm{poly}(\lambda)$。
+2. **每个分量内部的模板**：把 $\mathbb E[g\mid A_y]$ 拆成"跨过 $\partial A_y$"和"$A_y$ 内部"两部分。
+   - 跨边界的部分由中心付钱，比值自动 $\le O(1)$，因为边界电导和 $A_y^c$ 的质量同阶；
+   - 内部的部分由远足付钱，放大因子是 $\lambda\sum_{y':A_{y'}\supseteq\cdot}\varphi_c(\theta)/\theta$。
+   - **缺口 2**：截断因子 $\varphi_c(\theta)/\theta=\frac{c}{c+\theta}$。这里 $A_y$ 内部只有一个慢坐标，$\theta=c(1+\lambda)$，只损失 $1+\lambda$。一般情况下 $A_y$ 内部可能有很多快模（$\theta\gg c(1+\lambda)$），需要证明决定 $\mathbb E[F\mid A_y]$ 的那部分 $F$ 不会集中在快模上，或者快模的方差另有人付。
+
+⇒ **第 2 步的具体目标**：
+- 先在"每个 $y$ 只限制一个分量"的弦图子类上把 15.6 的论证写成一般定理。这个子类已经包含孪生、阻挡、whiskers 这些族。
+- 再处理缺口 1（交互项）和缺口 2（快模截断）。
+
+---
+
+## 16. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.
