@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪（引理 2′ 丢了叶子能量），正在修正；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：(⋆) 猜想仍成立；G′ 被证伪；中心部分已精确化为迹链 Green 界（§13）；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -634,7 +634,71 @@ $$\pi_\emptyset\sum_yw_yd_y^2\ \le\ C\,\big(n(1+\lambda)+\tau\big)\cdot\Big[\pi_
 
 ---
 
-## 13. 参考资料
+## 13. 修正方案的检验：坍缩链与迹链（2026-11-22）
+
+代码：[`code/chordal_collapsed_check.py`](../code/chordal_collapsed_check.py)、[`code/chordal_fiber_split_check.py`](../code/chordal_fiber_split_check.py)、[`code/chordal_trace_identity.py`](../code/chordal_trace_identity.py)
+
+### 13.1 坍缩链 $Q$：只对"纤维常数"的函数有效
+
+**定义**：$\nu=\mathrm{pr}_*\pi$，即 $\nu(J)=\pi(J)(1+\lambda N(J))$。坍缩链为
+$$Q(J,J')=\frac{\pi(J)P_\emptyset(J,J')\,(1+\lambda N(J,J'))}{\nu(J)},$$
+其中 $N(J,J')$ 是在 $J,J'$ 处都可插入的 $R$ 中点数。
+
+**刻画**：对在每颗星 $\{J\}\cup\{J\cup\{y\}\}$ 上取常数的 $f$，有 $\mathcal E(f)=\mathcal E_Q(F)$ 精确成立。于是在这类函数上，中心部分 / 能量的上确界恰好是 $\pi_\emptyset\|\Gamma^Q\|$，其中 $\Gamma^Q_{yy'}=\sqrt{w_yw_{y'}}\langle\psi_y,Z_Q\psi_{y'}\rangle_\nu$，$\psi_y=(\mu_y-\mu_0)/\nu$。
+
+**数值**（单位 $n(1+\lambda)$）：
+
+| 实例 | $\lambda$ | 旧 $\|\Gamma^Z\|$ | 新 $\pi_\emptyset\|\Gamma^Q\|$ | 真实中心部分 |
+|---|---|---|---|---|
+| twin+blocker $s=16,u=32$ | 4 | 11.83 | 0.57 | 1.45 |
+| twin+blocker $s=16,u=32$ | 64 | 29.20 | 0.71 | 2.52 |
+| blocker $u=32$ | 4 | 1.59 | 0.33 | 0.82 |
+| blocker $u=32$ | 64 | 15.46 | 0.66 | 6.71 |
+| nested-twin d2 $u=2$ | 64 | 6.71 | 1.59 | 2.42 |
+
+- 新量在所有族上都有界（$\le1.6$），旧量的增长完全消失了。
+- **但新量可以远小于真实值**：$\lambda=64$ 的 blocker $u=32$ 上，新量 0.66，真实值 6.71。差出来的部分来自**纤维内部的变化**，也就是空位出现时的竞争。所以只看纤维常数函数是不够的。
+
+### 13.2 直接对纤维取平均也不行
+
+把任意 $f$ 写成 $\bar F\circ\mathrm{pr}+g$，其中 $\bar F$ 是纤维平均，$g$ 是纤维内偏差。测两个量：
+- $A=\sup_f\mathcal E_Q(\bar F)/\mathcal E(f)$：在 blocker 族上随 $u$ 增长。$\lambda=4$ 时 $u=8,32$ 对应 4.5 和 14.0；$\lambda=16$ 时对应 6.5 和 18.1。
+- $B$（纤维内偏差对中心部分的贡献）：很小，$\le0.9$。
+
+⇒ 损失来自"取平均"这一步本身，它会放大能量。所以 $\bar F$ 不是合适的代表元。
+
+### 13.3 精确刻画：迹链 **[已证 + 数值核对]**
+
+**命题 T**：设 $\mathcal E_{\mathrm{tr}}$ 是 $P$ 的 Dirichlet 形式对叶子状态 $\Omega\setminus\Omega_\emptyset$ 取的 **Schur 补**，也就是 $P$ 在 $\Omega_\emptyset$ 上的**迹链**（只在链位于 $\Omega_\emptyset$ 时记录它）的 Dirichlet 形式。则
+$$\sup_f\frac{\pi_\emptyset\sum_yw_yd_y^2}{\mathcal E(f,f)}\ =\ \pi_\emptyset\,\big\|\Gamma^{\mathrm{tr}}\big\|,\qquad \Gamma^{\mathrm{tr}}_{yy'}=\sqrt{w_yw_{y'}}\,\big\langle\varphi_y,\ Z_{\mathrm{tr}}\varphi_{y'}\big\rangle,$$
+其中 Green 函数用迹链的 Dirichlet 形式来定义。
+
+**证明**：中心部分只依赖 $F=f|_{\Omega_\emptyset}$。对固定的 $F$，在所有延拓中取 $\mathcal E(f)$ 的最小值，按定义就是 Schur 补 $\mathcal E_{\mathrm{tr}}(F)$，这是电网络化简的标准事实。剩下的就是引理 2′ 的同一套论证。$\blacksquare$
+
+**数值核对**（$\lambda=4$，单位 $n(1+\lambda)$）：whiskers 0.3230 / 0.3230，twin $s=8$ 0.4995 / 0.4995，blocker $u=8$ 0.6684 / 0.6684，blocker $u=32$ 0.8163 / 0.8163，twin+blocker 1.4515 / 1.4515。左右**完全一致**。
+
+### 13.4 三种几何的关系（按半正定序）
+
+$$\pi_\emptyset\,\mathcal E_{P_\emptyset}\ \preceq\ \mathcal E_{\mathrm{tr}},\qquad\text{从而}\quad \pi_\emptyset\|\Gamma^{\mathrm{tr}}\|\ \le\ \|\Gamma^Z\|\ (\text{引理 2′}).$$
+- **引理 2′** 用的是被杀死（限制）的链 $P_\emptyset$，丢掉了经过叶子的那些转移。
+- **坍缩链** $Q$ 只覆盖纤维常数函数，给出的是真实值的下界。
+- **迹链**是精确的：除了 $P_\emptyset$ 本身的转移，它还包含"**插入 $y$ → 在 $\Omega_y$ 里游走约 $n(1+\lambda)$ 步 → 删掉 $y$**"这样的长跳跃。正是这些**经过叶子的远足**让中心的混合变快，从而抵消了孪生和阻挡带来的损失。
+
+### 13.5 对下一步的意义
+
+问题被精确地化成了：
+$$\textbf{目标：}\quad \pi_\emptyset\,\|\Gamma^{\mathrm{tr}}\|\ \le\ \mathrm{poly}(\bar\lambda)\,\big(n(1+\lambda)+\tau\big).$$
+数值上它在所有实例中成立（例如 $\lambda=64$ 时最大约 $6.7\,n(1+\lambda)\approx0.1\lambda\,n(1+\lambda)$）。
+
+**证明思路**：把迹链的 Dirichlet 形式拆开，
+$$\mathcal E_{\mathrm{tr}}\ \succeq\ \pi_\emptyset\mathcal E_{P_\emptyset}+\sum_y\lambda\pi(A_y)\cdot\frac{1}{n(1+\lambda)}\cdot\mathcal E_{K_y},$$
+其中 $K_y$ 是"在 $\Omega_y$ 中用 $P_y$ 跑一段几何分布时间（均值 $n(1+\lambda)$）后返回"的核。它的谱满足：对 $P_y$ 的慢模，$\mathcal E_{K_y}\approx n(1+\lambda)\,\mathcal E_{P_y}$；对快模，$\mathcal E_{K_y}\approx$ 方差（相当于完全重采样）。
+- 这一步把"叶子能量"精确地放回了几何里，正是 §12.3 诊断出缺失的那部分。
+- 接下来，在这个更丰富的 Dirichlet 形式下重做 Green 函数估计。可以先在孪生 + 阻挡例子上手算，看远足项如何抵消 $W/\pi_\emptyset$ 的损失，再推广。
+
+---
+
+## 14. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.

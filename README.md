@@ -30,4 +30,4 @@
 | 类型 | 标题 | 状态 | 更新日期 |
 |---|---|---|---|
 | 问题 | [弦图上 hardcore model 的快速混合：能否去掉 bounded separator 限制？](problems/chordal-hardcore-mixing.md) | 文献梳理 + 小规模实验 | 2026-11-22 |
-| 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | (⋆) 仍成立；G′ 被证伪，修正方向已定位 | 2026-11-22 |
+| 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | (⋆) 仍成立；中心部分精确化为迹链 Green 界 | 2026-11-22 |
