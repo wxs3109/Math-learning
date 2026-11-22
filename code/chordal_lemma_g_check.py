@@ -34,7 +34,8 @@ def green_gram(n, adj, R, lam):
     d = np.sqrt(mu)
     S = (d[:, None] * Pe) / d[None, :]
     S = (S + S.T) / 2                                         # 对称化
-    Zs = np.linalg.pinv(np.eye(len(ids)) - S)                 # 对称坐标下的 Z
+    # 对称坐标下的 Z：在常数方向 d 上补成可逆后直接求解（比 pinv 数值上更稳）
+    Zs = np.linalg.inv(np.eye(len(ids)) - S + np.outer(d, d))
     nbr = [sum(1 << u for u in adj[v]) for v in range(n)]
     B = []
     for y in R:

@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：归约到两个待证引理（G′、L）；发现常数必须依赖 λ · 目标改为 n^{O(log λ)} · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：G′ 的难点已定位到非对角元；有块对角引理 + 核心事件分解方案 · 目标 n^{O(log λ)} · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -371,7 +371,86 @@ $$\|\Gamma^Z\|_{\mathrm{op}}\ \le\ C_1\,\bar\lambda\,\big(n(1+\lambda)+\tau\big)
 
 ---
 
-## 9. 参考资料
+## 9. 对角元与块结构（2026-11-22）
+
+代码：[`code/chordal_diag_block_check.py`](../code/chordal_diag_block_check.py)
+
+### 9.1 更正：对角元本身是平凡的
+
+由 $\langle\varphi,Z\varphi\rangle\le\tau_\emptyset\|\varphi\|^2$，有 $G_y\le\tau_\emptyset(1-p_y)/p_y$，所以
+$$\Gamma^Z_{yy}=w_yG_y=\lambda\pi_\emptyset p_yG_y\ \le\ \lambda\pi_\emptyset(1-p_y)\,\tau_\emptyset\ \le\ \bar\lambda\,\tau .$$
+
+也就是说 G′ 的对角元自动满足目标。我在 §8.7 说"先证 $U$ 是团时的对角元"，这个下一步选错了。**G′ 的全部难度在非对角元**：有多少个 $y$ 会"串通"起来，让算子范数比最大对角元大很多。
+- whiskers 例子：非对角元全为零。
+- 孪生例子：矩阵接近秩一。
+
+### 9.2 命题 D′：纤维分解（$U_y$ 是团） **[已证]**
+
+这个命题的价值不在于给对角元一个更好的界，而在于它给出的分解方式：把"$U$ 内部的快速动力学"和"环境的慢变化"分开。这正是处理非对角元需要的工具。
+
+**设定**：$U=N(y)\setminus R$ 是团。把 $J\in\Omega_\emptyset$ 写成 $J=e\cup S$，其中环境 $e=J\setminus U$，$S=J\cap U$，$|S|\le1$。
+- $N(e)$ 是给定 $e$ 时 $U$ 中可插入点的个数，$Z(e)=1+\lambda N(e)$。
+- 记 $p_e=\Pr(A\mid e)=1/Z(e)$。$e$ 在 $\mu_0$ 下的边缘分布记为 $\rho$，于是 $\rho(e)=\mu_0(e)Z(e)$，$p=\mathbb E_\rho[1/Z]$。
+
+**命题**：令 $\varphi=\mathbf 1_A-p$，则
+$$\langle\varphi,Z\varphi\rangle\ \le\ 2n(1+\lambda)\,\mathbb E_\rho\!\Big[\frac{Z-1}{Z^3}\Big]+2\tau_\emptyset\,\mathrm{Var}_\rho(1/Z).$$
+
+**证明**：把 $\varphi$ 拆成 $\varphi_1=\mathbf 1_A-p_e$（纤维内部）和 $\varphi_2=p_e-p$（只依赖环境）。由 $Z\succeq0$，$\langle\varphi,Z\varphi\rangle\le2\langle\varphi_1,Z\varphi_1\rangle+2\langle\varphi_2,Z\varphi_2\rangle$。
+
+1. **Thomson 原理**：对可逆链和均值为零的 $\psi$，$\langle\psi,Z\psi\rangle$ 等于所有"净流出量 $=\mu\psi$"的流 $\theta$ 中，能量 $\sum_{\text{边}}\theta^2/Q$ 的最小值，其中 $Q(x,x')=\mu(x)P(x,x')$。最优流是 $\theta^*=Q\,\nabla(Z\psi)$。
+2. **纤维部分**：在每个纤维里，从 $e$ 沿插入边向每个可插入的 $e\cup\{z\}$ 送 $\lambda\mu_0(e)/Z(e)$ 的流量。
+   - 散度检查：$e$ 处的净流出是 $\mu_0(e)\lambda N/Z=\mu_0(e)\varphi_1(e)$；$e\cup\{z\}$ 处的净流入是 $\lambda\mu_0(e)/Z=-\mu_0(e\cup\{z\})\varphi_1(e\cup\{z\})$。✓
+   - 边的导纳 $Q=\lambda\mu_0(e)/(n(1+\lambda))$。
+   - 能量 $=n(1+\lambda)\sum_e\mu_0(e)\lambda N/Z^2=n(1+\lambda)\,\mathbb E_\rho[(Z-1)/Z^3]$。
+3. **环境部分**：$\langle\varphi_2,Z\varphi_2\rangle\le\tau_\emptyset\,\mathrm{Var}_{\mu_0}(p_e)=\tau_\emptyset\,\mathrm{Var}_\rho(1/Z)$。$\blacksquare$
+
+**推论**：由 $(Z-1)/Z^3\le 1/Z^2\le1/Z$ 和 $\mathrm{Var}_\rho(1/Z)\le p(1-p)$，
+$$w_yG_y\le 2\lambda\pi_\emptyset\big(n(1+\lambda)+(1-p_y)\tau_\emptyset\big).$$
+
+**数值**：在公共阻挡点族上，左边/右边 ≈ 0.50–0.52，也就是只差一个因子 2。旧的"离散指数"版本（命题 D）在同样的例子上是 0.008，松了两个数量级。随机弦图 / split 图上，左边/右边的最大值是 0.64。
+
+### 9.3 引理 E：块对角 **[已证]**
+
+**引理**：若 $U_y$ 与 $U_{y'}$ 落在 $G-R$ 的不相交连通分量集合里，则 $\Gamma^Z_{yy'}=0$。
+
+**证明**：
+1. $\mu_0$ 是 $G-R$ 各分量上 hardcore 测度的乘积。$P_\emptyset$ 每步选点的随机性与状态无关，所以不同分量的坐标在任意时刻都相互独立地演化。
+2. 设 $\varphi_y$ 只依赖分量集 $\mathcal C$ 上的坐标，$\varphi_{y'}$ 只依赖与 $\mathcal C$ 不相交的分量集 $\mathcal C'$ 上的坐标。那么 $\mathbb E[\varphi_y(X_0)\varphi_{y'}(X_t)]=\mathbb E\varphi_y\cdot\mathbb E\varphi_{y'}=0$ 对每个 $t$ 成立。
+3. 对 $t$ 求和得 $\langle\varphi_y,Z\varphi_{y'}\rangle=0$。$\blacksquare$
+
+**数值**：whiskers 上非对角元 / 对角元 $\approx10^{-16}$，即机器精度。
+
+⇒ $\|\Gamma^Z\|=\max_{\text{块}}\|\Gamma^Z_{\text{块}}\|$。这里的"块"指通过共享 $G-R$ 的分量而连在一起的那些 $y$。
+
+**结构事实** **[已证]**：在以 $R$ 为一个节点的 clique tree 里，$G-R$ 的每个分量都只落在 $R$ 的某一个子树 $T_c$ 中。理由：$R$ 之外的点出现的 bag 构成一棵不含 $R$ 的连通子树；不同子树中 $R$ 之外的点之间没有边。
+
+设某个子树的根团是 $C_c$，分隔集 $S_c=R\cap C_c$：
+- 每个 $y\in S_c$ 都和 $C_c\setminus S_c$ 中的所有点相邻（因为 $C_c$ 是团）；
+- 于是 $A_y\subseteq B_c:=\{C_c\setminus S_c\text{ 全空}\}$。
+
+**同一个子树对应的那些 $y$，所有 $A_y$ 都共享一个核心事件 $B_c$。** 孪生例子就是 $A_y=B_c$ 的极端情形。
+
+⚠️ 一个 $y$ 可能同时属于多个子树的分隔集。这时它会把多个子树连进同一个块，并且 $A_y\subseteq\bigcap_{c:\,y\in S_c}B_c$。下面 9.4 先处理"一个块只涉及一个子树"的情形；多子树的块要按 $y$ 所属的子树集合进一步分组。
+
+### 9.4 核心事件分解：下一步的具体方案
+
+在一个块里，令 $B=B_c$，$p_B=\mu_0(B)$，$A_y=B\cap E_y$，$q_y=\mu_0(E_y\mid B)$。把 $\varphi_y$ 写成
+$$\varphi_y=\underbrace{\big(\mathbf 1_B/p_B-1\big)}_{\text{核心，与 }y\text{ 无关}}+\underbrace{\frac{\mathbf 1_B}{p_B}\Big(\frac{\mathbf 1_{E_y}}{q_y}-1\Big)}_{\text{条件在 }B\text{ 上的剩余部分}} .$$
+则在半正定意义下 $\Gamma^Z\preceq 2\,\Gamma_{\text{core}}+2\,\Gamma_{\text{rest}}$。
+
+**核心部分** **[已证]**：$\Gamma_{\text{core}}$ 是秩一矩阵，范数等于 $\big(\sum_{y\in\text{块}}w_y\big)G_B\le G_B$。$C_c\setminus S_c$ 是团，所以对 $B$ 用命题 D′，并记 $\kappa_B=\mathrm{CV}^2_\rho(1/Z_B)$（$1/Z_B$ 在环境分布下的平方变异系数），得到
+$$\|\Gamma_{\text{core}}\|\ \le\ 2(1+\kappa_B)\,n(1+\lambda)+2\,\kappa_B\,\tau .$$
+
+- 孪生例子里 $\kappa_B$ 很小，这就解释了 §7.6 的观察：Gram 矩阵的界涨，真实值不涨。
+- **但 $\kappa_B$ 本身可以很大**：公共阻挡点让 $1/Z_B$ 在 $1$ 和 $1/(1+\lambda|D|)$ 之间跳。这时需要把"$\kappa_B\cdot\tau$"细化成"$1/Z_B$ 这个环境函数在环境动力学下的 Green 能量"。而这个 Green 能量是下一层子树上的同类问题。
+
+**剩余部分**：$\Gamma_{\text{rest}}$ 是"条件在 $C_c\setminus S_c$ 全空"之后的同一个问题。条件在 $B$ 上以后，$C_c$ 下面的子树进一步解耦，可以再次使用引理 E 和结构事实。
+
+⇒ 这提示了一个**沿 clique tree 向下的归纳**：每层要么分出秩一的核心部分（代价是 $\mathrm{poly}(\lambda)$ 乘环境波动），要么按引理 E 块对角化。需要证明的是：环境波动 $\kappa$ 这一类量在归纳中保持 $\mathrm{poly}(\lambda)$ 有界，而不随团的大小增长。
+
+---
+
+## 10. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.
