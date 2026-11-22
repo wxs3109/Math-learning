@@ -26,7 +26,26 @@ $$\pi(I) = \frac{\lambda^{|I|}}{Z_G(\lambda)},\qquad Z_G(\lambda)=\sum_{I\in\mat
   - 有界 treewidth（Eppstein–Frishberg）
   - 有界分隔集的弦图（Bezáková–Sun，就是我们的论文）
   - 有界 tree-independence number（Marin，包含所有弦图，但只给出拟多项式）
-- 有意思的一点：弦图上 $Z_G(\lambda)$ **可以精确地在多项式时间内算出来**（Okamoto–Uno–Uehara 给了线性时间计数；带权版本用 clique tree DP 也很直接），所以**采样问题本身是容易的**。这里研究的纯粹是"自然局部链能不能快速混合"。弦图是检验 Glauber dynamics 的一个干净的测试场：结构很强，但度数、treewidth 都没有上界。
+- 有意思的一点：弦图上 $Z_G(\lambda)$ **可以精确地在多项式时间内算出来**，所以**采样问题本身是容易的**。这里研究的纯粹是"自然局部链能不能快速混合"。弦图是检验 Glauber dynamics 的一个干净的测试场：结构很强，但度数、treewidth 都没有上界。
+
+### 2.1 精确计算：clique tree DP **[已证 + 已对拍]**
+
+- **文献**：Okamoto–Uno–Uehara 给出了弦图上独立集计数的**线性时间**算法（$\lambda=1$）；也给出了固定大小独立集计数的多项式算法，所以独立集多项式 $\sum_k i_k\lambda^k$ 的全部系数都能算。但在弦图上，**极大**独立集计数是 #P-complete 的。
+- **带权版本的 DP**：取一棵 clique tree，以 $t$ 为根的子树顶点集记为 $V_t$。定义
+  $$f_t(x)=\sum\{\lambda^{|I|}: I\in\mathcal I(G[V_t]),\ I\cap C_t=x\},\qquad x\in\{\emptyset\}\cup C_t,$$
+  对每个孩子 $c$，设分隔集 $S=C_t\cap C_c$，转移为
+  $$f_t(x)=w(x)\prod_{c}g_c(x),\qquad
+  g_c(x)=\begin{cases} f_c(x)/\lambda, & x\in S\\[2pt] \sum_{y\in\{\emptyset\}\cup(C_c\setminus S)} f_c(y), & x\notin S\end{cases}$$
+  其中 $w(\emptyset)=1$、$w(v)=\lambda$。最后 $Z=\sum_x f_{\text{root}}(x)$。
+- **为什么正确**：
+  1. 独立集和每个团至多交 1 个点，所以每个 bag 只有 $|C_t|+1$ 种状态。
+  2. 由 running intersection，$x\in C_t\setminus S$ 和 $y\in C_c\setminus S$ 不会同时出现在任何一个 bag 里，所以不相邻。父子之间唯一的耦合就是分隔集 $S$。
+- **复杂度**：$O\big(\sum_t |C_t|\cdot\deg_T(t)\big)$，相对 clique tree 的大小是线性的。
+- **采样**：自顶向下，按 $f$ 的条件比例依次决定每个 bag 的状态，就能从 $\pi$ 精确采样，代价相同。
+- **对拍**：[`code/chordal_hardcore_dp.py`](../code/chordal_hardcore_dp.py)
+  - 200 个随机弦图（$n\le16$，有理数 $\lambda$），DP 得到的 $Z$ 和暴力枚举**精确相等**（全程用有理数运算）。
+  - $P_{10}$ 的独立集数是 144，等于 $F_{12}$。
+  - 在 $n=7$、64 个独立集的图上采样 20 万次，经验分布和精确分布的 TV 距离是 0.0068，和采样噪声的量级一致。
 
 ---
 
