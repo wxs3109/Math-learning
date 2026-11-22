@@ -116,6 +116,8 @@ $$\rho = \max_{e=(x,y)} \frac{1}{\pi(x)P(x,y)} \sum_{\gamma_{IJ}\ni e} \pi(I)\pi
 ### 4.4 相关但不同的方向
 
 - **Heinrich（2020）**：弦图上 $k\ge(1+\varepsilon)(\Delta+1)$ 种颜色时，colorings 的 Glauber dynamics 是多项式混合；有界 treewidth、$k\ge\Delta+2$ 时也是。这说明弦图上 colorings 也有类似的结构型结果。
+- **Chen（SODA 2024，arXiv 2307.08212）**：treewidth $t$ 时混合时间是 $n^{O(1+t\log(1+\lambda))}$，加强了 Eppstein–Frishberg。方法是在平衡分隔集树上做 block factorization，是和我们问题最接近的框架（详见 [chordal-remove-b.md](chordal-remove-b.md) §11.2）。
+- **Split graph**：取 bag $K\cup\{s\}$ 得 path-$\alpha\le2$，由 Marin 的定理 2 是多项式的 **[推论]**。加上区间图，开放的只剩"分叉的"弦图。
 - **Spectral independence 一系列工作**（Anari–Liu–Oveis Gharan，Chen–Liu–Vigoda，Chen–Feng–Yin–Zhang，…）只覆盖 $\lambda<\lambda_c(\Delta)$，处理不了任意 $\lambda$。
 
 ---

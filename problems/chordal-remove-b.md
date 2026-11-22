@@ -1,6 +1,6 @@
 # 去掉 bounded separator 限制：一条基于"团分解"的路线
 
-> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：G′ 的难点在非对角元；嵌套证伪实验支持猜想 · 目标 n^{O(log λ)} · 更新：2026-11-22
+> 接续 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) · 状态：G′ 的难点在非对角元；证伪实验支持猜想；文献核查无撞车 · 目标 n^{O(1+log(1+λ))}（与树上已知最好界一致） · 更新：2026-11-22
 > 标注：**[已证]** 本文给出了完整证明 · **[猜想]** 有数值支持、未证明 · **[需核实]** 引用的定理需要回原文确认常数和条件
 
 ---
@@ -30,12 +30,12 @@
 
 ## 3. 前置知识
 
-**弦图的平衡团分隔集** **[需核实：Gilbert–Rose–Edenbrandt 1984]**：每个弦图都存在一个团 $R$，使 $G-R$ 的每个连通分量至多有 $n/2$ 个点。
+**弦图的平衡团分隔集** **[标准事实：Gilbert–Rose–Edenbrandt 1984；也可由 clique tree 重心论证得到，见 §11.5]**：每个弦图都存在一个团 $R$，使 $G-R$ 的每个连通分量至多有 $n/2$ 个点。
 
 **乘积链的谱间隙** **[已证，标准]**：设 $Q=\sum_i \frac{n_i}{n}\,(I\otimes\cdots\otimes Q_i\otimes\cdots\otimes I)+\frac{n_0}{n}I$，其中 $Q_i$ 是第 $i$ 个分量上自己的链（$n_i$ 个点），$n_0$ 个点被冻结。则
 $$\mathrm{gap}(Q)=\min_i \frac{n_i}{n}\,\mathrm{gap}(Q_i).$$
 
-**分解定理（Jerrum–Son–Tetali–Vigoda 2004）** **[需核实常数]**：设 $\Omega=\bigsqcup_x\Omega_x$。投影链 $\bar P(x,y)=\pi(\Omega_x)^{-1}\sum_{I\in\Omega_x,J\in\Omega_y}\pi(I)P(I,J)$，限制链为 $P_x$，记 $\gamma=\max_x\max_{I\in\Omega_x}P(I,\Omega\setminus\Omega_x)$。则
+**分解定理（Jerrum–Son–Tetali–Vigoda 2004，定理 1）** **[已核对原文，§11.3]**：设 $\Omega=\bigsqcup_x\Omega_x$。投影链 $\bar P(x,y)=\pi(\Omega_x)^{-1}\sum_{I\in\Omega_x,J\in\Omega_y}\pi(I)P(I,J)$，限制链为 $P_x$，记 $\gamma=\max_x\max_{I\in\Omega_x}P(I,\Omega\setminus\Omega_x)$。则
 $$\mathrm{gap}(P)\ \ge\ \min\Big\{\tfrac{\mathrm{gap}(\bar P)}{3},\ \frac{\mathrm{gap}(\bar P)\,\min_x\mathrm{gap}(P_x)}{3\gamma+\mathrm{gap}(\bar P)}\Big\}.$$
 
 ---
@@ -497,10 +497,74 @@ $$\|\Gamma_{\text{core}}\|\ \le\ 2(1+\kappa_B)\,n(1+\lambda)+2\,\kappa_B\,\tau .
 
 ---
 
-## 11. 参考资料
+## 11. 文献核查结果（2026-11-22）
+
+这一轮由一个子 agent 做检索，我对关键条目回原文核对。"V"表示读过原文或摘要，"I"表示推断或未核实。
+
+### 11.1 有没有人已经做了（防撞车）
+
+**没有。**
+- 引用 Bezáková–Sun 2020 的论文有 5 篇（OpenAlex 数据，V）：Eppstein–Frishberg；Hébert-Johnson–Lokshtanov–Vigoda（采样弦图本身，不是独立集）；Achlioptas–Zampetakis；Marin；Ju–Liu–Yin 2026（关于唯一性阈值附近的硬度，不涉及弦图）。
+- Marin 只有 1 篇引用。他的开放问题 4（弦图上是否可能 $\Omega(n^{\ln n})$）目前没人回答。
+- 补充一个推论（I，但很直接）：split graph 可以取 bag $K\cup\{s\}$，所以 path-$\alpha\le2$，由 Marin 的定理 2 是多项式的。加上区间图，**开放的情形只剩"分叉的"弦图**。
+
+### 11.2 Chen（SODA 2024）——最接近的框架 **[V]**
+
+文献：Zongchen Chen, *Combinatorial approach for factorization of variance and entropy in spin systems*, arXiv 2307.08212。
+
+- **定理 1.1**：treewidth 为 $t$ 的图上，hardcore 的 Glauber 混合时间是 $n^{O(1+t\log(1+\lambda))}$。这是 Eppstein–Frishberg 的加强版。
+- **方法**：在平衡分隔集树上递归地做 block factorization（Prop 3.1）。总常数等于从根到叶路径上各层常数的乘积。
+- **每层常数（Lemma 4.2）**：$C=2(1+\lambda)^t$，来源是 $\mu(\sigma_S=\vec 0)\ge(1+\lambda)^{-|S|}$。
+- **两块分解（Lemma 3.4）**：若对所有条件 $y,y'$ 有 $d_{TV}(\pi_X^y,\pi_X^{y'})\le1-\varepsilon_X$，对所有 $x,x'$ 有 $d_{TV}(\pi_Y^x,\pi_Y^{x'})\le1-\varepsilon_Y$，则方差分解常数为 $\frac{2}{\varepsilon_X+\varepsilon_Y}$。
+
+**和我们路线的关系**：
+1. 套到弦图上，取团分隔集 $S$，有 $\mu(\sigma_S=\emptyset)\ge1/(1+|S|\lambda)$（引理 C 的类比）。每层损失 $\sim|S|\lambda$，递归给出 $n^{O(\log(b\lambda))}$，正好重新得到 2020 年的结果（I）。
+2. Lemma 3.4 的常数是 $\varepsilon_X+\varepsilon_Y$ 的**和**，所以只要一侧重叠大就够了。孪生例子就是这样：$\pi_Y^x$ 与 $x$ 无关，$\varepsilon_Y=1$。但 whiskers 例子两侧都差（$\varepsilon_X\sim1/(r\lambda)$，$\varepsilon_Y\sim(1+\lambda)^{-m}$），而真实动力学并不慢。原因是 Lemma 3.4 对边界条件取**最坏情况**的 TV 距离。
+3. 我们的 $\Gamma^Z$（引理 2′）本质上是它的**平均情形**版本：只看平稳分布下的 Green 能量，不对边界条件取上确界。这正是能同时处理 whiskers 和孪生两种例子的原因。
+
+**一个更自然的目标表述**：Chen 在树上（$t=1$）给出的是 $n^{O(1+\log(1+\lambda))}$。我们的猜想等价于：**弦图和树一样，混合时间是 $n^{O(1+\log(1+\lambda))}$，与团的大小、分隔集的大小都无关。**
+
+### 11.3 现成的分解定理能否直接用 **[V]**
+
+- **JSTV 定理 1**：形式为 $\mathrm{gap}\ge\min\{\bar\lambda/3,\ \bar\lambda\lambda_{\min}/(3\gamma+\bar\lambda)\}$，§3 的记忆是对的，"需核实"可以去掉。
+- **JSTV 推论 2/3**：若各块之间转移的"落点分布"在**两个方向**上都接近平稳分布，$\gamma$ 可以换成很小的 $\hat\gamma$；完全精确时 $\mathrm{gap}\ge\min\{\bar\lambda,\lambda_{\min}\}$。
+- **我们的星形分解只满足一个方向**：从中心到叶子的落点恰好平稳（引理 B）；反方向的落点是 $\pi_\emptyset(\cdot\mid A_y)$，和 $\pi_\emptyset$ 差得很远。所以推论 2/3 不适用。没有找到只用单向条件的现成定理。
+- ⇒ 命题 1（§7.2）可以看作一个"**单向精确落点**"的分解引理：缺的那个方向的损失，恰好就是 $\mathrm{Var}_w(m)$ 这一项。这本身可能值得单独写成一个一般引理。
+- **其它候选**：
+  - Madras–Randall 的重叠覆盖：取 $X_y=\Omega_y\cup A_y$，重叠度 $\Theta\le|K|+1$，又丢了 $|K|$（I）。
+  - Miracle–Streib–Streib（arXiv 1910.05184）：用一个 Rayleigh 商 $\hat\delta_2$ 和 $\varepsilon$-正交性代替 $\gamma$。形式上可以用，但需要估计 $\hat\delta_2$，难度和 G′ 相当。
+  - Caracciolo–Pelissetto–Sokal 型定理：没有 $\gamma$，但针对的是复合链，不直接适用。
+
+### 11.4 目标是不是最优的 **[V]**
+
+- **完全 $b$-叉树、自由边界**：Martinelli–Sinclair–Weitz 证明了对所有 $\lambda$ relaxation time 都是 $O(n)$（Restrepo 等人在文中引用了这一点）。所以在**完全**树上，指数不会随 $\lambda$ 增长。
+- **Restrepo 等人的下界**：需要特意构造的"坏"边界条件，没有自由边界版本。
+- **一般树**：Efthymiou–Hayes–Štefankovič–Vigoda 指出，存在一些树，在 $\lambda>C$（$C\approx28$）时有多项式级的慢化。Chen–Yang–Yin–Zhang（arXiv 2404.04668）对所有树证明了 $\lambda<e^2$ 时 relaxation time 是最优的 $O(n)$。
+- **至今没有人证明自由边界树上的指数必须随 $\lambda$ 增长**（例如 $n^{\Omega(\log\lambda)}$）。子 agent 提出一个思路：用 $C\log n$ 个悬挂叶子模拟边界条件。这还没有核实（I）。
+- ⇒ **我们的目标 $n^{O(1+\log(1+\lambda))}$ 和树上目前已知最好的上界一致，但不一定是最优的。** 是否最优，在树上本身就是开放的。
+
+### 11.5 其它核对
+
+- **Gilbert–Rose–Edenbrandt**，SIAM J. Algebraic Discrete Methods 5(3):306–313, 1984（V：题目、期刊、摘要）。"存在一个团，删去后每个连通分量至多 $n/2$ 个点"这个团形式，是通过二手来源确认的。它也可以由 clique tree 重心论证直接得到。§3 里的"需核实"可以降级为"标准事实"。
+- **Okamoto–Uno–Uehara**：WG 2005（LNCS 3787）和 J. Discrete Algorithms 6(2), 2008（V）。
+
+### 11.6 对下一步的影响
+
+1. **没有现成工具能直接给出 G′**，所以主线（核心事件归纳）有必要继续。它的定位也清楚了：这是 Chen 框架的"平均情形"加强。
+2. **结果的定位**：如果做成，结论是"弦图和树一样，混合时间是 $n^{O(1+\log(1+\lambda))}$"。这去掉了 2020 年结果和 Marin 结果中的分隔集 / bag 大小依赖。
+3. **"单向精确落点分解引理"**（命题 1）可以作为一个独立的技术贡献来写。
+
+---
+
+## 12. 参考资料
 
 1. M. Jerrum, J.-B. Son, P. Tetali, E. Vigoda. *Elementary bounds on Poincaré and log-Sobolev constants for decomposable Markov chains.* Ann. Appl. Probab. 14(4), 2004.
 2. R. A. Martin, D. Randall. *Sampling adsorbing staircase walks using a new Markov chain decomposition method.* FOCS 2000.
 3. N. Madras, D. Randall. *Markov chain decomposition for convergence rate analysis.* Ann. Appl. Probab. 12(2), 2002.
-4. J. R. Gilbert, D. J. Rose, A. Edenbrandt. *A separator theorem for chordal graphs.* SIAM J. Algebraic Discrete Methods 5(3), 1984.
-5. 以及 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) 里的全部参考资料。
+4. J. R. Gilbert, D. J. Rose, A. Edenbrandt. *A separator theorem for chordal graphs.* SIAM J. Algebraic Discrete Methods 5(3):306–313, 1984.
+5. Z. Chen. *Combinatorial approach for factorization of variance and entropy in spin systems.* SODA 2024. [arXiv:2307.08212](https://arxiv.org/abs/2307.08212)
+6. S. Miracle, A. P. Streib, N. Streib. *Iterated decomposition of biased permutations via new bounds on the spectral gap of Markov chains.* [arXiv:1910.05184](https://arxiv.org/abs/1910.05184)
+7. F. Martinelli, A. Sinclair, D. Weitz. *Glauber dynamics on trees: boundary conditions and mixing time.* Comm. Math. Phys. 2004. [arXiv:math/0307336](https://arxiv.org/abs/math/0307336)
+8. R. Restrepo, D. Štefankovič, J. C. Vera, E. Vigoda, L. Yang. *Phase transition for Glauber dynamics for independent sets on regular trees.* SIAM J. Discrete Math. 28(2), 2014. [arXiv:1007.2255](https://arxiv.org/abs/1007.2255)
+9. Z. Chen, K. Yang, Y. Yin, X. Zhang. [arXiv:2404.04668](https://arxiv.org/abs/2404.04668)（任意树上 $\lambda<e^2$ 时的最优谱间隙）
+10. 以及 [chordal-hardcore-mixing.md](chordal-hardcore-mixing.md) 里的全部参考资料。
