@@ -27,7 +27,7 @@
 |---|---|---|
 | [第 5 章 语言模型](ch05-language-model.md) | 预测下一个 token；交叉熵与 perplexity；bigram 模型及其局限；embedding | [`ch05_06_lm_attention.py`](code/ch05_06_lm_attention.py) 第 1 部分 |
 | [第 6 章 Self-attention 与 Transformer](ch06-self-attention.md) | query / key / value；causal mask；为什么除以 $\sqrt d$；多头；Transformer 块；KV cache | [`ch05_06_lm_attention.py`](code/ch05_06_lm_attention.py) 第 2 部分 |
-| 第 7 章 动手训练一个小 GPT（待写） | 把前六章组装起来，用反向传播真正训练，看损失下降、生成变好 | 计划跟 nanoGPT |
+| [第 7 章 从零实现并训练一个小 GPT](ch07-tiny-gpt.md) | byte-level BPE；Llama 式结构的前向（RMSNorm、RoPE、GQA、SwiGLU）；逐层手推反向与 gradient check；参数量与 6N；AdamW、warmup + cosine、梯度裁剪；KV cache；去掉 causal mask 会怎样；MoE；RoPE 外推（PI、NTK-aware、YaRN）；从 CPU 到 GPU | [`ch07_tiny_gpt.py`](code/ch07_tiny_gpt.py) |
 | [第 8 章 预训练与后训练](ch08-pre-post-training.md) | 训练阶段全貌；6ND 与 scaling law；训练显存账本、mixed precision、ZeRO、gradient checkpointing；SFT；LoRA 与 QLoRA；RLHF、PPO；DPO 的推导；GRPO 与 verifiable reward；蒸馏；什么时候该微调 | [`ch08_post_training.py`](code/ch08_post_training.py) |
 
 **第三部分 工程实践**
@@ -77,4 +77,4 @@
 - **准备面试**：先看附录 C，按岗位挑出对应的类别，再顺着每道题后面的链接回到正文。
 - **快速入门**：有概率和线性代数基础的话，先读附录 A，然后直接读第 5、6 章，遇到不懂的再回到第 1–4 章对应的小节。
 - **关心工程**：第 9–18 章可以直接读，遇到数学时按链接回查第 1–6 章。
-- 代码进入 `code/` 目录后 `python3 文件名.py` 直接运行。第 1–6、8–11、13、15、16 章只依赖 numpy 或标准库；第 18 章另外可选 `pip install jieba`；第 12 章的互操作部分需要 `pip install "mcp>=2"`（没装会自动跳过）；第 14 章需要 `pip install "langchain>=1" "langgraph>=1"`。都不需要 API key。第 17 章的 `ch17_gpu_benchmark.py` 需要 GPU（Kaggle / Colab 的免费 T4 即可）。
+- 代码进入 `code/` 目录后 `python3 文件名.py` 直接运行。第 1–11、13、15、16 章只依赖 numpy 或标准库；第 18 章另外可选 `pip install jieba`；第 12 章的互操作部分需要 `pip install "mcp>=2"`（没装会自动跳过）；第 14 章需要 `pip install "langchain>=1" "langgraph>=1"`。都不需要 API key。第 17 章的 `ch17_gpu_benchmark.py` 需要 GPU（Kaggle / Colab 的免费 T4 即可）。

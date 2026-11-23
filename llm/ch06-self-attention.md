@@ -75,13 +75,14 @@ $$\big(R(m\theta)q\big)^\top\big(R(n\theta)k\big)=q^\top R(m\theta)^\top R(n\the
 只和 $n-m$ 有关。每一对分量都是如此，加起来也是。
 4. **grouped-query attention（GQA）**：多个查询头共用一组 K、V，KV cache 变小几倍（[17.9 节](ch17-inference-serving.md#17.9)）。
 
-另外，输入的 embedding 矩阵和输出层的矩阵各是 $V\times d$，词表大时它们占参数量的不小一部分。按这些结构数一遍参数量，见 [17.2 节](ch17-inference-serving.md#17.2)。第 7 章会把这些都写成代码。
+另外，输入的 embedding 矩阵和输出层的矩阵各是 $V\times d$，词表大时它们占参数量的不小一部分。按这些结构数一遍参数量，见 [17.2 节](ch17-inference-serving.md#17.2)。[第 7 章](ch07-tiny-gpt.md) 把这些都写成了代码，包括反向传播。
 
 ## 6.4 由结构直接推出的几个现象 **[直觉]**
 
 - **context window 有上限、长文本贵**：注意力要算 $T\times T$ 的打分矩阵，计算量随长度平方增长。
 - **生成时可以缓存**：生成第 $t+1$ 个 token 时，前面位置的 $K,V$ 不变，可以存起来复用，这就是 KV cache。
 - **"幻觉"**：模型的目标只是给出"像训练文本"的下一个 token 分布，并没有"核对事实"这一步。流畅和正确是两件事。
+- **图像也能变成 token**：Transformer 处理的只是一串向量，不关心它们来自哪里。Vision Transformer（ViT）把图片切成固定大小的小块（patch，比如 16×16 像素），每块拉平后乘一个矩阵，就得到一个向量，相当于一个"视觉 token"，再加上位置编码。多模态大模型（VLM）通常是：一个图像 encoder 把图片变成一串视觉 token，经过一个小的投影层映射到语言模型的 embedding 空间，和文字 token 拼在一起送进语言模型。所以图片越大、切的块越多，占的上下文就越多。
 
 ## 6.5 数值实验
 
@@ -123,7 +124,7 @@ $d=1024$ 时，不缩放的 softmax 最大权重是 0.999，几乎是 one-hot；
 
 **疑问**：
 - 注意力权重是不是真能解释成"模型在看哪里"？可解释性研究里对此有争议。
-- positional encoding 有好几种（正弦、可学习、rotary position embedding RoPE），它们对长上下文外推的影响是什么？
+- RoPE 的长上下文外推见 [7.8.2 节](ch07-tiny-gpt.md#7.8.2)。不同的 head 实际学到了什么（比如专门看"上一个 token"的 head）？
 
 ## 参考资料
 

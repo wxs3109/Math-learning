@@ -46,19 +46,19 @@
 3. ★ 为什么最大似然就是最小化交叉熵？交叉熵、KL、熵之间是什么关系？ —— ✅ [1.7 节](ch01-probability.md#1.7)、[5.2 节](ch05-language-model.md#5.2)、[A.2 节](appendix-a-math-quick-reference.md#A.2)
 4. perplexity 是什么，怎么从交叉熵算出来？ —— ✅ [5.2 节](ch05-language-model.md#5.2)
 5. logits 是什么，在生成中起什么作用？ —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)、[A.5 节](appendix-a-math-quick-reference.md#A.5)
-6. ★ 贪心、beam search、top-k、top-p、温度各有什么取舍？什么时候把温度调到接近 0？ —— ◐ [9.6 节](ch09-prompt-engineering.md#9.6)（beam search 未讲）
+6. ★ 贪心、beam search、top-k、top-p、温度各有什么取舍？什么时候把温度调到接近 0？ —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)
 7. 你按下回车之后，ChatGPT 内部发生了什么？（从分词到流式返回） —— ◐ [9.2 节](ch09-prompt-engineering.md#9.2)、[17.1 节](ch17-inference-serving.md#17.1)
 8. 为什么第一个 token 出来得慢，后面的快？ —— ✅ [17.1 节](ch17-inference-serving.md#17.1)
-9. stop token 和 stop sequence 有什么区别？ —— ○（计划补到第 9 章）
-10. 长输出里出现"复读"的原因是什么，怎么缓解？ —— ○（计划补到第 9 章：重复惩罚、采样）
+9. stop token 和 stop sequence 有什么区别？ —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)
+10. 长输出里出现"复读"的原因是什么，怎么缓解？ —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)
 11. 涌现能力是什么？有人认为它是度量方式造成的假象，你怎么看？ —— ○
 12. RNN 有什么局限，Transformer 怎样解决？ —— ◐ [5.4 节](ch05-language-model.md#5.4)
 
 ### C.2.2 Tokenizer 与 embedding
 
 1. ★ token 是什么？token 数为什么同时影响费用和上下文上限？ —— ✅ [5.1 节](ch05-language-model.md#5.1)、[16.8 节](ch16-evals-production.md#16.8)
-2. ★ BPE、WordPiece、SentencePiece、Unigram 有什么区别？ —— ◐ [5.1 节](ch05-language-model.md#5.1)（BPE 的原理；其他算法和实现计划第 7 章）
-3. 手写 BPE 的训练和编码过程。 —— ○（计划第 7 章）
+2. ★ BPE、WordPiece、SentencePiece、Unigram 有什么区别？ —— ◐ [5.1 节](ch05-language-model.md#5.1)、[7.2 节](ch07-tiny-gpt.md#7.2)（WordPiece、Unigram 未讲）
+3. 手写 BPE 的训练和编码过程。 —— ✅ [7.2 节](ch07-tiny-gpt.md#7.2)、`ch07_tiny_gpt.py`
 4. 分词器把专业术语切成没有意义的碎片，会带来什么问题，怎么办？ —— ◐ [5.1 节](ch05-language-model.md#5.1)
 5. 中文分词和英文分词有什么不同？词表大小怎么定？ —— ○（计划第 7 章）
 6. embedding 是什么？语义相似在向量上是什么意思？ —— ✅ [5.4 节](ch05-language-model.md#5.4)、[15.4 节](ch15-rag.md#15.4)
@@ -76,7 +76,7 @@
 7. ★ MHA、MQA、GQA、MLA 的区别是什么？为什么它们都围绕 KV cache 展开？ —— ✅ [17.9 节](ch17-inference-serving.md#17.9)
 8. ★ 为什么需要 positional encoding？正弦 positional encoding、可学习 positional encoding、RoPE 各有什么特点？ —— ✅ [6.1 节](ch06-self-attention.md#6.1)、[6.3 节](ch06-self-attention.md#6.3)
 9. ★ RoPE 的原理是什么？为什么它能表达相对位置？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
-10. 长上下文外推：位置插值、NTK-aware、YaRN 分别做了什么？ —— ○
+10. 长上下文外推：位置插值、NTK-aware、YaRN 分别做了什么？ —— ✅ [7.8.2 节](ch07-tiny-gpt.md#7.8.2)
 11. sliding window 注意力、attention sink 是什么？ —— ○（计划第 17 章补充）
 12. FlashAttention 为什么快？它减少了计算还是减少了显存读写？ —— ✅ [17.3 节](ch17-inference-serving.md#17.3)
 
@@ -88,11 +88,11 @@
 4. ★ Pre-Norm 和 Post-Norm 有什么区别？各自的训练稳定性如何？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 5. residual connection 为什么让深层网络训练得动？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)、[4.8 节](ch04-calculus-optimization.md#4.8)
 6. FFN 在 Transformer 里起什么作用？SwiGLU 相比 ReLU 有什么好处？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
-7. 给定层数、隐藏维度、词表大小，估算模型参数量。 —— ✅ [17.2 节](ch17-inference-serving.md#17.2)、[6.3 节](ch06-self-attention.md#6.3)
-8. ★ MoE（Mixture of Experts）是什么？稠密模型和稀疏模型怎么比较？负载均衡怎么做？ —— ○
+7. 给定层数、隐藏维度、词表大小，估算模型参数量。 —— ✅ [7.5 节](ch07-tiny-gpt.md#7.5)、[17.2 节](ch17-inference-serving.md#17.2)
+8. ★ MoE（Mixture of Experts）是什么？稠密模型和稀疏模型怎么比较？负载均衡怎么做？ —— ✅ [7.8.1 节](ch07-tiny-gpt.md#7.8.1)
 9. 介绍 DeepSeek 系列模型在架构上的改动（MLA、MoE、多 token 预测）。 —— ◐ [17.9 节](ch17-inference-serving.md#17.9)
 10. 扩散语言模型和 autoregressive 模型有什么不同？ —— ○
-11. Transformer 能理解图像吗？视觉 token 是怎么来的？ —— ○（多模态，暂未计划）
+11. Transformer 能理解图像吗？视觉 token 是怎么来的？ —— ◐ [6.4 节](ch06-self-attention.md#6.4)
 
 ## C.3 预训练、分布式训练与微调 **[经验]**
 
@@ -161,7 +161,7 @@
 
 ### C.5.1 KV cache 与性能模型
 
-1. ★ KV cache 是什么？为什么能加速？为什么只缓存 K 和 V，不缓存 Q？ —— ✅ [17.1 节](ch17-inference-serving.md#17.1)
+1. ★ KV cache 是什么？为什么能加速？为什么只缓存 K 和 V，不缓存 Q？ —— ✅ [17.1 节](ch17-inference-serving.md#17.1)、[7.7 节](ch07-tiny-gpt.md#7.7)
 2. ★ 估算一个模型每个 token 的 KV cache 大小，以及服务 70B 模型要多少显存。 —— ✅ [17.2 节](ch17-inference-serving.md#17.2)、[17.12.1 节](ch17-inference-serving.md#17.12.1)
 3. ★ prefill 和 decode 有什么区别？为什么 prefill 受限于算力、decode 受限于带宽？ —— ✅ [17.1 节](ch17-inference-serving.md#17.1)、[17.3 节](ch17-inference-serving.md#17.3)
 4. 用 roofline 估算 70B 模型在 H100 上的 decode 速度上限。 —— ✅ [17.3 节](ch17-inference-serving.md#17.3)
@@ -472,18 +472,18 @@
 ### C.12.1 模型相关
 
 1. ★ 实现缩放点积注意力，带 causal mask 和 padding 掩码。 —— ✅ [6.5.1 节](ch06-self-attention.md#6.5.1)、`ch05_06_lm_attention.py`
-2. ★ 实现 multi-head attention，讲清每一步的张量形状。 —— ◐ [6.2 节](ch06-self-attention.md#6.2)（计划第 7 章给出完整实现）
-3. 把 multi-head attention 改成 GQA / MQA。 —— ○（计划第 7 章）
-4. ★ 实现 KV cache 和单步解码。 —— ○（计划第 7 章）
+2. ★ 实现 multi-head attention，讲清每一步的张量形状。 —— ✅ [7.3 节](ch07-tiny-gpt.md#7.3)、[7.4 节](ch07-tiny-gpt.md#7.4)、`ch07_tiny_gpt.py`
+3. 把 multi-head attention 改成 GQA / MQA。 —— ✅ [7.3 节](ch07-tiny-gpt.md#7.3)、`ch07_tiny_gpt.py`
+4. ★ 实现 KV cache 和单步解码。 —— ✅ [7.7 节](ch07-tiny-gpt.md#7.7)、`ch07_tiny_gpt.py`
 5. ★ 实现数值稳定的 softmax 和交叉熵。 —— ✅ [4.3 节](ch04-calculus-optimization.md#4.3)、[A.5 节](appendix-a-math-quick-reference.md#A.5)
-6. 实现 LayerNorm、RMSNorm。 —— ○（计划第 7 章）
-7. 实现 RoPE。 —— ○（计划第 7 章）
+6. 实现 LayerNorm、RMSNorm。 —— ◐ [7.4 节](ch07-tiny-gpt.md#7.4)、`ch07_tiny_gpt.py`（只实现了 RMSNorm）
+7. 实现 RoPE。 —— ✅ [7.3 节](ch07-tiny-gpt.md#7.3)、`ch07_tiny_gpt.py`
 8. ★ 实现 top-k、top-p、温度采样。 —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)、`ch09_prompting.py`
-9. 实现 beam search。 —— ○（计划第 7 章）
-10. 实现 BPE 的训练和编码。 —— ○（计划第 7 章）
+9. 实现 beam search。 —— ◐ [9.6 节](ch09-prompt-engineering.md#9.6)（原理，未实现）
+10. 实现 BPE 的训练和编码。 —— ✅ [7.2 节](ch07-tiny-gpt.md#7.2)、`ch07_tiny_gpt.py`
 11. 实现一个 LoRA 线性层。 —— ✅ [8.5 节](ch08-pre-post-training.md#8.5)、`ch08_post_training.py`
 12. 实现 DPO 损失、PPO 的 clipped objective。 —— ◐ [8.7 节](ch08-pre-post-training.md#8.7)、`ch08_post_training.py`（PPO 裁剪未实现）
-13. 实现一个最小的 decoder-only Transformer 并训练它。 —— ○（计划第 7 章）
+13. 实现一个最小的 decoder-only Transformer 并训练它。 —— ✅ [7.6 节](ch07-tiny-gpt.md#7.6)、[7.10 节](ch07-tiny-gpt.md#7.10)、`ch07_tiny_gpt.py`
 14. 实现 Adam 优化器。 —— ✅ [4.7 节](ch04-calculus-optimization.md#4.7)
 
 ### C.12.2 应用相关
@@ -543,40 +543,39 @@
 
 ## C.15 覆盖情况与补课顺序 **[经验]**
 
-上面一共 366 道题，其中 128 道标了 ★。按标记数：✅ 155 道，◐ 103 道，○ 101 道，其余 7 道是行为题。（第 8 章和一轮衔接补充之后更新；最初是 ✅ 119、◐ 97、○ 143。）按类别：
+上面一共 366 道题，其中 128 道标了 ★。按标记数：✅ 167 道，◐ 104 道，○ 88 道，其余 7 道是行为题。（第 7、8 章和两轮衔接补充之后更新；最初是 ✅ 119、◐ 97、○ 143。）按类别：
 
 | 类别 | 题数 | ✅ | ◐ | ○ | 主要空白 |
 |---|---|---|---|---|---|
-| C.2 基础与 Transformer | 43 | 23 | 10 | 10 | tokenizer 的实现、长上下文外推、MoE、涌现 |
+| C.2 基础与 Transformer | 43 | 29 | 10 | 4 | 涌现、扩散语言模型、WordPiece/Unigram |
 | C.3 训练与微调 | 29 | 19 | 9 | 1 | 多机容错 |
-| C.4 对齐与强化学习 | 20 | 11 | 5 | 4 | RLAIF 与 Constitutional AI、对齐税、拒绝采样 |
+| C.4 对齐与强化学习 | 20 | 11 | 5 | 4 | RLAIF 与 Constitutional AI、对齐税、rejection sampling |
 | C.5 推理与部署 | 31 | 19 | 8 | 4 | 框架对比、端侧推理 |
-| C.6 提示 | 18 | 12 | 5 | 1 | 多语言 |
+| C.6 Prompt | 18 | 12 | 5 | 1 | 多语言 |
 | C.7 RAG | 38 | 9 | 15 | 14 | query rewriting、引用、增量索引、向量库内部 |
 | C.8 Agent 与协议 | 60 | 34 | 15 | 11 | 记忆系统、多 agent、A2A |
 | C.9 评测与安全 | 30 | 7 | 13 | 10 | 传统指标与基准、red teaming、guardrails |
 | C.10 AI 前端 | 16 | 0 | 3 | 13 | SSE、流式渲染、中断、长对话 |
 | C.11 系统设计 | 26 | 5 | 11 | 10 | 需要把多章串起来练 |
-| C.12 手撕代码 | 34 | 10 | 4 | 20 | multi-head attention、KV cache、BPE、重试与限流 |
+| C.12 手撕代码 | 34 | 16 | 5 | 13 | 重试与限流、SSE 解析、缓存（应用侧） |
 
 **结论** **[经验]**：
 
 1. **工程实践部分（第 9–17 章）覆盖得最好**。RAG、agent、MCP、推理这几类高频题，大部分已经能在书里找到原理和数字。
 2. **训练和对齐（C.3、C.4）已由第 8 章补上**，剩下的是 RLAIF、对齐税这类概念题和多机训练的容错。
 3. **AI 前端（C.10）是现在最大的空白**，而且和你的背景最贴近：这些题本质上是前端工程问题加上一点对 autoregressive 生成的理解，补起来成本低、区分度高。第 18 章的项目会把它做出来。
-4. **第 7 章（动手训练一个小 GPT）能一次补上手撕代码里的大半**（原理已在 5.1、6.3 节补上，第 7 章负责写成代码）：multi-head attention、KV cache、RoPE、RMSNorm、BPE、采样，都可以在同一份代码里实现。
+4. **第 7 章已经补上了模型侧的手撕代码**：multi-head attention、GQA、KV cache、RMSNorm、RoPE、BPE、完整的训练。剩下的手撕题集中在应用侧（重试、限流、SSE 解析、缓存），会在第 18 章的项目里写出来。
 5. 系统设计题不需要新章节，需要的是练习：拿 C.11 里的题，按"需求 → 架构图 → 关键数字 → 失效方式 → 评测"的顺序各写一页。
 
 **建议的补课顺序**（按 AI 工程岗的路线）：
 
 | 顺序 | 内容 | 补上的题 |
 |---|---|---|
-| 已完成 | 第 8 章：预训练与后训练 | C.3、C.4 的大部分 |
+| 已完成 | 第 7 章：从零实现并训练一个小 GPT；第 8 章：预训练与后训练 | C.2、C.3、C.4、C.12.1 的大部分 |
 | 1 | 第 18 章的项目，含 AI 前端和真实 API | C.10、C.12.2 的重试与限流、C.14 的项目介绍、C.7 的 query rewriting 与引用 |
-| 2 | 第 7 章：动手训练一个小 GPT | C.2 的 tokenizer 实现；C.12.1 的大部分 |
-| 3 | 系统设计练习，贯穿全程 | C.11 |
-| 4 | Agent 深入（记忆、多 agent、A2A） | C.8.3、C.8.4 |
-| 5 | 数据与检索基础设施、评测工程、安全 | C.7.5、C.9 的剩余部分 |
+| 2 | 系统设计练习，贯穿全程 | C.11 |
+| 3 | Agent 深入（记忆、多 agent、A2A） | C.8.3、C.8.4 |
+| 4 | 数据与检索基础设施、评测工程、安全 | C.7.5、C.9 的剩余部分 |
 
 **关于"介绍你的项目"** **[经验]**：几篇面经里，一个带记忆的 RAG 项目被追问了四十多个问题，从记忆冲突、指代补全、hybrid search 打分、增量索引，一直问到 asyncio 和 SGLang。所以实战项目那一章最好做成一个能被这样追问的项目：每个设计决定都留下理由和一个实测数字。
 
