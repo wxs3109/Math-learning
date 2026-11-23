@@ -20,7 +20,7 @@
 
 **前置知识**
 
-矩阵乘法与外积（[3.2 节](ch03-linear-algebra.md#3.2)）、量化误差要用到的均匀分布方差（[1.3 节](ch01-probability.md#1.3)）、自注意力与 KV cache（[6.2 节](ch06-self-attention.md#6.2)、[6.4 节](ch06-self-attention.md#6.4)）、提示缓存（[11.6 节](ch11-agent-harness.md#11.6)）、总变差距离与接受–拒绝采样的思想。排队论部分用到马尔可夫链的平稳分布。
+矩阵乘法与外积（[3.2 节](ch03-linear-algebra.md#3.2)）、量化误差要用到的均匀分布方差（[1.3 节](ch01-probability.md#1.3)）、自注意力与 KV cache（[6.2 节](ch06-self-attention.md#6.2)、[6.4 节](ch06-self-attention.md#6.4)）、提示缓存（[11.6 节](ch11-agent-harness.md#11.6)）、总变差距离（[1.7 节](ch01-probability.md#1.7)）与接受–拒绝采样的思想。排队论部分用到马尔可夫链的平稳分布，17.11 节会就地推导。
 
 ## 17.1 一次生成的两个阶段 **[事实]**
 
