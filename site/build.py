@@ -60,6 +60,10 @@ PARTS = [
         ("ch16", "ch16-evals-production.md", "16", "评测、安全与上线",
          "误差累积；pass@k 与 pass^k；置信区间；LLM 评委；提示注入；成本与延迟。"),
     ]),
+    ("第四部分 · 系统与基础设施", [
+        ("ch17", "ch17-inference-serving.md", "17", "推理服务",
+         "prefill 与 decode；KV cache 与 roofline；连续批处理、PagedAttention；投机解码；量化；排队与容量规划。"),
+    ]),
     ("附录", [
         ("appA", "appendix-a-math-quick-reference.md", "A", "数学速查",
          "一页讲完第 5、6 章要用的结论：交叉熵与 KL、最大似然、softmax、反向传播。"),

@@ -33,4 +33,4 @@
 |---|---|---|---|
 | 问题 | [弦图上 hardcore model 的快速混合：能否去掉 bounded separator 限制？](problems/chordal-hardcore-mixing.md) | 文献梳理 + 小规模实验 | 2026-11-22 |
 | 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | (⋆) 被推翻，改为加法形式 (⋆′)（仍给出多项式）；K 精确化为迹链 Green 范数；远足分解 + 孪生阻挡族已证；⚠️ 分层星套星：减速指数随深度线性增长 ⇒ 很可能存在 n^{Θ(log n)} 下界，b 可能去不掉（数值，待严格证明） | 2026-11-22 |
-| 主题 | [大模型原理](llm/README.md) | 按章节组织：第 1–4 章数学基础、第 5–6 章语言模型与 Transformer、第 9–16 章工程实践（提示、工具、agent 与 harness、MCP、Skills、LangChain、RAG、评测）、附录 A 已写；第 7、8 章待写 | 2026-11-22 |
+| 主题 | [大模型原理](llm/README.md) | 按章节组织：第 1–4 章数学基础、第 5–6 章语言模型与 Transformer、第 9–16 章工程实践（提示、工具、agent 与 harness、MCP、Skills、LangChain、RAG、评测）、第 17 章推理服务、附录 A 已写；第 7、8 章待写 | 2026-11-22 |
