@@ -307,6 +307,7 @@ out = (tpl.replace("/*__KATEX_CSS__*/", katex_css)
           .replace("/*__SEARCH__*/", json.dumps(search, ensure_ascii=False))
           .replace("/*__ORDER__*/", json.dumps(order))
           .replace("<!--__ARTICLES__-->", articles))
+out = out.replace("\ufffd", "&#xFFFD;")                   # 实验输出里的乱码字符（不完整的 UTF-8）
 (SITE / "index.html").write_text(out, encoding="utf-8")
 errors = sum("katex-error" in h for h in rendered)
 print(f"写出 site/index.html：{len(order) - 1} 章，{len(code_files)} 个代码文件，"
