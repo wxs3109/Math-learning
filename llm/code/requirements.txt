@@ -1,0 +1,8 @@
+# 《大模型原理》配套代码的依赖（CPU 部分）。
+# 第 1–11、13、15、16 章和附录 A 只需要 numpy；其余是可选的，没装时对应部分会跳过或给出提示。
+numpy>=2.0
+jieba>=0.42          # 第 18 章：按词切分的 BM25（可选）
+mcp>=2               # 第 12 章：和官方 SDK 互操作（可选）
+langchain>=1         # 第 14 章
+langgraph>=1         # 第 14 章
+# 第 17 章的 ch17_gpu_benchmark.py 要在 GPU 机器上单独装：pip install vllm（会带上匹配的 PyTorch）

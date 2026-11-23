@@ -77,6 +77,17 @@ $$\frac{\partial L}{\partial z}=p-e_y,$$
 
 这个梯度结构简单，而且每个分量都落在 $[-1,1]$ 里，不会爆炸。这是交叉熵和 softmax 总是一起用的原因之一。
 
+**softmax 单独的 Jacobian**：softmax 后面不接交叉熵时（比如 attention 里），要用
+$$\frac{\partial p_i}{\partial z_j}=p_i(\delta_{ij}-p_j),\qquad\text{于是}\quad\bar z=p\odot\big(\bar p-(\bar p\cdot p)\mathbf 1\big).$$
+推导：对 $p_i=e^{z_i}/\sum_ke^{z_k}$ 用商的求导法则。第 7 章的 attention 反向用的就是它（[7.4 节](ch07-tiny-gpt.md#7.4)）。
+
+**sigmoid 与二分类** **[已证]**：$\sigma(z)=\frac1{1+e^{-z}}$ 就是两类的 softmax：$\mathrm{softmax}(z,0)_1=\frac{e^z}{e^z+1}=\sigma(z)$。三个常用的性质：
+- $\sigma'(z)=\sigma(z)(1-\sigma(z))$；
+- $1-\sigma(z)=\sigma(-z)$；
+- 标签 $y\in\{0,1\}$ 的交叉熵是 $-y\log\sigma(z)-(1-y)\log\sigma(-z)$，对 $z$ 的梯度是 $\sigma(z)-y$，和上面的 $p-e_y$ 是同一个形式。
+
+用它做二分类就是**逻辑回归**。第 6、7 章 SwiGLU 里的 SiLU、第 8 章的 reward model 和 DPO 损失 $-\log\sigma(\cdot)$，都会用到它。
+
 ## 4.4 泰勒展开与步长：为什么学习率不能太大 **[已证]**
 
 **二阶泰勒展开**：
@@ -140,7 +151,9 @@ $$\hat m=\frac m{1-\beta_1^t},\quad\hat v=\frac v{1-\beta_2^t},\qquad\theta\left
 - **偏差修正** $1-\beta^t$：$m,v$ 从 0 开始，前几步会偏小，除以这个因子补回来。
 - **默认值**：$\beta_1=0.9$，$\beta_2=0.95\sim0.999$，$\epsilon=10^{-8}$。
 
-**AdamW**：把 weight decay（[2.6 节](ch02-statistics.md#2.6) 的 L2 正则化）从梯度里拿出来，单独做 $\theta\leftarrow\theta-\eta\lambda\theta$。这是训练大模型的默认优化器。
+**AdamW**：把 weight decay 从梯度里拿出来，单独做 $\theta\leftarrow\theta-\eta\lambda\theta$。这是训练大模型的默认优化器。
+
+为什么要拿出来：如果像 [2.6 节](ch02-statistics.md#2.6) 那样把 $\frac\lambda2\|\theta\|^2$ 加进损失，它的梯度 $\lambda\theta$ 也会被除以 $\sqrt{\hat v}$。梯度一直很大的参数，衰减反而很小，正则化变得不均匀。解耦之后，每个参数都按同样的比例衰减。SGD 下两种写法等价，Adam 下不等价（[7.6 节](ch07-tiny-gpt.md#7.6)）。
 
 **学习率调度**：
 - **warmup**：前几千步学习率从 0 线性升到峰值。一开始 $v$ 的估计不准，参数也处于很"陡"的区域，大步长容易发散。

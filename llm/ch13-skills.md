@@ -4,7 +4,7 @@
 
 ## 导读
 
-模型很聪明，但不知道**你们的做法**：报告用什么模板、数据怎么清洗、发布要走哪些步骤。把这些全写进 system prompt，提示会越来越长；每次手动粘贴，又太麻烦。**Agent Skills** 用文件夹的形式把这类"程序性知识"打包，agent 需要时才加载。本章讲：
+模型很聪明，但不知道**你们的做法**：报告用什么模板、数据怎么清洗、发布要走哪些步骤。把这些全写进 system prompt，prompt 会越来越长；每次手动粘贴，又太麻烦。**Agent Skills** 用文件夹的形式把这类"程序性知识"打包，agent 需要时才加载。本章讲：
 - 一个 skill 的结构；
 - progressive disclosure：为什么装了很多 skill 也不会撑爆上下文；
 - description 为什么决定 skill 能否被用上；
@@ -13,7 +13,7 @@
 
 **与大模型的关系**
 
-Skills 是 context engineering（[9.8 节](ch09-prompt-engineering.md#9.8)）的一种具体做法：知识放在上下文之外的文件里，按需取用。Anthropic 在 2025 年 10 月推出 Agent Skills，同年 12 月把它发布为开放标准，多家 agent 产品都已支持。
+Skills 是 context engineering（[9.8 节](ch09-prompt-engineering.md#9.8)）的一种具体做法：知识放在上下文之外的文件里，按需取用。Anthropic 在 2025 年 10 月推出 Agent Skills，同年 12 月把它发布为开放标准，多家 agent 产品都已支持。2026 年 10 月 22 日，Anthropic 把它捐给了 Linux 基金会下的 Agentic AI Foundation（AAIF），和 MCP 由同一个基金会托管。
 
 **前置知识**
 
@@ -45,7 +45,7 @@ csv-cleaning/
 └── assets/           # 可选：模板、图片等资源
 ```
 
-`SKILL.md` 以 YAML 头开始，至少包含 `name` 和 `description`：
+`SKILL.md` 以 YAML 头开始，至少包含 `name` 和 `description`。规范的约束：`name` 不超过 64 个字符，只用小写字母、数字和连字符，并且和文件夹名一致；`description` 不超过 1024 个字符。
 ```markdown
 ---
 name: csv-cleaning
@@ -73,7 +73,7 @@ Skill 的内容分三层加载：
 **脚本是特殊的第 3 层**：agent 直接**执行**脚本，只有输出进入上下文，脚本的源码不进入。
 
 **开销估算**：设装了 $N$ 个 skill，每个的描述约 $d$ token，正文约 $b$ token，附带文件约 $r$ token。一次任务用到 $k$ 个 skill：
-- 全部塞进提示：$N(d+b+r)$；
+- 全部塞进 prompt：$N(d+b+r)$；
 - 渐进式加载：$Nd+k\,b+(\text{实际读到的附带文件})$。
 
 因为 $d\ll b+r$，而且 $k\ll N$，所以装的 skill 再多，固定开销也只随 $N$ 线性增长，而且系数只是 $d$。13.8.2 节的例子里，50 个 skill 全部塞进去约 3 万 token，渐进式加载只要约 2800 token。
@@ -102,7 +102,7 @@ Agent 只靠目录里的 `description` 判断要不要加载某个 skill。正�
 | system prompt / 项目说明文件（`CLAUDE.md`、`AGENTS.md`） | 每次都需要的规则 | 每次都在 | 构建命令、代码风格、绝对不能做的事 |
 | **Skills** | 某类任务的做法 | 相关时才加载 | 有固定流程、需要专门知识的任务 |
 | 工具（第 10 章） | 一个具体的动作 | 定义每次都在，调用时执行 | 读写数据、调用接口 |
-| MCP 服务器（第 12 章） | 一组外部系统的工具和数据 | 连接后工具定义一直在 | 接入 GitHub、数据库等外部系统 |
+| MCP 服务器（第 12 章） | 一组外部系统的工具和数据 | 默认连接后工具定义一直在；也可以按需加载（比如 Claude API 的 tool search），思路和 Skills 一样 | 接入 GitHub、数据库等外部系统 |
 | subagent（[11.4 节](ch11-agent-harness.md#11.4)） | 独立上下文里完成的子任务 | 只返回结论 | 需要大量探索、会产生大量中间输出的子任务 |
 
 **常见组合**：MCP 服务器提供"能做什么"（比如查询数据仓库的工具），skill 提供"怎样做好"（我们的指标口径是什么、哪几张表可信、报告怎样排版）。
@@ -147,7 +147,7 @@ Skill 可以包含脚本，agent 会执行它们；正文里的指令，agent �
 | 脚本输出 | 24 |
 | `references/date-formats.md`（第 3 层） | 774 |
 | **渐进式加载合计** | **2,812** |
-| 把 50 个 skill 的全部内容都塞进提示 | 30,271 |
+| 把 50 个 skill 的全部内容都塞进 prompt | 30,271 |
 | 脚本源码（只执行，没有进入上下文） | 128 |
 
 渐进式加载的开销约为全部塞进去的 1/11。差距随 skill 数量增长：多装一个 skill，固定开销只增加它的那一行描述。
@@ -177,4 +177,5 @@ Skill 可以包含脚本，agent 会执行它们；正文里的指令，agent �
 
 1. Anthropic. *Equipping agents for the real world with Agent Skills.* 2025（12 月 18 日更新：发布为开放标准）。
 2. Agent Skills 开放标准与规范：agentskills.io。
+3. The Linux Foundation. *Agentic AI Foundation Announces Four New Projects: Agent Skills, Open Responses, OpenEnv, and OpenSandbox.* 2026-10-22。
 3. Anthropic. *Skill authoring best practices*（Claude 文档）。

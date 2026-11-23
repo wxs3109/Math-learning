@@ -37,21 +37,23 @@ $$\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\Big(\frac{QK^\top}{\sqrt{d}}+M\Big)
 形状：$Q,K,V$ 都是 $T\times d$（$d$ 是每个头的维数），打分矩阵 $QK^\top$ 是 $T\times T$，输出是 $T\times d$。
 
 **三个关键细节**：
-1. **causal mask $M$**：语言模型预测第 $t+1$ 个 token 时不能偷看后面。所以 $M$ 在 $s>t$ 处取 $-\infty$，softmax 之后这些位置的权重恰好为 0。注意力矩阵因此是**下三角**的。
+1. **causal mask $M$**：语言模型预测第 $t+1$ 个 token 时不能偷看后面。所以 $M$ 在 $s>t$ 处取 $-\infty$，softmax 之后这些位置的权重恰好为 0。注意力矩阵因此是**下三角**的。另一种 mask 是 **padding mask**：一个 batch 里的序列长短不一，短的要补齐（padding）到同样长度，补齐的位置作为 key 也要设成 $-\infty$，否则真实 token 会去"注意"这些填充物。两种 mask 可以相加后一起用。
 2. **为什么除以 $\sqrt d$** **[已证]**：
    - 设 $q,k$ 的各分量独立、均值 0、方差 1，则 $q\cdot k=\sum_{i=1}^dq_ik_i$ 的方差是 $d$。
    - $d$ 很大时，打分的量级很大，softmax 会退化成接近 one-hot 的分布。这时梯度几乎为 0，学不动。
    - 除以 $\sqrt d$ 把方差拉回 1。
 3. **为什么说它不区分顺序**：如果把输入的行打乱，输出也只是相应地打乱。所以顺序信息必须靠 positional encoding 额外提供。
 
-**multi-head attention**：把上面的计算在 $h$ 组较小的 $W_Q,W_K,W_V$ 上并行做 $h$ 次，输出拼起来。不同的头可以学到不同类型的关系，比如一个头看语法、一个头看指代。
+**multi-head attention**：把上面的计算在 $h$ 组较小的 $W_Q,W_K,W_V$ 上并行做 $h$ 次，输出拼起来，再乘一个输出矩阵 $W_O$。不同的头可以学到不同类型的关系，比如一个头看语法、一个头看指代。
+
+"多"的是**注意力分布**，不是参数：模型维度为 $d_{\text{model}}$ 时，每个头的维度取 $d_{\text{model}}/h$，$h$ 个头的 $W_Q$ 拼起来仍是 $d_{\text{model}}\times d_{\text{model}}$，$W_K,W_V,W_O$ 也一样。所以参数量（约 $4d_{\text{model}}^2$）和计算量与单头相同，只是一个位置可以同时按 $h$ 种不同的权重去看其他位置，而单头只能给出一种加权平均。代价是每个头的维度变小了。
 
 ## 6.3 一个 Transformer 块 **[事实]**
 
 一个块（block）由两个子层组成，每个子层都带 residual connection 和归一化（LayerNorm）：
 $$X\leftarrow X+\mathrm{MultiHeadAttention}(\mathrm{LN}(X)),\qquad X\leftarrow X+\mathrm{FFN}(\mathrm{LN}(X)).$$
 - **注意力子层**：在位置之间交换信息。
-- **FFN 子层（FFN）**：对每个位置单独做一个两层的全连接网络（结构和 [A.7 节](appendix-a-math-quick-reference.md#A.7) 的例子一样），可以理解成"对取到的信息做加工"。
+- **FFN 子层**（feed-forward network）：对每个位置单独做一个两层的全连接网络（结构和 [A.7 节](appendix-a-math-quick-reference.md#A.7) 的例子一样），可以理解成"对取到的信息做加工"。
 - **residual connection**：让信息和梯度能直接穿过很多层，深层网络才训练得动。
 
 GPT 类模型就是把这样的块堆几十到上百层，最后接一个输出层，在每个位置得到下一个 token 的 logits，再用 [第 5 章](ch05-language-model.md) 的交叉熵损失训练。

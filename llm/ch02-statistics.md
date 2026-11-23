@@ -99,12 +99,14 @@ $$\mathbb E\big[(y-\hat f(x))^2\big]=\underbrace{\big(\mathbb E\hat f(x)-f(x)\bi
 - **模型太复杂**：方差大，它把训练数据里的噪声也记住了，叫**过拟合**。训练误差很小，测试误差很大。
 - 噪声 $\sigma^2$ 是任何模型都去不掉的下界。语言模型里对应的是"语言本身的熵"（[1.7 节](ch01-probability.md#1.7)）。
 
-**大模型的特殊之处** **[直觉]**：经典理论说参数多了会过拟合，但大模型参数比训练样本多，泛化反而很好。目前的理解大致是：
+**过参数化的网络** **[直觉]**：经典理论说参数多了会过拟合。但在图像分类等场景里，现代神经网络的参数常常比训练样本还多，泛化却很好。目前的理解大致是：
 - 海量数据本身压低了方差；
 - 梯度下降偏好"简单"的解，相当于一种隐式正则化；
 - 测试误差随参数量的变化有时呈现"双下降"（double descent）。
 
 这是活跃的研究方向，还没有完整的理论。
+
+**LLM 预训练是另一种情况**：数据远多于参数。Chinchilla 的经验是每个参数约 20 个 token，Llama-3-8B 则用了约 15 万亿 token（[8.2 节](ch08-pre-post-training.md#8.2)），而且数据通常只过一遍，几乎谈不上过拟合。过拟合主要出现在数据少的场合：SFT、领域微调，以及第 7 章那种小语料上的训练（[7.6 节](ch07-tiny-gpt.md#7.6)、[8.4 节](ch08-pre-post-training.md#8.4)）。
 
 ## 2.6 最大后验估计：正则化就是先验 **[已证]**
 
@@ -116,7 +118,7 @@ $$\hat\theta_{\mathrm{MAP}}=\arg\max_\theta\big[\ell(\theta)+\log p(\theta)\big]
 
 **例 1：高斯先验 ⇒ L2 正则化（岭回归、weight decay）**。取先验 $w\sim N(0,\tau^2I)$，则 $\log p(w)=-\frac{\|w\|^2}{2\tau^2}+$ 常数。代入线性回归：
 $$\hat w_{\mathrm{MAP}}=\arg\min_w\ \|y-Xw\|^2+\lambda\|w\|^2,\qquad \lambda=\sigma^2/\tau^2.$$
-解为 $\hat w=(X^\top X+\lambda I)^{-1}X^\top y$。训练大模型时的 **weight decay** 就是这一项。
+解为 $\hat w=(X^\top X+\lambda I)^{-1}X^\top y$。用 SGD 训练时，**weight decay**（每一步把参数乘一个略小于 1 的数）和这一项等价：L2 项的梯度是 $\lambda w$，更新 $w\leftarrow w-\eta(g+\lambda w)=(1-\eta\lambda)w-\eta g$。用 Adam 时两者**不再等价**，见 [4.7 节](ch04-calculus-optimization.md#4.7)。
 
 **例 2：Dirichlet 先验 ⇒ add-α 平滑**。类别分布配上 Dirichlet 先验 $p(\pi)\propto\prod_j\pi_j^{\alpha}$，最大化 $\sum_j(n_j+\alpha)\log\pi_j$，得
 $$\hat\pi_j=\frac{n_j+\alpha}{n+\alpha V}.$$
@@ -209,7 +211,7 @@ $$\hat\pi_j=\frac{n_j+\alpha}{n+\alpha V}.$$
 - 挑模型用验证集，测试集只用一次。
 
 **疑问**：
-- 大模型参数远多于"有效样本数"却不过拟合。隐式正则化和双下降的严格理论是什么？
+- 过参数化的网络为什么不过拟合？隐式正则化和双下降的严格理论是什么？
 - 训练数据被重复使用多遍（多个 epoch）时，泛化会怎样变化？
 
 ## 参考资料

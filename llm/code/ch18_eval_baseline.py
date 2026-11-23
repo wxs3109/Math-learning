@@ -8,11 +8,12 @@ r"""
 2. 把全书（第 1–17 章和附录 A）切成块，每块记住自己属于哪一节；
 3. 用几种检索方法找块，再把块的排名合并成节的排名；
 4. 算 recall@k 和 MRR，看哪种方法好、在哪些题上失败。
+5. 题目按固定的哈希分成 dev / test 两半：在 dev 上选方法，在 test 上报告分数，避免"在考卷上调参"。
 
 只依赖 numpy；装了 jieba（pip install jieba）会多跑两种按词切分的方法。
 不需要 API key，也不需要 GPU。
 """
-import math, re, sys
+import hashlib, math, re, sys, time
 from collections import Counter, defaultdict
 from pathlib import Path
 import numpy as np
@@ -23,6 +24,7 @@ BOOK = Path(__file__).resolve().parent.parent          # llm/
 CHAPTERS = [p for p in sorted(BOOK.glob("ch*.md")) if int(p.name[2:4]) <= 17] \
     + [BOOK / "appendix-a-math-quick-reference.md"]
 APPENDIX_C = BOOK / "appendix-c-interview-questions.md"
+CORPUS_FILES = {p.name for p in CHAPTERS}
 
 # ---------------------------------------------------------------------------
 # 1. 评测集：附录 C 中标 ✅ 的题
@@ -43,11 +45,14 @@ def load_eval_set():
         if not m:
             continue
         star, question, refs = bool(m.group(1)), m.group(2), m.group(3)
-        gold = {section_of(n) for _, n in LINK.findall(refs)}
-        chapters = {int(x) for m2 in CHAP_REF.finditer(refs) for x in m2.group(1).split("、")}
+        # 只认指向语料里那些文件的链接：链到第 18 章的题，答案不在语料里，不能当标注
+        gold = {section_of(n) for f, n in LINK.findall(refs) if f in CORPUS_FILES}
+        chapters = {int(x) for m2 in CHAP_REF.finditer(refs) for x in m2.group(1).split("、") if int(x) <= 17}
         question = re.sub(r"[（(](Anthropic|OpenAI|Sierra|Scale AI|xAI|Google|Databricks)[^）)]*[）)]", "", question)
         if gold or chapters:
-            items.append({"q": question.strip(), "gold": gold, "chapters": chapters, "star": star})
+            q = question.strip()
+            split = "dev" if int(hashlib.md5(q.encode()).hexdigest(), 16) % 2 == 0 else "test"
+            items.append({"q": q, "gold": gold, "chapters": chapters, "star": star, "split": split})
     return items
 
 
@@ -212,10 +217,13 @@ def bootstrap_ci(xs, n=2000, seed=0):
 
 
 if __name__ == "__main__":
+    t0 = time.time()
     items = load_eval_set()
     chunks = load_chunks()
-    print(f"评测集：{len(items)} 道 ✅ 题（其中 ★ {sum(i['star'] for i in items)} 道）；"
-          f"语料：{len(chunks)} 个块，来自 {len({c['sec'] for c in chunks})} 个节")
+    dev = [i for i in items if i["split"] == "dev"]; test = [i for i in items if i["split"] == "test"]
+    size = sum(len(p.read_bytes()) for p in CHAPTERS)
+    print(f"评测集：{len(items)} 道 ✅ 题（其中 ★ {sum(i['star'] for i in items)} 道），dev {len(dev)} / test {len(test)}；"
+          f"语料：{len(CHAPTERS)} 个文件 {size / 1e6:.2f} MB，切成 {len(chunks)} 个块，来自 {len({c['sec'] for c in chunks})} 个节")
     print(f"每题的正确节数：平均 {np.mean([len(i['gold']) or 1 for i in items]):.2f}")
 
     plain = [c["text"] for c in chunks]
@@ -236,24 +244,28 @@ if __name__ == "__main__":
     lsa = LSA(ctx, best_tok); methods["LSA（假 embedding）· 加标题"] = lsa.scores
     methods["混合 RRF：BM25 + LSA · 加标题"] = lambda q: rrf(bm_jc.scores(q), lsa.scores(q))
 
-    print(f"\n{pad('方法', 36)}{'R@1':>7}{'R@3':>7}{'R@5':>7}{'MRR':>7}")
-    all_ranks = {}
+    print(f"\n{pad('方法', 36)}{'dev R@1':>9}{'R@5':>7}{'MRR':>7}   {'test R@1':>9}{'R@5':>7}{'MRR':>7}")
+    res = {}
     for name, fn in methods.items():
-        m, ranks = evaluate(fn, items, chunks)
-        all_ranks[name] = ranks
-        print(pad(name, 36) + "".join(f"{m[k]:>7.2f}" for k in ("R@1", "R@3", "R@5", "MRR")))
+        md, rd = evaluate(fn, dev, chunks)
+        mt, rt = evaluate(fn, test, chunks)
+        res[name] = (md, rd, mt, rt)
+        print(pad(name, 36) + "".join(f"{md[k]:>{w}.2f}" for k, w in (("R@1", 9), ("R@5", 7), ("MRR", 7)))
+              + "   " + "".join(f"{mt[k]:>{w}.2f}" for k, w in (("R@1", 9), ("R@5", 7), ("MRR", 7))))
 
-    best = max(all_ranks, key=lambda n: np.mean([1 / r if r else 0 for r in all_ranks[n]]))
-    hits5 = [r is not None and r <= 5 for r in all_ranks[best]]
+    best = max(res, key=lambda n: res[n][0]["MRR"])            # 只看 dev 选方法
+    ranks = res[best][3]
+    hits5 = [r is not None and r <= 5 for r in ranks]
     lo, hi = bootstrap_ci(hits5)
-    print(f"\n最好的方法：{best}；R@5 = {np.mean(hits5):.2f}，95% 区间 [{lo:.2f}, {hi:.2f}]")
+    print(f"\n在 dev 上 MRR 最高的方法：{best}")
+    print(f"它在 test 上：R@5 = {np.mean(hits5):.2f}，95% 区间 [{lo:.2f}, {hi:.2f}]（{len(test)} 道）")
+    star = [h for h, it in zip(hits5, test) if it["star"]]
+    print(f"test 里只看 ★ 题：R@5 = {np.mean(star):.2f}（{len(star)} 道）")
 
-    star = [h for h, it in zip(hits5, items) if it["star"]]
-    print(f"只看 ★ 题：R@5 = {np.mean(star):.2f}（{len(star)} 道）")
-
-    print("\n最好的方法在前 5 名里也没找到正确节的题（正确节 / 实际排第几）：")
-    fails = [(it, r) for it, r in zip(items, all_ranks[best]) if not (r and r <= 5)]
+    print("\n这个方法在 test 上前 5 名里也没找到正确节的题（正确节 / 实际排第几）：")
+    fails = [(it, r) for it, r in zip(test, ranks) if not (r and r <= 5)]
     for it, r in fails[:12]:
         gold = "、".join(sorted(it["gold"])) or "第" + "、".join(map(str, sorted(it["chapters"]))) + "章"
         print(f"  [{gold} | 第 {r} 名] {it['q'][:46]}")
     print(f"  ……共 {len(fails)} 道")
+    print(f"\n总耗时 {time.time() - t0:.1f}s")

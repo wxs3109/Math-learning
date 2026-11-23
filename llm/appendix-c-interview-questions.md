@@ -60,7 +60,7 @@
 2. ★ BPE、WordPiece、SentencePiece、Unigram 有什么区别？ —— ◐ [5.1 节](ch05-language-model.md#5.1)、[7.2 节](ch07-tiny-gpt.md#7.2)（WordPiece、Unigram 未讲）
 3. 手写 BPE 的训练和编码过程。 —— ✅ [7.2 节](ch07-tiny-gpt.md#7.2)、`ch07_tiny_gpt.py`
 4. 分词器把专业术语切成没有意义的碎片，会带来什么问题，怎么办？ —— ◐ [5.1 节](ch05-language-model.md#5.1)
-5. 中文分词和英文分词有什么不同？词表大小怎么定？ —— ○（计划第 7 章）
+5. 中文分词和英文分词有什么不同？词表大小怎么定？ —— ✅ [7.2 节](ch07-tiny-gpt.md#7.2)
 6. embedding 是什么？语义相似在向量上是什么意思？ —— ✅ [5.4 节](ch05-language-model.md#5.4)、[15.4 节](ch15-rag.md#15.4)
 7. 余弦相似度、点积、欧氏距离的区别是什么？归一化之后有什么关系？ —— ✅ [3.1 节](ch03-linear-algebra.md#3.1)、[15.4 节](ch15-rag.md#15.4)
 8. 为什么高维空间里随机向量几乎正交？这对检索意味着什么？ —— ✅ [3.7 节](ch03-linear-algebra.md#3.7)
@@ -77,7 +77,7 @@
 8. ★ 为什么需要 positional encoding？正弦 positional encoding、可学习 positional encoding、RoPE 各有什么特点？ —— ✅ [6.1 节](ch06-self-attention.md#6.1)、[6.3 节](ch06-self-attention.md#6.3)
 9. ★ RoPE 的原理是什么？为什么它能表达相对位置？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 10. 长上下文外推：位置插值、NTK-aware、YaRN 分别做了什么？ —— ✅ [7.8.2 节](ch07-tiny-gpt.md#7.8.2)
-11. sliding window 注意力、attention sink 是什么？ —— ○（计划第 17 章补充）
+11. sliding window 注意力、attention sink 是什么？ —— ◐ [17.9 节](ch17-inference-serving.md#17.9)（sliding window 提到了；attention sink 没有讲）
 12. FlashAttention 为什么快？它减少了计算还是减少了显存读写？ —— ✅ [17.3 节](ch17-inference-serving.md#17.3)
 
 ### C.2.4 Transformer 块与架构变体
@@ -170,13 +170,13 @@
 
 ### C.5.2 Batching 与调度
 
-1. ★ static batching 和 continuous batching（continuous batching）有什么区别？ —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.12.4 节](ch17-inference-serving.md#17.12.4)
+1. ★ static batching 和 continuous batching 有什么区别？ —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.12.4 节](ch17-inference-serving.md#17.12.4)
 2. ★ PagedAttention 解决了什么问题？它借鉴了操作系统的什么机制？ —— ✅ [17.5 节](ch17-inference-serving.md#17.5)
 3. ★ prefix caching（prefix caching / prompt caching）的原理？怎样设计提示才能命中？ —— ✅ [17.5 节](ch17-inference-serving.md#17.5)、[11.6 节](ch11-agent-harness.md#11.6)
 4. chunked prefill 为什么能改善尾延迟？ —— ✅ [17.6 节](ch17-inference-serving.md#17.6)
 5. prefill 和 decode 分离部署（disaggregation）有什么好处和代价？ —— ✅ [17.6 节](ch17-inference-serving.md#17.6)
-6. ★ 设计一个单卡上的推理 batching 系统，同步用户，每批最多 100 个请求。（Anthropic） —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)
-7. 设计一个端到端的 LLM 请求 batching 系统，包括排队和调度。（Anthropic） —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)
+6. ★ 设计一个单卡上的推理 batching 系统，同步用户，每批最多 100 个请求。（Anthropic） —— ◐ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)（原理和容量估算讲了；队列、超时、背压的完整设计没有展开）
+7. 设计一个端到端的 LLM 请求 batching 系统，包括排队和调度。（Anthropic） —— ◐ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)（同上）
 8. 请求优先级和公平调度怎么做？ —— ◐ [17.11 节](ch17-inference-serving.md#17.11)
 
 ### C.5.3 加速：speculative decoding、量化
@@ -200,7 +200,6 @@
 7. Serverless 推理的冷启动怎么缓解？多模型如何共享显存？ —— ○
 8. CPU/GPU 混合推理和 offloading 的代价是什么？ —— ○
 9. 同步推理和异步推理（批量离线任务）的架构有什么不同？ —— ◐ [17.4 节](ch17-inference-serving.md#17.4)
-10. 实现一个 GPU 额度管理系统，事件里有发放、使用和过期。（OpenAI） —— ○（编码题，见 C.12）
 
 ## C.6 Prompt engineering 与 structured output **[经验]**
 
@@ -216,12 +215,11 @@
 10. ★ "lost in the middle" 是什么？长上下文提示里信息该放在哪里？ —— ◐ [9.8 节](ch09-prompt-engineering.md#9.8)
 11. 从 prompt engineering 到 context engineering，变的是什么？ —— ✅ [9.8 节](ch09-prompt-engineering.md#9.8)
 12. few-shot 结果不稳定、对措辞很敏感，怎么办？ —— ◐ [9.4 节](ch09-prompt-engineering.md#9.4)、[16.4 节](ch16-evals-production.md#16.4)
-13. 怎么系统地评估和迭代一个提示？改提示或换模型后怎么防退化？ —— ✅ [16.1 节](ch16-evals-production.md#16.1)、[16.4 节](ch16-evals-production.md#16.4)
-14. 怎样防止 system prompt 泄露？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)
-15. 怎样让模型在不知道时说"不知道"？怎样控制回答长度？ —— ◐ [9.3 节](ch09-prompt-engineering.md#9.3)
-16. prompt engineering 和 prompt tuning（软提示）有什么区别？ —— ◐ [8.5 节](ch08-pre-post-training.md#8.5)
-17. 提示的成本和延迟怎么优化？ —— ✅ [11.6 节](ch11-agent-harness.md#11.6)、[16.8 节](ch16-evals-production.md#16.8)
-18. 多语言提示要注意什么？跨语言 zero-shot 迁移为什么会失败？ —— ○
+13. 怎样防止 system prompt 泄露？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)
+14. 怎样让模型在不知道时说"不知道"？怎样控制回答长度？ —— ◐ [9.3 节](ch09-prompt-engineering.md#9.3)
+15. prompt engineering 和 prompt tuning（软提示）有什么区别？ —— ◐ [8.5 节](ch08-pre-post-training.md#8.5)
+16. 提示的成本和延迟怎么优化？ —— ✅ [11.6 节](ch11-agent-harness.md#11.6)、[16.8 节](ch16-evals-production.md#16.8)
+17. 多语言提示要注意什么？跨语言 zero-shot 迁移为什么会失败？ —— ○
 
 ## C.7 RAG 与向量检索 **[经验]**
 
@@ -261,7 +259,7 @@
 ### C.7.4 生成、幻觉与评测
 
 1. ★ 怎样在提示里划定边界，防止模型答出文档以外的内容？拒答阈值怎么定？ —— ◐ [15.2 节](ch15-rag.md#15.2)、[9.3 节](ch09-prompt-engineering.md#9.3)
-2. ★ 怎么让模型给出引用？怎么保证引用是真的？ —— ○（计划第 15 章补充）
+2. ★ 怎么让模型给出引用？怎么保证引用是真的？ —— ◐ [15.2 节](ch15-rag.md#15.2)、[18.6 节](ch18-project-design.md#18.6)（引用由服务端校验；忠实度评测见 18.9 节）
 3. 上下文是对的，模型还是答错，可能是什么原因？ —— ◐ [15.6 节](ch15-rag.md#15.6)
 4. 多个来源互相矛盾，怎么处理？ —— ○（计划第 15 章补充）
 5. ★ RAG 怎么评测？检索和生成分别看什么指标（召回率、MRR、nDCG、忠实度、相关性）？ —— ✅ [15.6 节](ch15-rag.md#15.6)、[16.5 节](ch16-evals-production.md#16.5)
@@ -291,7 +289,7 @@
 7. 反思（reflection）在 agent 里怎么用？ —— ○（计划 agent 深入章）
 8. 写代码的 agent 和调用工具的 agent 有什么区别？ —— ◐ [11.7 节](ch11-agent-harness.md#11.7)
 9. computer-use agent、浏览器 agent 的难点在哪里？ —— ○（计划 agent 深入章）
-10. 让 LLM 当 agent 的核心有哪些局限？ —— ✅ [11.9 节](ch11-agent-harness.md#11.9)
+10. 让 LLM 当 agent 的核心有哪些局限？ —— ◐ [11.1 节](ch11-agent-harness.md#11.1)、[16.2 节](ch16-evals-production.md#16.2)（延迟、费用、误差累积讲了；局限没有单独整理）
 
 ### C.8.2 Tool calling
 
@@ -367,7 +365,7 @@
 
 1. ★ 为什么 LLM 评测难？没有唯一正确答案时怎么评？ —— ✅ [16.1 节](ch16-evals-production.md#16.1)
 2. ★ LLM-as-a-judge 怎么用？有哪些失效方式（位置偏差、长度偏差、偏爱自家模型）？怎么加固？ —— ✅ [16.5 节](ch16-evals-production.md#16.5)、[16.9.4 节](ch16-evals-production.md#16.9.4)
-3. ★ 改了提示或换了模型，怎么发现退化？托管模型更新后行为变了，什么能发现？ —— ✅ [16.4 节](ch16-evals-production.md#16.4)、[16.6 节](ch16-evals-production.md#16.6)
+3. ★ 怎么系统地评估和迭代一个提示？改了提示或换了模型，怎么发现退化？托管模型更新后行为变了，什么能发现？ —— ✅ [16.4 节](ch16-evals-production.md#16.4)、[16.6 节](ch16-evals-production.md#16.6)
 4. 怎么从统计上比较两个模型或两个提示？分数差多少才算显著？ —— ✅ [16.4 节](ch16-evals-production.md#16.4)、[2.3 节](ch02-statistics.md#2.3)
 5. pass@k 和 pass^k 的区别？为什么上线更该看 pass^k？ —— ✅ [16.3 节](ch16-evals-production.md#16.3)
 6. BLEU、ROUGE、BERTScore、G-Eval 分别是什么？为什么传统指标不够？ —— ○（计划评测工程章）
@@ -407,20 +405,20 @@
 这一类题集中出现在"前端转 AI 全栈"和 AI 应用开发的面经里，和你的前端背景最相关。
 
 1. ★ 流式输出的原理是什么？为什么"打字机效果"不是前端动画，而是 autoregressive 生成的直接体现？ —— ◐ [17.1 节](ch17-inference-serving.md#17.1)（计划 AI 前端章）
-2. ★ SSE、WebSocket、HTTP chunking 传输怎么选？为什么 AI 回复多用 SSE？ —— ○（计划 AI 前端章）
-3. ★ `EventSource` 只能发 GET，为什么很多实现改用 `fetch` + `ReadableStream`？怎么手写一个 SSE 解析器？ —— ○（计划 AI 前端章）
-4. ★ 用户点"停止生成"、切换页面或组件卸载时，怎么中断请求（`AbortController`）并避免内存泄漏？后端怎么停止推理？ —— ○（计划 AI 前端章）
-5. 用户快速连点发送，导致多个流交错，怎么处理？ —— ○（计划 AI 前端章）
-6. 流式 Markdown 怎么增量渲染？代码块没闭合时怎么办？怎么防 XSS？ —— ○（计划 AI 前端章）
-7. 很长的对话怎么做虚拟滚动和懒加载？自动滚动到底部和用户手动上翻怎么兼容？ —— ○（计划 AI 前端章）
+2. ★ SSE、WebSocket、HTTP chunking 传输怎么选？为什么 AI 回复多用 SSE？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
+3. ★ `EventSource` 只能发 GET，为什么很多实现改用 `fetch` + `ReadableStream`？怎么手写一个 SSE 解析器？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
+4. ★ 用户点"停止生成"、切换页面或组件卸载时，怎么中断请求（`AbortController`）并避免内存泄漏？后端怎么停止推理？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
+5. 用户快速连点发送，导致多个流交错，怎么处理？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
+6. 流式 Markdown 怎么增量渲染？代码块没闭合时怎么办？怎么防 XSS？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
+7. 很长的对话怎么做虚拟滚动和懒加载？自动滚动到底部和用户手动上翻怎么兼容？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
 8. 流式输出时如何同时展示 tool calling 的进度？Function calling 给流式带来什么挑战？ —— ◐ [10.4 节](ch10-tool-calling.md#10.4)（计划 AI 前端章）
-9. 部署到 nginx 后流式变成一次性返回，可能是什么原因？ —— ○（计划 AI 前端章）
+9. 部署到 nginx 后流式变成一次性返回，可能是什么原因？ —— ◐ [18.4 节](ch18-project-design.md#18.4)（第 18 章讲了设计，代码在 M1 实现）
 10. 设计一个 AI 聊天应用的文件上传：大文件、多模态，最终放进模型上下文。（xAI） —— ○（计划 AI 前端章）
 11. 设计 OpenAI Playground。（OpenAI） —— ○（计划 AI 前端章）
-12. 用 FastAPI + asyncio 调用大模型 API，为什么高并发下有优势？和多线程比呢？怎样避免阻塞事件循环？ —— ○（计划实战项目章）
-13. 给一段 Python 代码加上带超时和退避的异步重试。（Sierra） —— ○（计划实战项目章）
-14. 多家模型厂商怎么用一套接口适配？模型网关（AI gateway）做什么？ —— ◐ [14.1 节](ch14-langchain.md#14.1)
-15. API 密钥怎么管理？为什么不能放在前端？ —— ○（计划实战项目章）
+12. 用 FastAPI + asyncio 调用大模型 API，为什么高并发下有优势？和多线程比呢？怎样避免阻塞事件循环？ —— ◐ [18.3 节](ch18-project-design.md#18.3)（只讲了选型理由）
+13. 给一段 Python 代码加上带超时和退避的异步重试。（Sierra） —— ◐ [18.5 节](ch18-project-design.md#18.5)（第 18 章讲了设计，代码在 M1 实现）
+14. 多家模型厂商怎么用一套接口适配？模型网关（AI gateway）做什么？ —— ◐ [14.1 节](ch14-langchain.md#14.1)、[18.5 节](ch18-project-design.md#18.5)
+15. API 密钥怎么管理？为什么不能放在前端？ —— ◐ [18.10 节](ch18-project-design.md#18.10)（第 18 章讲了设计，代码在 M1 实现）
 16. 生成式 UI：让模型输出界面组件而不是文本，怎么做？ —— ○（计划 AI 前端章）
 
 ## C.11 系统设计题 **[经验]**
@@ -449,13 +447,13 @@
 ### C.11.3 平台与基础设施类
 
 1. ★ 端到端设计 ChatGPT。 —— ◐ 第 9、17 章、C.10
-2. ★ 设计一个 LLM 推理平台；设计一个高效采样的 API，支持 batching 和请求编排。（Anthropic） —— ✅ 第 17 章
+2. ★ 设计一个 LLM 推理平台；设计一个高效采样的 API，支持 batching 和请求编排。（Anthropic） —— ◐ 第 17 章（各部件讲了；完整的系统设计答案没有整理）
 3. 设计一个 LLM 评测平台；设计一个实验追踪平台。（Google） —— ◐ 第 16 章
 4. ★ LLM 应用的缓存策略：精确缓存、语义缓存、prompt caching。 —— ◐ [11.6 节](ch11-agent-harness.md#11.6)、[17.5 节](ch17-inference-serving.md#17.5)
 5. ★ 限流、配额与成本管理怎么设计？厂商限流时怎么办？ —— ◐ [16.8 节](ch16-evals-production.md#16.8)
 6. ★ 主模型挂了怎么回退？怎么在不停机的情况下换厂商或换模型？ —— ◐ [16.8 节](ch16-evals-production.md#16.8)
 7. 语义路由：按难度把请求分给大模型或小模型。 —— ✅ [16.8 节](ch16-evals-production.md#16.8)、[16.9.6 节](ch16-evals-production.md#16.9.6)
-8. 从每秒 100 个请求扩到每秒 5000 个，要改什么？ —— ✅ [17.11 节](ch17-inference-serving.md#17.11)
+8. 从每秒 100 个请求扩到每秒 5000 个，要改什么？ —— ◐ [17.11 节](ch17-inference-serving.md#17.11)（容量估算讲了；限流、多副本、多区域没有展开）
 9. 多租户聊天机器人平台怎么隔离？ —— ○
 10. 内容审核系统（含直播）怎么设计？ —— ○
 
@@ -471,7 +469,7 @@
 
 ### C.12.1 模型相关
 
-1. ★ 实现缩放点积注意力，带 causal mask 和 padding 掩码。 —— ✅ [6.5.1 节](ch06-self-attention.md#6.5.1)、`ch05_06_lm_attention.py`
+1. ★ 实现缩放点积注意力，带 causal mask 和 padding 掩码。 —— ◐ [6.2 节](ch06-self-attention.md#6.2)、[6.5.1 节](ch06-self-attention.md#6.5.1)、`ch05_06_lm_attention.py`（代码只实现了 causal mask；padding mask 在 6.2 节讲了做法）
 2. ★ 实现 multi-head attention，讲清每一步的张量形状。 —— ✅ [7.3 节](ch07-tiny-gpt.md#7.3)、[7.4 节](ch07-tiny-gpt.md#7.4)、`ch07_tiny_gpt.py`
 3. 把 multi-head attention 改成 GQA / MQA。 —— ✅ [7.3 节](ch07-tiny-gpt.md#7.3)、`ch07_tiny_gpt.py`
 4. ★ 实现 KV cache 和单步解码。 —— ✅ [7.7 节](ch07-tiny-gpt.md#7.7)、`ch07_tiny_gpt.py`
@@ -480,11 +478,9 @@
 7. 实现 RoPE。 —— ✅ [7.3 节](ch07-tiny-gpt.md#7.3)、`ch07_tiny_gpt.py`
 8. ★ 实现 top-k、top-p、温度采样。 —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)、`ch09_prompting.py`
 9. 实现 beam search。 —— ◐ [9.6 节](ch09-prompt-engineering.md#9.6)（原理，未实现）
-10. 实现 BPE 的训练和编码。 —— ✅ [7.2 节](ch07-tiny-gpt.md#7.2)、`ch07_tiny_gpt.py`
-11. 实现一个 LoRA 线性层。 —— ✅ [8.5 节](ch08-pre-post-training.md#8.5)、`ch08_post_training.py`
-12. 实现 DPO 损失、PPO 的 clipped objective。 —— ◐ [8.7 节](ch08-pre-post-training.md#8.7)、`ch08_post_training.py`（PPO 裁剪未实现）
-13. 实现一个最小的 decoder-only Transformer 并训练它。 —— ✅ [7.6 节](ch07-tiny-gpt.md#7.6)、[7.10 节](ch07-tiny-gpt.md#7.10)、`ch07_tiny_gpt.py`
-14. 实现 Adam 优化器。 —— ✅ [4.7 节](ch04-calculus-optimization.md#4.7)
+10. 实现一个 LoRA 线性层。 —— ✅ [8.5 节](ch08-pre-post-training.md#8.5)、`ch08_post_training.py`
+11. 实现一个最小的 decoder-only Transformer 并训练它。 —— ✅ [7.6 节](ch07-tiny-gpt.md#7.6)、[7.10 节](ch07-tiny-gpt.md#7.10)、`ch07_tiny_gpt.py`
+12. 实现 Adam 优化器。 —— ✅ [4.7 节](ch04-calculus-optimization.md#4.7)
 
 ### C.12.2 应用相关
 
@@ -494,7 +490,7 @@
 4. 实现一个 function calling 处理器（解析、校验、执行、回填）。 —— ✅ `ch10_tool_calling.py`
 5. 实现对话记忆：sliding window、摘要、缓冲。 —— ◐ `ch11_agent_harness.py`
 6. 实现一个 LLM-as-a-judge 流水线，并消除位置偏差。 —— ✅ [16.9.4 节](ch16-evals-production.md#16.9.4)、`ch16_evals.py`
-7. ★ 实现带指数退避和抖动的重试。 —— ○（计划实战项目章）
+7. ★ 实现带指数退避和抖动的重试。 —— ◐ [18.5 节](ch18-project-design.md#18.5)（第 18 章讲了设计，代码在 M1 实现）
 8. 实现流式 SSE 解析器。 —— ○（计划 AI 前端章）
 9. 实现带 TTL 的 LRU 缓存、语义缓存。 —— ○（计划实战项目章）
 10. 实现令牌桶限流器，再改成分布式的。 —— ○（计划实战项目章）
@@ -511,6 +507,7 @@
 6. 按每张图的指令文件顺序执行图像变换的流水线。（Anthropic） —— ○
 7. 只用 SQL 和 Python 从演示数据库里抽取并清洗出可用数据集。（Anthropic） —— ○
 8. 编辑距离；统计每个商家去重后的评论数（SQL）。（腾讯） —— ○
+9. 实现一个 GPU 额度管理系统，事件里有发放、使用和过期。（OpenAI） —— ○
 
 ## C.13 场景排障题 **[经验]**
 
@@ -531,7 +528,7 @@
 
 1. 介绍你做过的 RAG 或 agent 项目：背景、最难的点、怎么评估、遇到过什么坑？（中文面经几乎每场都从这里开始，追问可以有二三十个） —— 见 C.15 的建议
 2. 你做过端到端的 agent 系统吗？（Glean） —— 同上
-3. AI 工程和传统机器学习工程有什么区别？什么时候不该用 AI？ —— ✅ [11.1 节](ch11-agent-harness.md#11.1)
+3. AI 工程和传统机器学习工程有什么区别？什么时候不该用 AI？ —— ◐ [11.1 节](ch11-agent-harness.md#11.1)（讲了什么时候不该用 agent；和传统 ML 工程的对比没有展开）
 4. 直接调 API 还是自己部署模型？ —— ◐ [17.11 节](ch17-inference-serving.md#17.11)
 5. 怎样衡量 AI 功能的投入产出？怎么管理利益相关方的预期？ —— ○
 6. 讲一次你对方案很有信心、后来发现错了的经历。（Anthropic） —— 行为题
@@ -543,27 +540,29 @@
 
 ## C.15 覆盖情况与补课顺序 **[经验]**
 
-上面一共 366 道题，其中 128 道标了 ★。按标记数：✅ 167 道，◐ 104 道，○ 88 道，其余 7 道是行为题。（第 7、8 章和两轮衔接补充之后更新；最初是 ✅ 119、◐ 97、○ 143。）按类别：
+上面一共 363 道题（去掉了 3 道重复题），其中 128 道标了 ★。按标记数：✅ 159 道，◐ 123 道，○ 74 道，其余 7 道是行为题。（第 7、8 章、两轮衔接补充和一次独立 review 之后更新：review 把十几道"链接到的节其实没回答"的 ✅ 降成了 ◐，或者把内容补进了对应的节；第 18 章讲到的前端和工程题从 ○ 升为 ◐。最初是 ✅ 119、◐ 97、○ 143。）按类别：
 
 | 类别 | 题数 | ✅ | ◐ | ○ | 主要空白 |
 |---|---|---|---|---|---|
-| C.2 基础与 Transformer | 43 | 29 | 10 | 4 | 涌现、扩散语言模型、WordPiece/Unigram |
+| C.2 基础与 Transformer | 43 | 30 | 11 | 2 | 涌现、扩散语言模型、attention sink |
 | C.3 训练与微调 | 29 | 19 | 9 | 1 | 多机容错 |
-| C.4 对齐与强化学习 | 20 | 11 | 5 | 4 | RLAIF 与 Constitutional AI、对齐税、rejection sampling |
-| C.5 推理与部署 | 31 | 19 | 8 | 4 | 框架对比、端侧推理 |
-| C.6 Prompt | 18 | 12 | 5 | 1 | 多语言 |
-| C.7 RAG | 38 | 9 | 15 | 14 | query rewriting、引用、增量索引、向量库内部 |
-| C.8 Agent 与协议 | 60 | 34 | 15 | 11 | 记忆系统、多 agent、A2A |
+| C.4 对齐与强化学习 | 20 | 11 | 5 | 4 | RLAIF 与 Constitutional AI、对齐税、rejection sampling、PPO 裁剪的实现 |
+| C.5 推理与部署 | 30 | 17 | 10 | 3 | 框架对比、端侧推理、batching 系统的完整设计 |
+| C.6 Prompt | 17 | 11 | 5 | 1 | 多语言 |
+| C.7 RAG | 38 | 9 | 16 | 13 | query rewriting、增量索引、向量库内部 |
+| C.8 Agent 与协议 | 60 | 33 | 16 | 11 | 记忆系统、多 agent、A2A |
 | C.9 评测与安全 | 30 | 7 | 13 | 10 | 传统指标与基准、red teaming、guardrails |
-| C.10 AI 前端 | 16 | 0 | 3 | 13 | SSE、流式渲染、中断、长对话 |
-| C.11 系统设计 | 26 | 5 | 11 | 10 | 需要把多章串起来练 |
-| C.12 手撕代码 | 34 | 16 | 5 | 13 | 重试与限流、SSE 解析、缓存（应用侧） |
+| C.10 AI 前端 | 16 | 0 | 13 | 3 | 第 18 章讲了设计，代码还没写；文件上传、Playground、生成式 UI |
+| C.11 系统设计 | 26 | 3 | 13 | 10 | 需要把多章串起来练 |
+| C.12 手撕代码 | 33 | 14 | 6 | 13 | 应用侧（重试、限流、SSE 解析、缓存）和通用编码题 |
+| C.13 场景排障 | 10 | 5 | 3 | 2 | 需要真实系统的经验 |
+| C.14 行为面与开放题 | 11 | 0 | 3 | 1 | 7 道行为题不标记，靠项目经历回答 |
 
 **结论** **[经验]**：
 
-1. **工程实践部分（第 9–17 章）覆盖得最好**。RAG、agent、MCP、推理这几类高频题，大部分已经能在书里找到原理和数字。
+1. **模型基础、训练和推理（C.2–C.5）覆盖得最好**，七成左右是 ✅。工程实践里，prompt、agent、MCP 也大多能在书里找到原理和数字；**RAG（C.7）反而偏弱**：原理和检索方法讲了（第 15 章），但 query rewriting、引用、增量索引、向量库内部这些高频追问大多只是 ◐ 或 ○，要靠第 18 章的项目补。
 2. **训练和对齐（C.3、C.4）已由第 8 章补上**，剩下的是 RLAIF、对齐税这类概念题和多机训练的容错。
-3. **AI 前端（C.10）是现在最大的空白**，而且和你的背景最贴近：这些题本质上是前端工程问题加上一点对 autoregressive 生成的理解，补起来成本低、区分度高。第 18 章的项目会把它做出来。
+3. **AI 前端（C.10）只有设计、还没有代码**：第 18.4 节讲了 SSE、中断、增量渲染、nginx 缓冲这些做法，所以都标成 ◐；要等 M1 把它们真正写出来、测过，才算 ✅。这一类和你的背景最贴近：本质上是前端工程问题加上一点对 autoregressive 生成的理解，补起来成本低、区分度高。
 4. **第 7 章已经补上了模型侧的手撕代码**：multi-head attention、GQA、KV cache、RMSNorm、RoPE、BPE、完整的训练。剩下的手撕题集中在应用侧（重试、限流、SSE 解析、缓存），会在第 18 章的项目里写出来。
 5. 系统设计题不需要新章节，需要的是练习：拿 C.11 里的题，按"需求 → 架构图 → 关键数字 → 失效方式 → 评测"的顺序各写一页。
 

@@ -47,6 +47,7 @@ def memory_ledger():
         n_lora = sum(r * (i + o) for i, o in shapes)
         print(f"  LoRA r={r:<3} 加在全部 7 种线性层：可训练参数 {n_lora / 1e6:6.1f}M，占 {n_lora / N:.2%}")
     n_lora = sum(16 * (i + o) for i, o in shapes)
+    E = 2 * 128256 * 4096          # embedding 和输出层：bitsandbytes 只量化线性层，这两块通常留在 BF16
 
     rows = [
         ("全参，FP32 + Adam", 16 * N),                      # 权重 4 + 梯度 4 + Adam 两个矩 8
@@ -55,7 +56,7 @@ def memory_ledger():
         ("  ZeRO-2，8 卡，每卡", 2 * N + 14 * N / 8),
         ("  ZeRO-3，8 卡，每卡", 16 * N / 8),
         ("LoRA r=16（底座 BF16 冻结）", 2 * N + 16 * n_lora),
-        ("QLoRA r=16（底座 4 bit）", 4.127 / 8 * N + 16 * n_lora),
+        ("QLoRA r=16（线性层 4 bit）", 4.127 / 8 * (N - E) + 2 * E + 16 * n_lora),
         ("只做推理，BF16", 2 * N),
     ]
     for name, b in rows:

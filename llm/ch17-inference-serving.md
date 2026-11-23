@@ -20,11 +20,11 @@
 
 **前置知识**
 
-矩阵乘法与外积（[3.2 节](ch03-linear-algebra.md#3.2)）、量化误差要用到的均匀分布方差（[1.3 节](ch01-probability.md#1.3)）、self-attention 与 KV cache（[6.2 节](ch06-self-attention.md#6.2)、[6.4 节](ch06-self-attention.md#6.4)）、prompt caching（[11.6 节](ch11-agent-harness.md#11.6)）、总变差距离（[1.7 节](ch01-probability.md#1.7)）与接受–拒绝采样的思想。排队论部分用到马尔可夫链的平稳分布，17.11 节会就地推导。
+矩阵乘法与外积（[3.2 节](ch03-linear-algebra.md#3.2)）、量化误差要用到的均匀分布方差（[1.4 节](ch01-probability.md#1.4)）、self-attention 与 KV cache（[6.2 节](ch06-self-attention.md#6.2)、[6.4 节](ch06-self-attention.md#6.4)）、prompt caching（[11.6 节](ch11-agent-harness.md#11.6)）、总变差距离（[1.7 节](ch01-probability.md#1.7)）与接受–拒绝采样的思想。排队论部分用到马尔可夫链的平稳分布，17.11 节会就地推导。
 
 ## 17.1 一次生成的两个阶段 **[事实]**
 
-**Prefill**：把整段提示（$T$ 个 token）一次送进模型，并行算出每一层的 K、V，存进 KV cache，同时得到第一个输出 token 的分布。
+**Prefill**：把整段 prompt（$T$ 个 token）一次送进模型，并行算出每一层的 K、V，存进 KV cache，同时得到第一个输出 token 的分布。
 - 所有 token 一起算，本质是**矩阵 × 矩阵**；
 - 计算量约 $2NT$ FLOP（$N$ 是参数量，每个参数对每个 token 做一次乘加）；
 - 决定了**TTFT**（time to first token）。
@@ -78,8 +78,8 @@ $$M\approx2N+B\cdot T\cdot\kappa,$$
 $$F\approx B\,(2N+4LdT).$$
 
 **情形 1：$B=1$**。$I\approx2N/2N=1$ FLOP/字节，比 ridge point 低两个数量级，**完全受限于带宽**。每生成一个 token，都要把 15 GiB 的权重从显存读一遍：
-$$t\ \ge\ \frac{2N}{\beta}=\frac{16\text{ GB}}{3.35\text{ TB/s}}\approx4.9\text{ ms}.$$
-所以单个请求在 H100 上最多约每秒 205 个 token，算力利用率不到 1%（17.12.2 节）。
+$$t\ \ge\ \frac{2N}{\beta}=\frac{16\text{ GB}}{3.35\text{ TB/s}}\approx4.8\text{ ms}.$$
+再加上读 KV cache 的时间（上下文 2048 时约 0.1 ms），约 4.9 ms。所以单个请求在 H100 上最多约每秒 205 个 token，算力利用率不到 1%（17.12.2 节）。
 
 **情形 2：增大 $B$**。权重只读一次却被 $B$ 个请求共用，矩阵乘法部分的强度变成约 $B$。忽略 KV，需要 $B\approx295$ 才能"喂饱"H100 的算力。
 
@@ -87,7 +87,7 @@ $$t\ \ge\ \frac{2N}{\beta}=\frac{16\text{ GB}}{3.35\text{ TB/s}}\approx4.9\text{
 $$I_{\text{attn}}=\frac{4LdT B}{2L\,n_{kv}d_{\text{head}}\cdot2\cdot TB}=\frac{d}{n_{kv}d_{\text{head}}}=\frac{n_{\text{heads}}}{n_{kv}}.$$
 Llama-3-8B 是 $32/8=4$ FLOP/字节。**无论批多大，decode 阶段的注意力都受限于带宽**。上下文一长，读 KV cache 的时间就会盖过读权重的时间。解"读数据时间 = 计算时间"可以算出：在 H100 上，上下文为 128 时，batch size 要到约 424 才进入算力受限；上下文 512 以上，**永远**进不了（17.12.2 节）。
 
-**Prefill**：$T$ 个 token 一起算，矩阵乘法的强度约为 $T$。只要提示有几百个 token，prefill 就受限于**算力**。2048 个 token 的提示约 33 TFLOP，在 H100 上至少 33 ms。
+**Prefill**：$T$ 个 token 一起算，矩阵乘法的强度约为 $T$。只要 prompt 有几百个 token，prefill 就受限于**算力**。2048 个 token 的 prompt 约 33 TFLOP，在 H100 上至少 33 ms。
 
 **FlashAttention：减少显存读写** **[事实 + 已证]**：GPU 的存储分两层：
 - **显存**（HBM）：几十 GB，就是上面带宽 $\beta$ 说的那一层；
@@ -103,7 +103,7 @@ $$m'=\max\big(m,\max_js_j\big),\quad \ell'=e^{m-m'}\ell+\sum_je^{s_j-m'},\quad o
 $$\frac{o}{\ell}=\frac{\sum_je^{s_j}v_j}{\sum_je^{s_j}}=\sum_j\mathrm{softmax}(s)_jv_j.$$
 减去 $m$ 只是为了数值稳定（[4.3 节](ch04-calculus-optimization.md#4.3)），不改变结果。
 
-所以 FlashAttention **是精确计算，不是近似**：运算量不变，显存读写从 $O(T^2)$ 降到 $O(T)$ 量级，打分矩阵也不用存下来。训练时反向传播需要注意力矩阵，它选择重新算一遍，而不是存下来，这也是 [8.3 节](ch08-pre-post-training.md#8.3) 里"用 FlashAttention 时激活少了一大项"的原因。它主要加速 prefill 和训练；decode 时每步只有一个 query，瓶颈在读 KV cache。
+所以 FlashAttention **是精确计算，不是近似**：运算量不变；额外的显存占用从 $O(T^2)$ 降到 $O(T)$，因为打分矩阵不存下来；显存读写量从标准实现的 $\Theta(Td+T^2)$ 降到 $\Theta(T^2d^2/M)$，$M$ 是 SRAM 的大小，$d^2$ 远小于 $M$ 时这是好几倍的减少。面试里常问"FlashAttention 减少的是计算还是读写"：减少的是读写。训练时反向传播需要注意力矩阵，它选择重新算一遍，而不是存下来，这也是 [8.3 节](ch08-pre-post-training.md#8.3) 里"用 FlashAttention 时激活少了一大项"的原因。它主要加速 prefill 和训练；decode 时每步只有一个 query，瓶颈在读 KV cache。
 
 **这解释了几件"商业"现象** **[直觉]**：
 - **输出比输入贵**：输入在 prefill 里成批并行地算，GPU 满负荷；输出一个一个地生成，每个 token 都要读一遍权重和 KV。
@@ -136,14 +136,14 @@ $$t(B)\approx\frac{2N+B T\kappa}{\beta}\quad(\text{带宽受限时}),$$
 17.12.5 节的模拟里，同样的显存，并发数从 48 提高到 221（4.6 倍），浪费从 78% 降到 0.8%。论文报告，在相同延迟下吞吐提高 2–4 倍。
 
 **块共享**：有了块表，多个请求可以指向**同一个**物理块。
-- 一个请求采样多个回答（比如 $n=4$）：共享提示部分的块，写入时再复制（copy-on-write）；
+- 一个请求采样多个回答（比如 $n=4$）：共享 prompt 部分的块，写入时再复制（copy-on-write）；
 - **prefix caching**：不同请求的开头相同（同一个 system prompt、同一份文档、agent 循环里不断增长的历史），对应的 KV 块算一次、存一份。vLLM 按块内容的哈希做自动 prefix caching，SGLang 用基数树（RadixAttention）组织所有前缀。
 
 **API 的"prompt caching"就是这个机制**（[11.6 节](ch11-agent-harness.md#11.6)）：命中的前缀不用重新 prefill。100 个请求共享 3000 token 的 system prompt 时，要算的 prefill token 减少 93%（17.12.6 节）。这也解释了为什么前缀必须**逐字节相同**：哈希的是 token 块。
 
 ## 17.6 Prefill 与 decode 的调度 **[事实]**
 
-一个长提示的 prefill 可能要几百毫秒。如果它和正在 decode 的请求排在同一个批里一起跑，那一步就会很慢，所有正在生成的请求都会卡一下。用户看到的就是输出"顿住"。
+一个长 prompt 的 prefill 可能要几百毫秒。如果它和正在 decode 的请求排在同一个批里一起跑，那一步就会很慢，所有正在生成的请求都会卡一下。用户看到的就是输出"顿住"。
 
 **chunked prefill**：把长 prefill 切成小块，每一步只做一块，和 decode 请求拼在一起。prefill 用的是算力，decode 用的是带宽，拼在一起正好互补，单步时间也更平稳。
 
@@ -181,7 +181,7 @@ $$\text{加速比}\approx\frac{(1-\alpha^{k+1})/(1-\alpha)}{1+kc}.$$
 $k$ 太大，后面的猜测大多被拒，还白白付出了草稿的开销。最优的 $k$ 取决于 $\alpha$ 和 $c$。
 
 **变体**：
-- 草稿不一定是另一个模型：可以是 target model 上加几个预测头（Medusa、EAGLE），或者直接从提示里找重复的片段（n-gram / prompt lookup，适合改代码、改文档这类大量复制原文的任务）；
+- 草稿不一定是另一个模型：可以是 target model 上加几个预测头（Medusa、EAGLE），或者直接从 prompt 里找重复的片段（n-gram / prompt lookup，适合改代码、改文档这类大量复制原文的任务）；
 - **批很大时收益变小**：speculative decoding 利用的是"带宽受限、算力闲置"，批大到接近算力受限时，多算的位置就不再免费了。
 
 ## 17.8 量化 **[已证 + 事实]**
@@ -236,7 +236,7 @@ $$\mathrm{Var}(e)=\frac{s^2}{12}.$$
 ## 17.11 服务指标、排队与容量规划 **[已证 + 经验]**
 
 **指标**：
-- **TTFT**：TTFT，用户感知的"反应速度"；
+- **TTFT**（time to first token，首个 token 的延迟）：用户感知的"反应速度"；
 - **TPOT / ITL**：输出 token 之间的间隔，流式输出时的"打字速度"。人的阅读速度约每秒几个到十几个词，TPOT 低于约 50 ms 时，用户基本感觉不到在等；
 - **吞吐**：每秒处理的 token 或请求数，决定成本；
 - **Goodput**：**满足延迟目标（SLO）的**请求数每秒。只看吞吐会误导：把批开得很大，吞吐很高，但大部分请求超时了。
@@ -258,7 +258,7 @@ $$W_q=\frac{\lambda\,\mathbb E[S^2]}{2(1-\rho)}=\frac{\rho}{1-\rho}\cdot\frac{\m
 - 长尾请求会堵住短请求（队头阻塞）。continuous batching、preemption（KV cache 不够时把长请求换出到 CPU 内存或重算）、按预计长度分队列，都是在对付这个问题；
 - 严格地说，带 batching 的推理服务器不是单服务台队列。这里的公式用来建立直觉、做粗略估计，精确的容量要靠压测（17.13 节的脚本是一个起点）。
 
-**一个容量估算的例子**：要服务 Llama-3-8B，峰值每秒 10 个请求，平均提示 1000 token、输出 300 token，要求 TPOT < 30 ms。
+**一个容量估算的例子**：要服务 Llama-3-8B，峰值每秒 10 个请求，平均 prompt 1000 token、输出 300 token，要求 TPOT < 30 ms。
 1. 由 Little 定律，每个请求约 $0.1+300\times0.03\approx9$ 秒，平均同时约 90 个请求；
 2. 每个请求平均约 1150 个 token 的 KV，90 个约 10 万 token、约 13 GiB。H100 放得下（17.2 节）；
 3. batch size 约 90、上下文约 1150 时，decode 一步的下界约 $(16+90\times1150\times131072/10^9)\text{ GB}/3.35\text{ TB/s}\approx8.8$ ms。满足 30 ms，留有余量。
@@ -389,14 +389,14 @@ Llama-3-8B 在 RTX 4090 上单请求的 decode 下界：BF16 16.2 ms，INT8 8.2 
 - 指数分布的平均总时间正是 M/M/1 的 $1/(1-\rho)$：2、10、20；
 - 平均服务时间相同，长尾分布在利用率 90% 时，平均等待约为指数分布的 3.4 倍，p99 约为 3.8 倍。
 
-## 17.13 GPU 实验（等你在 GPU 上运行）
+## 17.13 GPU 实验（需要自己在 GPU 上运行）
 
 代码：[`code/ch17_gpu_benchmark.py`](code/ch17_gpu_benchmark.py)。在 Kaggle Notebook（打开 GPU 和 Internet）、Colab 或 RunPod 上：
 ```
 pip install vllm
 python ch17_gpu_benchmark.py
 ```
-vLLM 需要计算能力 7.5 以上的 GPU，Kaggle 和 Colab 免费的 T4 满足要求。脚本最后打印一段 JSON，把它发回来，我把实测结果写进这一节，和理论值对照。
+vLLM 需要计算能力 7.5 以上的 GPU，Kaggle 和 Colab 免费的 T4 满足要求。脚本最后打印一段 JSON，记下来和下面的理论预期对照（也可以把它贴到书的 issue 里，补进这一节）。
 
 **三个实验和理论预期**：
 
@@ -407,13 +407,14 @@ vLLM 需要计算能力 7.5 以上的 GPU，Kaggle 和 Colab 免费的 T4 满足
 **B. vLLM 的并发与吞吐**：Qwen2.5-0.5B，同时提交 1、8、32、128 个请求，每个生成 256 个 token。
 - 预期总吞吐随并发数大幅上升，单个请求的速度只略微下降（17.4 节）。
 
-**C. prefix caching**：32 个请求共享约 2000 token 的前缀，只做 prefill，跑两次。
-- 预期第二次（前缀已缓存）明显更快（17.5 节）。
+**C. prefix caching**：32 个请求、每个约 2000 token，只做 prefill。"冷"的一组前缀各不相同，"热"的一组共享一个先放进缓存的前缀。
+- 预期热的明显更快（17.5 节）。
+- 为什么不直接把同一批共享前缀的请求跑两次、拿第一次当冷：同一批里先算完的块会被后面的请求命中，第一次其实已经是半热的，比出来的加速比偏小。
 
 ## 17.14 小结与疑问
 
 **搞懂了什么**：
-- Prefill 一次算完整个提示，受限于算力，决定 TTFT；decode 每步一个 token，受限于显存带宽，决定输出速度。
+- Prefill 一次算完整个 prompt，受限于算力，决定 TTFT；decode 每步一个 token，受限于显存带宽，决定输出速度。
 - 显存 = 权重 + KV cache；KV cache 每 token $2Ln_{kv}d_{\text{head}}\times$字节数，它决定并发能力。
 - Roofline：单请求 decode 的强度约为 1，要靠 batching 共用一次权重读取；decode 时注意力的强度只有 $n_{\text{heads}}/n_{kv}$，所以长上下文永远受限于带宽。
 - continuous batching 每步补位；PagedAttention 用分页消除碎片，并支持前缀共享，API 的 prompt caching 就建立在它上面。
@@ -424,7 +425,7 @@ vLLM 需要计算能力 7.5 以上的 GPU，Kaggle 和 Colab 免费的 T4 满足
 **疑问**：
 - Mixture of Experts 模型（MoE）的推理特征有什么不同？每个 token 只激活一部分专家，但所有专家的权重都要放在显存里。
 - 推理引擎怎样在 preemption（换出或重算 KV）和排队之间做选择？
-- 实测效率和 roofline 上界差多少？差在哪里？（等 17.13 节的结果。）
+- 实测效率和 roofline 上界差多少？差在哪里？（17.13 节的实验可以回答一部分。）
 
 ## 参考资料
 

@@ -101,7 +101,10 @@ $$\mathrm{Var}(aX+bY)=a^2\mathrm{Var}X+b^2\mathrm{Var}Y+2ab\,\mathrm{Cov}(X,Y).$
 | 伯努利 $\mathrm{Ber}(p)$ | $\{0,1\}$ | $P(1)=p$ | $p$ | $p(1-p)$ | 二分类、dropout 的掩码 |
 | 类别 $\mathrm{Cat}(\pi)$ | $\{1,\dots,V\}$ | $P(j)=\pi_j$ | — | — | 下一个 token 的分布 |
 | 二项 $\mathrm{Bin}(n,p)$ | $\{0,\dots,n\}$ | $\binom nkp^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $n$ 次伯努利的和 |
+| 均匀 $U(a,b)$ | $[a,b]$ | $\frac1{b-a}$ | $\frac{a+b}2$ | $\frac{(b-a)^2}{12}$ | 量化的舍入误差（[17.8 节](ch17-inference-serving.md#17.8)） |
 | 高斯 $N(\mu,\sigma^2)$ | $\mathbb R$ | $\frac1{\sqrt{2\pi}\sigma}e^{-(x-\mu)^2/2\sigma^2}$ | $\mu$ | $\sigma^2$ | 初始化、噪声 |
+
+**均匀分布的方差** **[已证]**：$\mathbb E[X^2]=\frac1{b-a}\int_a^bx^2dx=\frac{a^2+ab+b^2}{3}$，减去 $\big(\frac{a+b}2\big)^2$ 即得 $\frac{(b-a)^2}{12}$。
 
 **类别分布与 softmax**：类别分布的参数是一个和为 1 的非负向量 $\pi$。神经网络输出的是任意实数向量 $z$（logits），再用 $\pi=\mathrm{softmax}(z)$ 变成合法的类别分布（细节见 [第 4 章](ch04-calculus-optimization.md)）。
 

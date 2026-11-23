@@ -29,7 +29,7 @@ LangChain 和 LangGraph 在 2025 年 10 月发布 1.0，接口大幅简化：
 **统一不同厂商的接口**：Claude、GPT、Gemini、开源模型的 API 各不相同，比如消息格式、tool calling 格式、流式输出。LangChain 提供统一的聊天模型接口和消息类型，换模型通常只改一行。
 
 **现成的部件**：
-- 提示模板、输出解析、structured output；
+- prompt 模板、输出解析、structured output；
 - 工具定义（从函数签名生成 schema）；
 - agent 循环，以及摘要压缩、人工审批、重试等常用 middleware；
 - 大量第三方集成：向量数据库、文档加载器、检索器（第 15 章）。
@@ -50,7 +50,7 @@ LangChain 和 LangGraph 在 2025 年 10 月发布 1.0，接口大幅简化：
 
 **工具**：`@tool` 装饰一个带类型标注和文档字符串的函数，自动生成名字、描述和参数 schema（[10.2 节](ch10-tool-calling.md#10.2)）。
 
-**Runnable 与 LCEL**：模型、提示模板、解析器、普通函数都是 `Runnable`，有相同的 `invoke` / `batch` / `stream` 接口。用 `|` 把它们串起来（LangChain Expression Language）：
+**Runnable 与 LCEL**：模型、prompt 模板、解析器、普通函数都是 `Runnable`，有相同的 `invoke` / `batch` / `stream` 接口。用 `|` 把它们串起来（LangChain Expression Language）：
 ```python
 chain = prompt | model | StrOutputParser()
 chain.invoke({"subject": "线性代数", "question": "什么是秩？"})
@@ -123,7 +123,7 @@ agent.invoke({"messages": [{"role": "user", "content": "温哥华天气？"}]})
 - 只用一家模型，流程简单：直接用厂商 SDK，几十行代码就能写出 agent 循环（[11.2 节](ch11-agent-harness.md#11.2)），每一步都看得见；
 - 需要用到厂商最新的功能，而框架还没跟上。
 
-**无论用不用** **[经验]**：要知道框架在底层做了什么。很多问题出在"以为框架做了某件事，其实没做"，比如提示到底长什么样、工具结果有没有被截断、缓存有没有命中。打开调试日志，看实际发出去的请求。Anthropic 的建议也是：可以从直接调用 API 开始；用框架的话，一定要理解它底层的代码。
+**无论用不用** **[经验]**：要知道框架在底层做了什么。很多问题出在"以为框架做了某件事，其实没做"，比如 prompt 到底长什么样、工具结果有没有被截断、缓存有没有命中。打开调试日志，看实际发出去的请求。Anthropic 的建议也是：可以从直接调用 API 开始；用框架的话，一定要理解它底层的代码。
 
 ## 14.6 数值实验
 
@@ -139,11 +139,11 @@ agent.invoke({"messages": [{"role": "user", "content": "温哥华天气？"}]})
 
 ### 14.6.3 LCEL
 
-- 提示模板填好后是两条消息：system "你是线性代数助教，回答不超过一句话。"，human "什么是秩？"。
+- prompt 模板填好后是两条消息：system "你是线性代数助教，回答不超过一句话。"，human "什么是秩？"。
 - `prompt | model | StrOutputParser()` 用 `batch` 一次处理两个问题，返回两个字符串。
 - `RunnableParallel(upper=..., length=...)` 对 `"lcel"` 同时得到 `{'upper': 'LCEL', 'length': 4}`。
 
-### 14.6.4 Create_agent 与 middleware
+### 14.6.4 `create_agent` 与 middleware
 
 消息序列：
 1. `HumanMessage`：温哥华和北京天气？
@@ -151,7 +151,7 @@ agent.invoke({"messages": [{"role": "user", "content": "温哥华天气？"}]})
 3. 两条 `ToolMessage`：`8°C 多云`、`2°C 晴`
 4. `AIMessage`：最终回答
 
-middleware 日志：调用模型前上下文有 1 条消息 → 两次 tool calling → 调用模型前上下文有 4 条消息。两个 tool calling 记录的顺序和请求顺序不同（先 Beijing 后 Vancouver），说明框架是并行执行的。
+middleware 日志：调用模型前上下文有 1 条消息 → 两次 tool calling → 调用模型前上下文有 4 条消息。两个 tool calling 是并行执行的，日志里谁先谁后每次运行可能不同（这次是先 Beijing 后 Vancouver）。顺序不同说明它们确实是并发的，但顺序相同不能说明是串行的；要确认并行，看两次调用的时间戳是否重叠，或让工具各 sleep 1 秒，看总耗时是 1 秒还是 2 秒。
 
 ### 14.6.5 LangGraph：写—审—改 + 人工审批
 

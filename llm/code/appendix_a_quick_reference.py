@@ -93,24 +93,25 @@ def forward_backward(p, X, Y):
     z = z - z.max(1, keepdims=True)
     P = np.exp(z); P /= P.sum(1, keepdims=True)
     loss = -np.mean(np.log(P[np.arange(n), Y]))
+    acc = np.mean(z.argmax(1) == Y)          # 和 loss 来自同一次前向（更新参数之前）
     # —— 反向：从损失往回，逐层用链式法则 ——
     dz = P.copy(); dz[np.arange(n), Y] -= 1; dz /= n     # ∂L/∂z = (p − y)/n
     g = {"W2": h.T @ dz, "b2": dz.sum(0)}
     dh = dz @ p["W2"].T                                   # ∂L/∂h
     da1 = dh * (1 - h ** 2)                               # tanh'(a) = 1 − tanh(a)²
     g["W1"] = X.T @ da1; g["b1"] = da1.sum(0)
-    return loss, g
+    return loss, g, acc
 
 # 梯度检查：对每个参数随机挑几个分量，和数值梯度比较
 p = init()
-_, g = forward_backward(p, X, Y)
+_, g, _ = forward_backward(p, X, Y)
 worst = 0.0
 for name in p:
     for _ in range(3):
         idx = tuple(rng.integers(0, s) for s in p[name].shape)
         old = p[name][idx]
-        p[name][idx] = old + 1e-5; lp, _ = forward_backward(p, X, Y)
-        p[name][idx] = old - 1e-5; lm, _ = forward_backward(p, X, Y)
+        p[name][idx] = old + 1e-5; lp = forward_backward(p, X, Y)[0]
+        p[name][idx] = old - 1e-5; lm = forward_backward(p, X, Y)[0]
         p[name][idx] = old
         worst = max(worst, abs((lp - lm) / 2e-5 - g[name][idx]))
 print(f"梯度检查：反向传播 vs 数值梯度，最大误差 {worst:.2e}")
@@ -118,9 +119,8 @@ print(f"梯度检查：反向传播 vs 数值梯度，最大误差 {worst:.2e}")
 # 梯度下降训练
 lr = 0.5
 for step in range(3001):
-    loss, g = forward_backward(p, X, Y)
+    loss, g, acc = forward_backward(p, X, Y)
     for name in p:
         p[name] -= lr * g[name]              # θ ← θ − η ∇L
     if step in (0, 100, 500, 1000, 3000):
-        h = np.tanh(X @ p["W1"] + p["b1"]); acc = np.mean((h @ p["W2"] + p["b2"]).argmax(1) == Y)
         print(f"  第 {step:>4} 步：损失 {loss:.4f}   训练准确率 {acc:.3f}")

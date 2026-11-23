@@ -17,7 +17,7 @@
 **与大模型的关系**
 
 API 背后的模型都是这样训练出来的。即使你不训练模型，也需要懂它：
-- 判断一个需求该用提示、RAG 还是微调；
+- 判断一个需求该用 prompt、RAG 还是微调；
 - 估算微调要多少显存和多少钱；
 - 用大模型生成数据、蒸馏出一个小模型上线，是降低成本最常见的办法；
 - 读懂模型的行为：为什么它会讨好、会变啰嗦、会在不懂时编造。
@@ -115,7 +115,7 @@ $$N^*\propto C^{\beta/(\alpha+\beta)},\qquad D^*\propto C^{\alpha/(\alpha+\beta)
 | FP32 | 1 / 8 / 23 | 约 $3.4\times10^{38}$ | 约 $10^{-7}$ | master weights、optimizer states |
 | BF16 | 1 / 8 / 7 | 约 $3.4\times10^{38}$ | 约 $8\times10^{-3}$ | 训练和推理的计算 |
 | FP16 | 1 / 5 / 10 | 65504 | 约 $10^{-3}$ | 较早的 mixed precision 训练、推理 |
-| FP8（E4M3） | 1 / 4 / 3 | 448 | 约 $6\times10^{-2}$ | 新一代 GPU 上的训练和推理 |
+| FP8（E4M3） | 1 / 4 / 3 | 448 | 约 $1.3\times10^{-1}$ | 新一代 GPU 上的训练和推理 |
 | INT8 / INT4 | 整数 | 127 / 7 | 均匀间隔 | 量化推理（[17.8 节](ch17-inference-serving.md#17.8)） |
 
 两个推论：
@@ -142,7 +142,7 @@ $$N^*\propto C^{\beta/(\alpha+\beta)},\qquad D^*\propto C^{\alpha/(\alpha+\beta)
 $$sbh\left(34+\frac{5as}{h}\right)\ \text{字节},$$
 - $s$ 是序列长度，$b$ 是 batch size，$h$ 是隐藏维度，$a$ 是头数；
 - $5as/h$ 那一项来自注意力矩阵，它随 $s$ 二次增长；用 FlashAttention 时注意力矩阵不存下来，这一项消失；
-- 现在的大模型训练一般不用 dropout，实际会比这个式子小一些。
+- 这个系数是按普通 multi-head attention 和"放大 4 倍"的 GELU FFN 推出来的。换成 Llama 的结构会有出入：不用 dropout、用 GQA 会小一些，SwiGLU（三个矩阵、中间维度 3.5 倍）会大不少，合起来往往比这个式子还大约两成。
 
 激活和 batch size、序列长度成正比，长序列训练时它常常比模型状态还大。
 
@@ -200,7 +200,7 @@ $$\frac{\partial\mathcal L}{\partial B}=GA^\top,\qquad\frac{\partial\mathcal L}{
 
 **QLoRA** **[事实]**：把冻结的底座量化成 4 位（NF4 格式），LoRA 部分仍用 BF16 训练；前向时把底座临时反量化成 BF16 再计算。
 - 用"双重量化"连量化常数也压缩，平均每个参数约 4.13 位；
-- 8B 模型底座只要约 4 GiB，加 LoRA 共约 4.5 GiB；
+- 8B 模型的线性层量化后约 3.4 GiB；embedding 和输出层通常不量化（bitsandbytes 只量化线性层），仍是 BF16，约 2 GiB；加上 LoRA 的部分，共约 5.9 GiB；
 - 原论文在一张 48 GB 的卡上微调了 65B 的模型。
 
 **其他参数高效方法**：
@@ -218,14 +218,14 @@ $$\frac{\partial\mathcal L}{\partial B}=GA^\top,\qquad\frac{\partial\mathcal L}{
 
 **动机**：让人写出一个好回答很难，但比较两个回答哪个更好很容易。RLHF（InstructGPT，2022）利用这一点，分三步：
 1. SFT，得到初始策略 $\pi_{\text{SFT}}$；
-2. 对同一个提示采几个回答，让人标出哪个更好，训练一个**reward model** $r_\phi(x,y)$；
+2. 对同一个 prompt 采几个回答，让人标出哪个更好，训练一个**reward model** $r_\phi(x,y)$；
 3. 用强化学习优化策略，让奖励高，同时别离 $\pi_{\text{SFT}}$ 太远。
 
 **reward model** **[事实]**：用 Bradley–Terry 模型描述"$y_w$ 比 $y_l$ 好"的概率：
 $$P(y_w\succ y_l\mid x)=\sigma\big(r(x,y_w)-r(x,y_l)\big),\qquad\sigma(z)=\frac{1}{1+e^{-z}}.$$
 对偏好数据做最大似然，损失是 $-\log\sigma(r_\phi(x,y_w)-r_\phi(x,y_l))$，就是一个二分类的逻辑回归。
 
-**只有分数之差有意义** **[已证]**：把 $r(x,y)$ 换成 $r(x,y)+c(x)$，上面的概率不变。所以 reward model 的绝对分数没有意义，不同提示之间的分数也不能直接比较。
+**只有分数之差有意义** **[已证]**：把 $r(x,y)$ 换成 $r(x,y)+c(x)$，上面的概率不变。所以 reward model 的绝对分数没有意义，不同 prompt 之间的分数也不能直接比较。
 
 **强化学习的目标**：
 $$\max_{\pi}\ \mathbb E_{x,\ y\sim\pi(\cdot\mid x)}\big[r_\phi(x,y)\big]-\beta\,\mathrm{KL}\big(\pi(\cdot\mid x)\,\big\|\,\pi_{\text{ref}}(\cdot\mid x)\big).$$
@@ -257,7 +257,7 @@ $$\mathbb E_t\Big[\min\big(\rho_tA_t,\ \mathrm{clip}(\rho_t,1-\varepsilon,1+\var
 
 DPO（Rafailov 等，2023）的关键是：8.6 节的目标有一个**闭式最优解**。
 
-**第一步：最优策略** **[已证]**。固定一个提示 $x$（下面省略），目标是
+**第一步：最优策略** **[已证]**。固定一个 prompt $x$（下面省略），目标是
 $$J(\pi)=\sum_y\pi(y)\,r(y)-\beta\sum_y\pi(y)\log\frac{\pi(y)}{\pi_{\text{ref}}(y)}.$$
 定义
 $$\pi^*(y)=\frac{1}{Z}\,\pi_{\text{ref}}(y)\,e^{r(y)/\beta},\qquad Z=\sum_y\pi_{\text{ref}}(y)\,e^{r(y)/\beta}.$$
@@ -270,7 +270,7 @@ KL 散度非负，且只在两个分布相等时为零（[1.7 节](ch01-probabil
 **第二步：用策略表示奖励**。把上式反解：
 $$r(y)=\beta\log\frac{\pi^*(y)}{\pi_{\text{ref}}(y)}+\beta\log Z.$$
 
-**第三步：代入 Bradley–Terry**。两个回答的奖励相减，$\beta\log Z$ 正好消掉，它只依赖于提示，不依赖回答：
+**第三步：代入 Bradley–Terry**。两个回答的奖励相减，$\beta\log Z$ 正好消掉，它只依赖于 prompt，不依赖回答：
 $$P(y_w\succ y_l)=\sigma\Big(\beta\log\frac{\pi^*(y_w)}{\pi_{\text{ref}}(y_w)}-\beta\log\frac{\pi^*(y_l)}{\pi_{\text{ref}}(y_l)}\Big).$$
 
 **第四步：把 $\pi^*$ 换成要训练的 $\pi_\theta$，对偏好数据做最大似然**：
@@ -321,7 +321,7 @@ $$T^2\cdot\mathrm{KL}\big(p^{(T)}_{\text{老师}}\,\big\|\,p^{(T)}_{\text{学生
 - 一个 hard label 最多带 $\log_2 C$ 比特信息；一个完整的分布带的信息多得多："这张图不是猫，但比起卡车更像狗"；
 - 更形式地说：用 hard label 训练，是在用老师分布的**一个样本**估计交叉熵的梯度；用 soft label，是直接用**期望**。两者的期望相同，前者多了采样噪声。8.11.6 节里，同样 200 个样本，soft label 学到的 KL 比 hard label 小几千倍。
 
-**做法二：学老师生成的文本**（sequence-level distillation）。让老师对大量提示生成回答，再用这些回答对学生做 SFT。
+**做法二：学老师生成的文本**（sequence-level distillation）。让老师对大量 prompt 生成回答，再用这些回答对学生做 SFT。
 - 实践中用得最多，因为只需要老师的输出，不需要它的 logits，调用 API 就能做；
 - DeepSeek-R1 就用 R1 生成的推理数据对 Qwen 和 Llama 的小模型做 SFT，得到了一系列"蒸馏版"推理模型；
 - 本质上是"用合成数据做 SFT"，所以 8.4 节的要点都适用。
@@ -341,16 +341,16 @@ $$T^2\cdot\mathrm{KL}\big(p^{(T)}_{\text{老师}}\,\big\|\,p^{(T)}_{\text{学生
 | 需求 | 首选 | 原因 |
 |---|---|---|
 | 模型不知道某些事实（新政策、内部文档） | RAG | 知识要能更新、能引用出处；用微调注入新知识效果差，还会增加编造（8.4 节） |
-| 输出格式、风格、语气要稳定一致 | 先提示，不够再 SFT | 提示能解决大部分；大量样例都无法放进提示时才微调 |
+| 输出格式、风格、语气要稳定一致 | 先 prompt，不够再 SFT | prompt 能解决大部分；大量样例都无法放进 prompt 时才微调 |
 | 某个窄任务要更便宜、更快 | 蒸馏：大模型生成数据，SFT 一个小模型 | 推理成本和延迟能降一个数量级 |
 | 回答质量的高低难以写成规则 | 偏好数据 + DPO | 比较比描述容易 |
 | 有明确对错的推理任务 | RLVR | 成本最高，适合有大量题目和判题程序的场景 |
 
 **做之前要问的问题**：
-1. **提示和 RAG 真的试到头了吗**？大多数"需要微调"的需求，用更好的提示和例子就能解决（第 9 章）。
+1. **prompt 和 RAG 真的试到头了吗**？大多数"需要微调"的需求，用更好的 prompt 和例子就能解决（第 9 章）。
 2. **有 eval set 吗**？没有 eval set，微调完无法知道是变好了还是变差了。
 3. **数据从哪来**？几百条高质量样例是起点；用大模型生成再人工筛，是最常见的办法。
-4. **底座模型升级了怎么办**？微调是绑定在某个底座上的，底座一换就要重做；提示和 RAG 可以直接迁移。
+4. **底座模型升级了怎么办**？微调是绑定在某个底座上的，底座一换就要重做；prompt 和 RAG 可以直接迁移。
 5. **算过总成本吗**？包括训练、评测、托管一个自己的模型，以及以后每次重训。
 
 ## 8.11 数值实验
@@ -369,7 +369,7 @@ $$T^2\cdot\mathrm{KL}\big(p^{(T)}_{\text{老师}}\,\big\|\,p^{(T)}_{\text{学生
     ZeRO-2，8 卡，每卡                 28.0 GiB
     ZeRO-3，8 卡，每卡                 15.0 GiB
   LoRA r=16（底座 BF16 冻结）           15.6 GiB
-  QLoRA r=16（底座 4 bit）             4.5 GiB
+  QLoRA r=16（线性层 4 bit）            5.9 GiB
   只做推理，BF16                       15.0 GiB
 
   激活（序列 2048，batch 1）：普通注意力 28.5 GiB；FlashAttention 8.5 GiB；再加梯度检查点 0.77 GiB
@@ -379,7 +379,7 @@ $$T^2\cdot\mathrm{KL}\big(p^{(T)}_{\text{老师}}\,\big\|\,p^{(T)}_{\text{学生
 
 - 全参微调的模型状态约 120 GiB，mixed precision 不减少它（8.3 节）；
 - ZeRO-3 切到 8 张卡，每卡 15 GiB，正好等于一份 BF16 权重；
-- LoRA 只比推理多 0.6 GiB；QLoRA 把 8B 模型的训练压到 4.5 GiB，再加上激活，一张免费的 T4（16 GB）就能跑；
+- LoRA 只比推理多 0.6 GiB；QLoRA 把 8B 模型的训练压到约 5.9 GiB，再加上激活，一张免费的 T4（16 GB）就能跑。注意 T4 不支持 BF16，要改用 FP16 加 loss scaling（8.3 节）；
 - 激活随序列长度增长：2048 个 token 时，不用 FlashAttention 的激活（28.5 GiB）比 LoRA 的模型状态还大得多；gradient checkpointing 把它压到不到 1 GiB。
 
 ### 8.11.2 Scaling law：两组拟合参数
@@ -428,7 +428,7 @@ $$T^2\cdot\mathrm{KL}\big(p^{(T)}_{\text{老师}}\,\big\|\,p^{(T)}_{\text{学生
 
 ### 8.11.4 RLHF、DPO 与 reward hacking
 
-一个提示，8 个候选回答，每个有质量 $q$ 和长度 $\ell$ 两个特征。我们真正想要的奖励只看质量，但标注者有长度偏好，按 $q+0.6\ell$ 选。回答 6 又长又空（$q=0.2$，$\ell=5$）。
+一个 prompt，8 个候选回答，每个有质量 $q$ 和长度 $\ell$ 两个特征。我们真正想要的奖励只看质量，但标注者有长度偏好，按 $q+0.6\ell$ 选。回答 6 又长又空（$q=0.2$，$\ell=5$）。
 
 ```
   偏好数据：3448 对，按 π_ref 采样回答，标注者按 q + 0.6ℓ 选
@@ -514,7 +514,7 @@ $$T^2\cdot\mathrm{KL}\big(p^{(T)}_{\text{老师}}\,\big\|\,p^{(T)}_{\text{学生
 
 ## 8.12 用 GPU 跑真模型 **[经验]**
 
-上面的实验是为了看清机制。用真模型做一遍，免费的 Kaggle 或 Colab 的 T4 就够：
+上面的实验是为了看清机制。用真模型做一遍，免费的 Kaggle 或 Colab 的 T4 就够。T4 不支持 BF16，训练时用 FP16 加 loss scaling（TRL 里设 `fp16=True`）：
 - **LoRA SFT**：用 Hugging Face 的 TRL 库，在 Qwen2.5-0.5B-Instruct 上用几百条样例做 LoRA 微调，比较微调前后在你自己的 eval set 上的分数；
 - **DPO**：用 TRL 的 DPO 训练器，在一份公开的偏好数据上跑几百步，观察好回答和差回答的对数概率怎样变化、回答长度怎样变化（8.7 节）；
 - **显存**：用 `torch.cuda.max_memory_allocated()` 实测，和 8.11.1 节的账本对照。

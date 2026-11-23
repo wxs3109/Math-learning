@@ -3,8 +3,10 @@ r"""
 
 按 MCP 2026-07-28 规范实现 stdio 传输：从 stdin 逐行读 JSON-RPC 请求，向 stdout 逐行写响应，日志写到 stderr。
 支持的方法：server/discover、tools/list、tools/call、resources/list、resources/read、prompts/list、prompts/get。
-通常不直接运行它，而是由客户端（ch12_mcp_client.py 或任何 MCP 客户端）作为子进程启动：
-    python3 ch12_mcp_server.py
+不要直接运行它（直接运行会停在那里等 stdin 输入，看起来像卡住了），而是运行客户端，由客户端把它作为子进程启动：
+    python3 ch12_mcp_client.py
+也可以手动喂一行请求试试：
+    echo '{"jsonrpc":"2.0","id":1,"method":"server/discover"}' | python3 ch12_mcp_server.py
 """
 import json, sys
 
@@ -68,8 +70,11 @@ def handle(req):
     method, params = req.get("method"), req.get("params") or {}
     version = (params.get("_meta") or {}).get("io.modelcontextprotocol/protocolVersion")
     # 无状态：每个请求自带协议版本。server/discover 用来让客户端在不知道版本时先问一下。
-    if method != "server/discover" and version is not None and version != PROTOCOL:
-        raise RpcError(-32022, f"不支持的协议版本 {version}", {"supported": [PROTOCOL]})
+    if method != "server/discover":
+        if version is None:                                      # 没有握手，版本只能从请求里拿：缺了就是参数无效
+            raise RpcError(-32602, "缺少 _meta.io.modelcontextprotocol/protocolVersion", {"supported": [PROTOCOL]})
+        if version != PROTOCOL:
+            raise RpcError(-32022, f"不支持的协议版本 {version}", {"supported": [PROTOCOL]})
     if method == "server/discover":
         return cacheable({"supportedVersions": [PROTOCOL],
                           "capabilities": {"tools": {}, "resources": {}, "prompts": {}},
@@ -85,6 +90,7 @@ def handle(req):
                                         for i, n in NOTES.items()]})
     if method == "resources/read":
         uri = params.get("uri", "")
+        if not isinstance(uri, str): raise RpcError(-32602, "uri 必须是字符串")
         i = int(uri.removeprefix("note://")) if uri.removeprefix("note://").isdigit() else None
         if i not in NOTES: raise RpcError(-32602, f"资源不存在：{uri}")
         return cacheable({"contents": [{"uri": uri, "mimeType": "text/plain", "text": NOTES[i]["body"]}]})
@@ -103,20 +109,34 @@ class RpcError(Exception):
         self.code, self.message, self.data = code, message, data
 
 
+def error(id_, code, message, data=None):
+    err = {"code": code, "message": message}
+    if data is not None: err["data"] = data
+    return {"jsonrpc": "2.0", "id": id_, "error": err}
+
+
 def main():
     log("启动，协议版本", PROTOCOL)
     for line in sys.stdin:
         if not line.strip(): continue
-        req = json.loads(line)
-        if "id" not in req:            # 通知（notification）没有 id，也不需要回复
-            continue
         try:
-            resp = {"jsonrpc": "2.0", "id": req["id"], "result": handle(req)}
-        except RpcError as e:
-            err = {"code": e.code, "message": e.message}
-            if e.data is not None: err["data"] = e.data
-            resp = {"jsonrpc": "2.0", "id": req["id"], "error": err}
-        log("处理", req.get("method"))
+            req = json.loads(line)
+        except json.JSONDecodeError as e:   # 读不出 id，按 JSON-RPC 规定 id 填 null
+            resp = error(None, -32700, f"JSON 解析失败：{e}")
+        else:
+            if not isinstance(req, dict) or req.get("jsonrpc") != "2.0" or "method" not in req:
+                resp = error(req.get("id") if isinstance(req, dict) else None, -32600, "不是合法的 JSON-RPC 请求")
+            elif "id" not in req:           # 通知（notification）没有 id，也不需要回复
+                continue
+            else:
+                try:
+                    resp = {"jsonrpc": "2.0", "id": req["id"], "result": handle(req)}
+                except RpcError as e:
+                    resp = error(req["id"], e.code, e.message, e.data)
+                except Exception as e:      # 服务器自己的 bug：回一个内部错误，进程不能崩
+                    log("内部错误", repr(e))
+                    resp = error(req["id"], -32603, "服务器内部错误")
+            log("处理", req.get("method") if isinstance(req, dict) else req)
         sys.stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
         sys.stdout.flush()
 

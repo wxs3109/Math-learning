@@ -24,8 +24,14 @@ rng = np.random.default_rng(0)
 # ===========================================================================
 # 1. Byte-level BPE（7.2 节）
 # ===========================================================================
-def load_corpus(max_bytes=400_000):
-    """取第 1–6 章和第 8–17 章的正文，去掉代码块、公式和 Markdown 符号。"""
+SNAPSHOT = Path(__file__).resolve().parent / "data" / "ch07_corpus.txt"
+
+
+def load_corpus(max_bytes=400_000, rebuild=False):
+    """语料：本书第 1–6、8–17 章的正文（去掉代码块、公式和 Markdown 符号）。
+    书会更新，为了让结果可复现，默认读冻结的快照 data/ch07_corpus.txt；加 --rebuild-corpus 才从书重新生成。"""
+    if SNAPSHOT.exists() and not rebuild:
+        return SNAPSHOT.read_bytes()[:max_bytes]
     parts = []
     for p in sorted(BOOK.glob("ch*.md")):
         n = int(p.name[2:4])
@@ -39,7 +45,10 @@ def load_corpus(max_bytes=400_000):
         t = re.sub(r"[*#>|`]", "", t)
         t = re.sub(r"\n\s*\n+", "\n", t)
         parts.append(t)
-    return "\n".join(parts).encode("utf-8")[:max_bytes]
+    data = "\n".join(parts).encode("utf-8")[:max_bytes]
+    SNAPSHOT.parent.mkdir(exist_ok=True)
+    SNAPSHOT.write_bytes(data)
+    return data
 
 
 def merge(ids, pair, new_id):
@@ -244,19 +253,20 @@ def backward(p, c, cache):
 
 def gradient_check():
     print("=" * 72)
-    print("gradient check：手写的反向 vs 有限差分（float64，小模型）")
+    print("gradient check：手写的反向 vs 有限差分（float64，小模型，检查每一个参数）")
     print("=" * 72)
-    c = Config(V=20, d=8, L=2, H=2, Hkv=1, f=12, T=6)
+    r = np.random.default_rng(1)
+    c = Config(V=20, d=16, L=2, H=4, Hkv=2, f=24, T=6)          # Hkv=2、每组 2 个 head：GQA 的分组求和写错会被抓到
     p = init_params(c, np.float64, seed=1)
-    for k in p:                                               # 用大一点的随机值，避免梯度太小
-        p[k] = p[k] + np.random.default_rng(2).normal(0, 0.3, p[k].shape)
-    idx = rng.integers(0, c.V, (2, c.T)); tgt = rng.integers(0, c.V, (2, c.T))
+    for k in p:                                               # 加大一点的随机扰动，避免梯度太小
+        p[k] = p[k] + r.normal(0, 0.3, p[k].shape)
+    idx = r.integers(0, c.V, (2, c.T)); tgt = r.integers(0, c.V, (2, c.T))
     _, _, cache = forward(p, c, idx, tgt)
     g = backward(p, c, cache)
-    worst = 0
+    worst, n = 0.0, 0
     for name in p:
         flat = p[name].reshape(-1)
-        for j in rng.choice(flat.size, min(4, flat.size), replace=False):
+        for j in range(flat.size):
             old = flat[j]
             flat[j] = old + 1e-5; lp = forward(p, c, idx, tgt)[1]
             flat[j] = old - 1e-5; lm = forward(p, c, idx, tgt)[1]
@@ -264,7 +274,8 @@ def gradient_check():
             num = (lp - lm) / 2e-5
             ana = g[name].reshape(-1)[j]
             worst = max(worst, abs(num - ana) / max(1e-8, abs(num) + abs(ana)))
-    print(f"  检查了 {len(p)} 个参数张量，每个 4 个元素；最大相对误差 {worst:.2e}")
+            n += 1
+    print(f"  检查了 {len(p)} 个参数张量、全部 {n} 个元素；最大相对误差 {worst:.2e}")
 
 
 # ===========================================================================
@@ -397,8 +408,9 @@ def moe_routing_demo():
     print("MoE 路由：8 个 expert，每个 token 选 top-2，capacity factor 1.25")
     print("=" * 72)
     N, E, k, d = 8192, 8, 2, 64
-    X = rng.normal(0, 1, (N, d))
-    W = rng.normal(0, 0.1, (d, E))
+    r = np.random.default_rng(30)
+    X = r.normal(0, 1, (N, d))
+    W = r.normal(0, 0.1, (d, E))
     for name, bias in [("均衡的 router", np.zeros(E)), ("偏向前两个 expert 的 router", np.array([1.5, 1.0, 0, 0, 0, 0, 0, 0]))]:
         probs = softmax(X @ W + bias)
         top = np.argsort(-probs, axis=1)[:, :k]
@@ -445,13 +457,14 @@ def rope_extrapolation_demo():
 
 # ===========================================================================
 if __name__ == "__main__":
+    import sys
     t_start = time.time()
     gradient_check()
 
     print("\n" + "=" * 72)
     print("Byte-level BPE：在本书正文上训练，词表 512")
     print("=" * 72)
-    data = load_corpus()
+    data = load_corpus(rebuild="--rebuild-corpus" in sys.argv)
     t0 = time.time()
     tok = BPE(data, 512)
     ids = tok.train_ids
@@ -469,6 +482,7 @@ if __name__ == "__main__":
               " | ".join(show(tok.vocab[int(i)]) for i in e))
     assert tok.decode(tok.encode("测试 round trip：αβγ")) == "测试 round trip：αβγ"
 
+    rng = np.random.default_rng(10)                           # 每个实验用自己的随机种子，互不影响
     n = int(0.9 * len(ids))
     train_data, val_data = ids[:n], ids[n:]
     c = Config()
@@ -513,6 +527,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 72)
     print("去掉 causal mask：模型能看见答案")
     print("=" * 72)
+    rng = np.random.default_rng(20)
     q = init_params(c, seed=5)
     q = train(q, c, train_data, val_data, steps=200, causal=False)
     print(f"  训练 200 步。不带 mask 评估（训练时的样子）loss {evaluate(q, c, val_data, causal=False):.3f}；"
