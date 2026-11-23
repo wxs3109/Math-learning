@@ -67,6 +67,8 @@ PARTS = [
     ("附录", [
         ("appA", "appendix-a-math-quick-reference.md", "A", "数学速查",
          "一页讲完第 5、6 章要用的结论：交叉熵与 KL、最大似然、softmax、反向传播。"),
+        ("appC", "appendix-c-interview-questions.md", "C", "面试题清单",
+         "中英文面试题 366 道，按主题归类，每题标出本书哪一节能回答，并汇总还没覆盖的空白。"),
     ]),
 ]
 CHAPTERS = [c for _, cs in PARTS for c in cs]
@@ -149,7 +151,7 @@ def tag_html(label):
     return f'<span class="tag tag-{cls}">{label}</span>'
 
 
-NUM = r"([0-9A]+(?:\.\d+)+)"
+NUM = r"([0-9A-Z]+(?:\.\d+)+)"
 
 
 def postprocess(body, pid):
