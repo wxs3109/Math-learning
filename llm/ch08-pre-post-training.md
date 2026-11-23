@@ -26,7 +26,9 @@ API 背后的模型都是这样训练出来的。即使你不训练模型，也�
 
 **前置知识**
 
-最大似然与交叉熵（[2.2 节](ch02-statistics.md#2.2)、[5.2 节](ch05-language-model.md#5.2)）、KL 散度（[1.7 节](ch01-probability.md#1.7)）、SVD 与低秩近似（[3.5 节](ch03-linear-algebra.md#3.5)）、Adam（[4.7 节](ch04-calculus-optimization.md#4.7)）、反向传播（[4.8 节](ch04-calculus-optimization.md#4.8)）、量化（[17.8 节](ch17-inference-serving.md#17.8)）。强化学习只用到"策略梯度"一个公式，8.6 节会推。
+最大似然与交叉熵（[2.2 节](ch02-statistics.md#2.2)、[5.2 节](ch05-language-model.md#5.2)）、KL 散度（[1.7 节](ch01-probability.md#1.7)）、SVD 与低秩近似（[3.5 节](ch03-linear-algebra.md#3.5)）、Adam（[4.7 节](ch04-calculus-optimization.md#4.7)）、反向传播（[4.8 节](ch04-calculus-optimization.md#4.8)）、量化（[17.8 节](ch17-inference-serving.md#17.8)）。强化学习只用到策略梯度和重要性采样，8.6 节会推。
+
+本章有几处引用了后面的章节（量化在 17.8 节、模型并行在 17.10 节、评测在第 16 章）。第一次读可以先跳过这些地方，不影响主线。
 
 ## 8.1 从基座模型到助手 **[事实]**
 
@@ -104,9 +106,21 @@ $$N^*\propto C^{\beta/(\alpha+\beta)},\qquad D^*\propto C^{\alpha/(\alpha+\beta)
 
 **混合精度并不省模型状态**：多存了一份 FP32 主权重。它省的是**计算时间**（张量核心的 BF16 算力远高于 FP32）和**激活的显存**（激活用 BF16 存）。更新必须在 FP32 的主权重上做：学习率乘梯度往往远小于 BF16 在该权重处能分辨的最小差值，直接加到 BF16 权重上会被舍入掉。
 
-**FP16 和 BF16** **[事实]**：都是 16 位。
-- FP16：5 位指数、10 位尾数，范围小，小梯度会下溢成 0，需要 **loss scaling**：先把损失乘一个大数，反向后再除回来；
-- BF16：8 位指数、7 位尾数，范围和 FP32 一样，精度更低，但不需要 loss scaling。现在的大模型训练基本都用 BF16。
+**浮点数格式** **[事实]**：一个浮点数由符号位、指数位和尾数位组成，表示 $\pm1.\text{尾数}\times2^{\text{指数}}$。
+- **指数位**决定**范围**：能表示多大和多小的数；
+- **尾数位**决定**精度**：相邻两个可表示的数隔多远。相对间隔约为 $2^{-\text{尾数位数}}$。
+
+| 格式 | 符号 / 指数 / 尾数 | 最大值 | 相对精度 | 用在哪里 |
+|---|---|---|---|---|
+| FP32 | 1 / 8 / 23 | 约 $3.4\times10^{38}$ | 约 $10^{-7}$ | 主权重、优化器状态 |
+| BF16 | 1 / 8 / 7 | 约 $3.4\times10^{38}$ | 约 $8\times10^{-3}$ | 训练和推理的计算 |
+| FP16 | 1 / 5 / 10 | 65504 | 约 $10^{-3}$ | 较早的混合精度训练、推理 |
+| FP8（E4M3） | 1 / 4 / 3 | 448 | 约 $6\times10^{-2}$ | 新一代 GPU 上的训练和推理 |
+| INT8 / INT4 | 整数 | 127 / 7 | 均匀间隔 | 量化推理（[17.8 节](ch17-inference-serving.md#17.8)） |
+
+两个推论：
+- **FP16 范围小**：很小的梯度会下溢成 0，所以要 **loss scaling**：先把损失乘一个大数，反向后再除回来。BF16 的范围和 FP32 一样，不需要。现在的大模型训练基本都用 BF16；
+- **BF16 精度低**：相对精度只有约千分之八。一次更新 $\eta g$ 相对于权重往往只有 $10^{-5}$ 量级，直接加到 BF16 权重上会被舍入掉，这就是上面说"更新必须在 FP32 主权重上做"的原因。
 
 所以 8B 模型全参微调，光模型状态就要 $16\times 8\times10^9$ 字节，约 120 GiB，一张 80 GB 的卡放不下。
 
@@ -226,6 +240,10 @@ $$\nabla_\theta J=\sum_y R(y)\,\nabla_\theta\pi_\theta(y)=\mathbb E_{y\sim\pi_\t
 **减去基线不改变期望** **[已证]**：对任何不依赖 $y$ 的 $b$，
 $$\mathbb E_{y\sim\pi}\big[b\,\nabla\log\pi(y)\big]=b\sum_y\nabla\pi(y)=b\,\nabla\sum_y\pi(y)=b\,\nabla 1=0.$$
 所以可以用 $R(y)-b$ 代替 $R(y)$，期望不变，方差却可以小得多（8.11.5 节）。$R-b$ 叫**优势**（advantage）。PPO 用一个价值网络（critic）估计基线；8.8 节的 GRPO 改用同一组样本的平均分。
+
+**重要性采样** **[已证]**：想算 $\mathbb E_{y\sim p}[f(y)]$，手上却只有从另一个分布 $q$ 采来的样本。因为
+$$\mathbb E_{y\sim p}[f(y)]=\sum_yp(y)f(y)=\sum_yq(y)\frac{p(y)}{q(y)}f(y)=\mathbb E_{y\sim q}\Big[\frac{p(y)}{q(y)}f(y)\Big],$$
+只要给每个样本乘上权重 $p/q$ 就行。代价是：$p$ 和 $q$ 差得越远，权重越容易出现极大的值，估计的方差越大。
 
 **PPO** **[事实]**：用旧策略采一批样本后，想在这批样本上多更新几步。直接优化 $\rho_t A_t$（$\rho_t=\pi_\theta(y_t\mid\cdot)/\pi_{\text{old}}(y_t\mid\cdot)$ 是重要性权重，$A_t$ 是优势）会让策略一步走太远，样本就不再代表新策略了。PPO 优化
 $$\mathbb E_t\Big[\min\big(\rho_tA_t,\ \mathrm{clip}(\rho_t,1-\varepsilon,1+\varepsilon)\,A_t\big)\Big].$$

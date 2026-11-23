@@ -89,6 +89,22 @@ Llama-3-8B 是 $32/8=4$ FLOP/字节。**无论批多大，decode 阶段的注意
 
 **Prefill**：$T$ 个 token 一起算，矩阵乘法的强度约为 $T$。只要提示有几百个 token，prefill 就受限于**算力**。2048 个 token 的提示约 33 TFLOP，在 H100 上至少 33 ms。
 
+**FlashAttention：减少显存读写** **[事实 + 已证]**：GPU 的存储分两层：
+- **显存**（HBM）：几十 GB，就是上面带宽 $\beta$ 说的那一层；
+- **片上 SRAM**：每个计算单元只有一两百 KB，但读写速度快一个数量级以上。
+
+标准的注意力实现先算出 $T\times T$ 的打分矩阵，写回显存，再读出来做 softmax，再写回、再读出来乘 $V$。打分矩阵的读写量随 $T^2$ 增长，序列一长，时间主要花在搬数据上。
+
+FlashAttention 把 $Q,K,V$ 切成小块，每次只把一小块搬进 SRAM 算完，打分矩阵**从不完整地写回显存**。难点是 softmax 需要整行的最大值和总和，而一次只看到一块。解法是**在线 softmax**：对一行，依次处理各块，维护到目前为止的最大值 $m$、指数和 $\ell$、加权和 $o$。来了一块新的打分 $s_j$（对应 $v_j$）时：
+$$m'=\max\big(m,\max_js_j\big),\quad \ell'=e^{m-m'}\ell+\sum_je^{s_j-m'},\quad o'=e^{m-m'}o+\sum_je^{s_j-m'}v_j.$$
+全部处理完后，输出就是 $o/\ell$。
+
+正确性：按归纳法，任何时刻都有 $\ell=\sum_{\text{已处理}}e^{s_j-m}$ 和 $o=\sum_{\text{已处理}}e^{s_j-m}v_j$；换新的最大值时乘 $e^{m-m'}$ 正好把旧的项换算到新的基准上。最后
+$$\frac{o}{\ell}=\frac{\sum_je^{s_j}v_j}{\sum_je^{s_j}}=\sum_j\mathrm{softmax}(s)_jv_j.$$
+减去 $m$ 只是为了数值稳定（[4.3 节](ch04-calculus-optimization.md#4.3)），不改变结果。
+
+所以 FlashAttention **是精确计算，不是近似**：运算量不变，显存读写从 $O(T^2)$ 降到 $O(T)$ 量级，打分矩阵也不用存下来。训练时反向传播需要注意力矩阵，它选择重新算一遍，而不是存下来，这也是 [8.3 节](ch08-pre-post-training.md#8.3) 里"用 FlashAttention 时激活少了一大项"的原因。它主要加速 prefill 和训练；decode 时每步只有一个 query，瓶颈在读 KV cache。
+
 **这解释了几件"商业"现象** **[直觉]**：
 - **输出比输入贵**：输入在 prefill 里成批并行地算，GPU 满负荷；输出一个一个地生成，每个 token 都要读一遍权重和 KV。
 - **提示缓存便宜**：缓存命中就跳过了这一段的 prefill 计算。

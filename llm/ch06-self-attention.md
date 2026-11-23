@@ -22,7 +22,7 @@ Transformer 的回答是**自注意力**（self-attention）：每个位置按�
 
 ## 6.1 位置编码 **[事实]**
 
-注意力本身不区分顺序（见 6.2 的细节 3），所以要把"第几个位置"的信息加进去，即**位置编码**。最简单的做法是给每个位置一个向量，直接加到 token 的 embedding 上。
+注意力本身不区分顺序（见 6.2 的细节 3），所以要把"第几个位置"的信息加进去，即**位置编码**。最简单的做法是给每个位置一个向量，直接加到 token 的 embedding 上。现在的大模型多用另一种做法 RoPE：不加到输入上，而是在算注意力时旋转 query 和 key（6.3 节末尾）。
 
 ## 6.2 自注意力 **[事实 + 直觉]**
 
@@ -55,6 +55,27 @@ $$X\leftarrow X+\mathrm{MultiHeadAttention}(\mathrm{LN}(X)),\qquad X\leftarrow X
 - **残差连接**：让信息和梯度能直接穿过很多层，深层网络才训练得动。
 
 GPT 类模型就是把这样的块堆几十到上百层，最后接一个输出层，在每个位置得到下一个 token 的 logits，再用 [第 5 章](ch05-language-model.md) 的交叉熵损失训练。
+
+**归一化在做什么** **[事实]**：对每个位置的向量 $x\in\mathbb R^d$ 单独做（不跨位置、不跨样本）：
+$$\mathrm{LayerNorm}(x)=\gamma\odot\frac{x-\mu}{\sqrt{\sigma^2+\epsilon}}+\beta,\qquad \mu=\frac1d\sum_ix_i,\ \sigma^2=\frac1d\sum_i(x_i-\mu)^2.$$
+$\gamma,\beta$ 是可学习的。它把每层的输入拉回固定的尺度，训练更稳定。不用 BatchNorm 是因为它要在一批样本之间统计，而语言模型的序列长短不一，推理时又常常一次只有一个样本。
+
+**上面写的是 Pre-Norm** **[事实]**：归一化放在子层**之前**，残差那条路上不做归一化。原始 Transformer 用的是 Post-Norm：$X\leftarrow\mathrm{LN}(X+\mathrm{Sublayer}(X))$。Pre-Norm 的残差路径从输入一直通到输出，梯度可以不经过任何归一化直接传回去，层数很深时更容易训练，现在的大模型基本都用它。
+
+**真实的大模型在这个结构上做了哪些改动** **[事实 + 已证]**：第 8 章和第 17 章都以 Llama 3 为例，它和上面的结构有四处不同：
+
+1. **RMSNorm** 代替 LayerNorm：不减均值，也没有 $\beta$，
+$$\mathrm{RMSNorm}(x)=\gamma\odot\frac{x}{\sqrt{\frac1d\sum_ix_i^2+\epsilon}}.$$
+少算一个均值，效果相当。
+2. **SwiGLU 前馈层**：用三个矩阵代替两个，
+$$\mathrm{FFN}(x)=W_{\text{down}}\big(\mathrm{SiLU}(W_{\text{gate}}x)\odot W_{\text{up}}x\big),\qquad\mathrm{SiLU}(z)=z\,\sigma(z).$$
+一路算出"门"，逐元素乘到另一路上，控制哪些特征通过。中间维度 $d_{\text{ffn}}$ 取 $\frac83d$ 时，三个矩阵的参数量正好等于普通的"先放大 4 倍再缩回"的两层前馈；实际模型常取得更大一些（Llama-3-8B 是 3.5 倍）。第 8、17 章说的 gate、up、down 三个矩阵就是它们。
+3. **RoPE（旋转位置编码）**：不给输入加位置向量，而是把 query 和 key 的分量两两配对，看成平面上的点，位置 $m$ 处转 $m\theta_i$ 角（每一对用不同的频率 $\theta_i$）。它的好处是注意力打分**只依赖相对位置**。证明：设 $R(\phi)$ 是转角为 $\phi$ 的旋转矩阵，它满足 $R(a)^\top R(b)=R(b-a)$，于是
+$$\big(R(m\theta)q\big)^\top\big(R(n\theta)k\big)=q^\top R(m\theta)^\top R(n\theta)k=q^\top R\big((n-m)\theta\big)k,$$
+只和 $n-m$ 有关。每一对分量都是如此，加起来也是。
+4. **分组查询注意力（GQA）**：多个查询头共用一组 K、V，KV cache 变小几倍（[17.9 节](ch17-inference-serving.md#17.9)）。
+
+另外，输入的 embedding 矩阵和输出层的矩阵各是 $V\times d$，词表大时它们占参数量的不小一部分。按这些结构数一遍参数量，见 [17.2 节](ch17-inference-serving.md#17.2)。第 7 章会把这些都写成代码。
 
 ## 6.4 由结构直接推出的几个现象 **[直觉]**
 

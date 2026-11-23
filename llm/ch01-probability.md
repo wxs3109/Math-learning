@@ -161,6 +161,12 @@ $$D_{\mathrm{KL}}(p\|q)=\mathbb E_p\Big[-\log\frac{q(x)}{p(x)}\Big]\ \ge\ -\log\
 - $D_{\mathrm{KL}}(p\|q)$ 在 $p>0$ 而 $q\approx0$ 的地方惩罚极重，所以最小化它的 $q$ 会尽量**覆盖** $p$ 的所有模式；
 - $D_{\mathrm{KL}}(q\|p)$ 则倾向于让 $q$ **只抓住** $p$ 的一个模式。
 
+**总变差距离** **[事实 + 已证]**：另一种衡量两个分布差多远的方式，
+$$\mathrm{TV}(p,q)=\frac12\sum_x|p(x)-q(x)|=\max_{A}\,|p(A)-q(A)|,$$
+即"任何一个事件，在两个分布下的概率最多差多少"。它是对称的，取值在 0 到 1 之间。两个常用的事实：
+- $\sum_x\min(p(x),q(x))=1-\mathrm{TV}(p,q)$。证明：$\min(a,b)=\frac{a+b-|a-b|}{2}$，对 $x$ 求和即得。投机解码的接受率就是这个量（[17.7 节](ch17-inference-serving.md#17.7)）；
+- **Pinsker 不等式**：$\mathrm{TV}(p,q)\le\sqrt{D_{\mathrm{KL}}(p\|q)/2}$。KL 小，总变差一定小；反过来不成立。
+
 **互信息**：知道 $Y$ 之后，$X$ 的不确定性减少了多少：
 $$I(X;Y)=H(X)-H(X\mid Y)=D_{\mathrm{KL}}\big(p(x,y)\,\|\,p(x)p(y)\big)\ge0.$$
 等于 0 当且仅当 $X,Y$ 独立。和协方差不同，互信息能检测任何形式的依赖。

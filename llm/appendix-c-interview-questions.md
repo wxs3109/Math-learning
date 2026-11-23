@@ -56,10 +56,10 @@
 
 ### C.2.2 Tokenizer 与 embedding
 
-1. ★ token 是什么？token 数为什么同时影响费用和上下文上限？ —— ◐ [5.1 节](ch05-language-model.md#5.1)、[16.8 节](ch16-evals-production.md#16.8)
-2. ★ BPE、WordPiece、SentencePiece、Unigram 有什么区别？ —— ○（计划第 7 章）
+1. ★ token 是什么？token 数为什么同时影响费用和上下文上限？ —— ✅ [5.1 节](ch05-language-model.md#5.1)、[16.8 节](ch16-evals-production.md#16.8)
+2. ★ BPE、WordPiece、SentencePiece、Unigram 有什么区别？ —— ◐ [5.1 节](ch05-language-model.md#5.1)（BPE 的原理；其他算法和实现计划第 7 章）
 3. 手写 BPE 的训练和编码过程。 —— ○（计划第 7 章）
-4. 分词器把专业术语切成没有意义的碎片，会带来什么问题，怎么办？ —— ○（计划第 7 章）
+4. 分词器把专业术语切成没有意义的碎片，会带来什么问题，怎么办？ —— ◐ [5.1 节](ch05-language-model.md#5.1)
 5. 中文分词和英文分词有什么不同？词表大小怎么定？ —— ○（计划第 7 章）
 6. embedding 是什么？语义相似在向量上是什么意思？ —— ✅ [5.4 节](ch05-language-model.md#5.4)、[15.4 节](ch15-rag.md#15.4)
 7. 余弦相似度、点积、欧氏距离的区别是什么？归一化之后有什么关系？ —— ✅ [3.1 节](ch03-linear-algebra.md#3.1)、[15.4 节](ch15-rag.md#15.4)
@@ -74,21 +74,21 @@
 5. 自注意力和交叉注意力有什么区别？ —— ◐ [6.2 节](ch06-self-attention.md#6.2)
 6. 注意力的时间和空间复杂度是多少？长文本时怎么降？ —— ◐ [6.4 节](ch06-self-attention.md#6.4)、[17.9 节](ch17-inference-serving.md#17.9)
 7. ★ MHA、MQA、GQA、MLA 的区别是什么？为什么它们都围绕 KV cache 展开？ —— ✅ [17.9 节](ch17-inference-serving.md#17.9)
-8. ★ 为什么需要位置编码？正弦位置编码、可学习位置编码、RoPE 各有什么特点？ —— ◐ [6.1 节](ch06-self-attention.md#6.1)（RoPE 只提到）
-9. ★ RoPE 的原理是什么？为什么它能表达相对位置？ —— ○（计划第 7 章）
+8. ★ 为什么需要位置编码？正弦位置编码、可学习位置编码、RoPE 各有什么特点？ —— ✅ [6.1 节](ch06-self-attention.md#6.1)、[6.3 节](ch06-self-attention.md#6.3)
+9. ★ RoPE 的原理是什么？为什么它能表达相对位置？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 10. 长上下文外推：位置插值、NTK-aware、YaRN 分别做了什么？ —— ○
 11. 滑动窗口注意力、attention sink 是什么？ —— ○（计划第 17 章补充）
-12. FlashAttention 为什么快？它减少了计算还是减少了显存读写？ —— ○（计划第 17 章补充）
+12. FlashAttention 为什么快？它减少了计算还是减少了显存读写？ —— ✅ [17.3 节](ch17-inference-serving.md#17.3)
 
 ### C.2.4 Transformer 块与架构变体
 
 1. ★ 画出一个 decoder-only Transformer 块，讲清楚一次前向传播的每一步和张量形状。 —— ✅ [6.3 节](ch06-self-attention.md#6.3)、[3.8 节](ch03-linear-algebra.md#3.8)
 2. ★ encoder-only、decoder-only、encoder-decoder 的区别？为什么现在的大模型几乎都是 decoder-only？ —— ◐ [6.3 节](ch06-self-attention.md#6.3)
-3. ★ LayerNorm、RMSNorm、BatchNorm 的区别？为什么大模型不用 BatchNorm？ —— ○（计划第 7 章）
-4. ★ Pre-Norm 和 Post-Norm 有什么区别？各自的训练稳定性如何？ —— ◐ [6.3 节](ch06-self-attention.md#6.3)
+3. ★ LayerNorm、RMSNorm、BatchNorm 的区别？为什么大模型不用 BatchNorm？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
+4. ★ Pre-Norm 和 Post-Norm 有什么区别？各自的训练稳定性如何？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 5. 残差连接为什么让深层网络训练得动？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)、[4.8 节](ch04-calculus-optimization.md#4.8)
-6. FFN 在 Transformer 里起什么作用？SwiGLU 相比 ReLU 有什么好处？ —— ◐ [6.3 节](ch06-self-attention.md#6.3)（SwiGLU 未讲）
-7. 给定层数、隐藏维度、词表大小，估算模型参数量。 —— ◐ [17.2 节](ch17-inference-serving.md#17.2)（计划第 7 章给出完整推导）
+6. FFN 在 Transformer 里起什么作用？SwiGLU 相比 ReLU 有什么好处？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
+7. 给定层数、隐藏维度、词表大小，估算模型参数量。 —— ✅ [17.2 节](ch17-inference-serving.md#17.2)、[6.3 节](ch06-self-attention.md#6.3)
 8. ★ MoE（混合专家）是什么？稠密模型和稀疏模型怎么比较？负载均衡怎么做？ —— ○
 9. 介绍 DeepSeek 系列模型在架构上的改动（MLA、MoE、多 token 预测）。 —— ◐ [17.9 节](ch17-inference-serving.md#17.9)
 10. 扩散语言模型和自回归模型有什么不同？ —— ○
@@ -183,7 +183,7 @@
 
 1. ★ 投机解码的原理是什么？为什么输出分布不变？接受率怎么算？ —— ✅ [17.7 节](ch17-inference-serving.md#17.7)
 2. Medusa、EAGLE、n-gram 投机分别怎么产生草稿？ —— ◐ [17.7 节](ch17-inference-serving.md#17.7)
-3. ★ INT8、INT4、FP8、BF16 各有什么取舍？量化损失了什么？ —— ✅ [17.8 节](ch17-inference-serving.md#17.8)
+3. ★ INT8、INT4、FP8、BF16 各有什么取舍？量化损失了什么？ —— ✅ [17.8 节](ch17-inference-serving.md#17.8)、[8.3 节](ch08-pre-post-training.md#8.3)
 4. ★ 权重量化和激活量化有什么区别？为什么激活更难量化（离群值）？ —— ✅ [17.8 节](ch17-inference-serving.md#17.8)
 5. GPTQ、AWQ、SmoothQuant 分别怎么做？ —— ✅ [17.8 节](ch17-inference-serving.md#17.8)
 6. PTQ 和 QAT 的区别？低比特下为什么会突然崩？ —— ◐ [17.8 节](ch17-inference-serving.md#17.8)
@@ -543,11 +543,11 @@
 
 ## C.15 覆盖情况与补课顺序 **[经验]**
 
-上面一共 366 道题，其中 128 道标了 ★。按标记数：✅ 147 道，◐ 106 道，○ 106 道，其余 7 道是行为题。（第 8 章写完后更新；之前是 ✅ 119、◐ 97、○ 143。）按类别：
+上面一共 366 道题，其中 128 道标了 ★。按标记数：✅ 155 道，◐ 103 道，○ 101 道，其余 7 道是行为题。（第 8 章和一轮衔接补充之后更新；最初是 ✅ 119、◐ 97、○ 143。）按类别：
 
 | 类别 | 题数 | ✅ | ◐ | ○ | 主要空白 |
 |---|---|---|---|---|---|
-| C.2 基础与 Transformer | 43 | 15 | 13 | 15 | RoPE、tokenizer、归一化、FlashAttention、MoE |
+| C.2 基础与 Transformer | 43 | 23 | 10 | 10 | tokenizer 的实现、长上下文外推、MoE、涌现 |
 | C.3 训练与微调 | 29 | 19 | 9 | 1 | 多机容错 |
 | C.4 对齐与强化学习 | 20 | 11 | 5 | 4 | RLAIF 与 Constitutional AI、对齐税、拒绝采样 |
 | C.5 推理与部署 | 31 | 19 | 8 | 4 | 框架对比、端侧推理 |
@@ -564,7 +564,7 @@
 1. **工程实践部分（第 9–17 章）覆盖得最好**。RAG、agent、MCP、推理这几类高频题，大部分已经能在书里找到原理和数字。
 2. **训练和对齐（C.3、C.4）已由第 8 章补上**，剩下的是 RLAIF、对齐税这类概念题和多机训练的容错。
 3. **AI 前端（C.10）是现在最大的空白**，而且和你的背景最贴近：这些题本质上是前端工程问题加上一点对自回归生成的理解，补起来成本低、区分度高。第 18 章的项目会把它做出来。
-4. **第 7 章（动手训练一个小 GPT）能一次补上手撕代码里的大半**：多头注意力、KV cache、RoPE、RMSNorm、BPE、采样，都可以在同一份代码里实现。
+4. **第 7 章（动手训练一个小 GPT）能一次补上手撕代码里的大半**（原理已在 5.1、6.3 节补上，第 7 章负责写成代码）：多头注意力、KV cache、RoPE、RMSNorm、BPE、采样，都可以在同一份代码里实现。
 5. 系统设计题不需要新章节，需要的是练习：拿 C.11 里的题，按"需求 → 架构图 → 关键数字 → 失效方式 → 评测"的顺序各写一页。
 
 **建议的补课顺序**（按 AI 工程岗的路线）：
@@ -573,7 +573,7 @@
 |---|---|---|
 | 已完成 | 第 8 章：预训练与后训练 | C.3、C.4 的大部分 |
 | 1 | 第 18 章的项目，含 AI 前端和真实 API | C.10、C.12.2 的重试与限流、C.14 的项目介绍、C.7 的查询改写与引用 |
-| 2 | 第 7 章：动手训练一个小 GPT | C.2 的 RoPE、tokenizer、归一化；C.12.1 的大部分 |
+| 2 | 第 7 章：动手训练一个小 GPT | C.2 的 tokenizer 实现；C.12.1 的大部分 |
 | 3 | 系统设计练习，贯穿全程 | C.11 |
 | 4 | Agent 深入（记忆、多 agent、A2A） | C.8.3、C.8.4 |
 | 5 | 数据与检索基础设施、评测工程、安全 | C.7.5、C.9 的剩余部分 |
