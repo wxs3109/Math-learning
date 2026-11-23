@@ -329,5 +329,130 @@ def fig_rope():
     f.save()
 
 
+# ---------------------------------------------------------------------------
+# 图：三个矩阵从哪来（X → Q、K、V），以及一个算到底的小例子
+# ---------------------------------------------------------------------------
+import numpy as np
+
+EX_TOK = ["我", "养", "猫"]
+EX_X = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [1, 0, 0, 0]], float)
+EX_W = {
+    "Q": np.array([[1, 0], [0, 1], [1, 0], [0, 1]], float) * 0.5,
+    "K": np.array([[0, 1], [1, 0], [0, 1], [1, 0]], float),
+    "V": np.array([[2, 0], [0, 0], [0, 0], [0, 2]], float),
+}
+CLS = {"Q": "q", "K": "k", "V": "v"}
+
+
+def example():
+    Q, K, V = (EX_X @ EX_W[n] for n in "QKV")
+    S = Q @ K.T / math.sqrt(2)
+    Z = S + np.triu(np.full((3, 3), -np.inf), 1)
+    P = np.exp(Z - Z.max(1, keepdims=True)); P /= P.sum(1, keepdims=True)
+    return Q, K, V, S, P, P @ V
+
+
+def num(v):
+    if v == -np.inf:
+        return "−∞"
+    s = f"{v:.2f}".rstrip("0").rstrip(".")
+    return "0" if s in ("-0", "") else s.replace("-", "−")
+
+
+def matrix(f, x, y, A, c, cls="box", op=0.18, size=12, hl_row=None, shade=None, upper_mask=False):
+    r, k = A.shape
+    for i in range(r):
+        for j in range(k):
+            o = op if shade is None else shade(i, j)
+            cc = "mask" if (A[i, j] == -np.inf or (upper_mask and j > i)) else cls
+            f.rect(x + j * c, y + i * c, c, c, cc, 0, f'opacity="{o:.2f}"')
+            f.text(x + j * c + c / 2, y + i * c + c / 2 + 4.5, num(A[i, j]), size)
+    f.rect(x, y, k * c, r * c, "frame", 2)
+    if hl_row is not None:
+        f.rect(x - 2, y + hl_row * c - 2, k * c + 4, c + 4, "frame", 3, 'style="stroke:#cf3b25;stroke-width:2.2"')
+
+
+def fig_projection():
+    f = Fig("ch06-projection", 760, 612)
+    Q, K, V, *_ = example()
+    c = 30
+    f.text(380, 28, "self-attention 的第一步：同一个 X 乘三个不同的参数矩阵", 16, weight="bold")
+    f.text(380, 50, "例子：T = 3 个 token，d_{model} = 4，每个 head 的维数 d = 2", 13, "t mu")
+    # X
+    xx, xy = 70, 262
+    matrix(f, xx, xy, EX_X, c, "box", 1.0, hl_row=2)
+    for i, t in enumerate(EX_TOK):
+        f.text(xx - 14, xy + i * c + c / 2 + 5, t, 14, weight="bold", anchor="end")
+    f.text(xx + 2 * c, xy - 12, "X（T × d_{model} = 3 × 4）", 13, weight="bold")
+    f.text(xx + 2 * c, xy + 3 * c + 22, "每一行是一个 token 的向量", 12, "t mu")
+    f.text(xx + 2 * c, xy + 3 * c + 40, "（embedding，或前一层的输出）", 12, "t mu")
+    rows = [(80, "Q", "W_{Q}", "query：我在找什么"), (250, "K", "W_{K}", "key：我这里有什么"), (420, "V", "W_{V}", "value：被选中时交出的内容")]
+    for y, n, wl, meaning in rows:
+        out = {"Q": Q, "K": K, "V": V}[n]
+        f.path(f"M{xx + 4 * c + 6},{xy + 1.5 * c} C{xx + 4 * c + 50},{xy + 1.5 * c} {290},{y + 2 * c} {306},{y + 2 * c}", "ln", arrow=True)
+        wx = 330
+        f.text(wx - 4, y + 2 * c + 7, "×", 20, anchor="end")
+        matrix(f, wx + 6, y, EX_W[n], c, CLS[n], 0.22)
+        f.text(wx + 6 + c, y - 10, f"{wl}（4 × 2）", 13, weight="bold")
+        f.text(wx + 6 + 2 * c + 22, y + 2 * c + 7, "=", 20)
+        ox = wx + 6 + 2 * c + 44
+        oy = y + c / 2
+        matrix(f, ox, oy, out, c, CLS[n], 0.45, hl_row=2)
+        f.text(ox + c, oy - 10, f"{n}（3 × 2）", 13, weight="bold")
+        f.text(ox + 2 * c + 16, oy + c + 4, meaning, 13, anchor="start")
+        f.text(ox + 2 * c + 16, oy + 2 * c + 2, f"第 t 行就是 {n.lower()}_{{t}}", 12, "t mu", anchor="start")
+    f.rect(20, 562, 720, 40, "box", 6)
+    f.text(380, 580, "W_{Q}、W_{K}、W_{V} 是参数：训练学出来，所有位置共用同一份，大小和 T 无关。", 12)
+    f.text(380, 596, "Q、K、V 是中间结果：换一句输入就全变。红框：「猫」那一行只由 X 的第 3 行算出。", 12)
+    f.save()
+
+
+def fig_example():
+    f = Fig("ch06-example", 760, 330)
+    Q, K, V, S, P, O = example()
+    c = 40
+    y = 92
+    f.text(380, 28, "接着算完：打分 → mask → softmax → 加权读取 value", 16, weight="bold")
+    f.text(380, 50, "接上图的 Q、K、V，d = 2，所以打分要除以 √2", 13, "t mu")
+    x = 40
+    for i, t in enumerate(EX_TOK):
+        f.text(x - 8, y + i * c + c / 2 + 5, t, 13, weight="bold", anchor="end")
+    for j, t in enumerate(EX_TOK):
+        f.text(x + j * c + c / 2, y - 8, t, 12, "t mu")
+    matrix(f, x, y, S, c, "acc", 0.15)
+    f.text(x + 1.5 * c, y + 3 * c + 22, "S = QK^{⊤} / √d", 13, weight="bold")
+    f.text(x + 1.5 * c, y + 3 * c + 40, "第 t 行第 s 列：q_{t}·k_{s} / √d", 11, "t mu")
+    x += 3 * c + 12
+    f.line(x, y + 1.5 * c, x + 40, y + 1.5 * c, "ln", arrow=True); f.text(x + 20, y + 1.5 * c - 8, "+ M", 12, "t mu")
+    x += 52
+    Z = S + np.triu(np.full((3, 3), -np.inf), 1)
+    matrix(f, x, y, Z, c, "acc", 0.15, shade=lambda i, j: 1.0 if j > i else 0.15)
+    f.text(x + 1.5 * c, y + 3 * c + 22, "加上 causal mask", 13, weight="bold")
+    f.text(x + 1.5 * c, y + 3 * c + 40, "s > t 的位置变成 −∞", 11, "t mu")
+    x += 3 * c + 12
+    f.line(x, y + 1.5 * c, x + 40, y + 1.5 * c, "ln", arrow=True); f.text(x + 20, y + 1.5 * c - 8, "softmax", 11, "t mu")
+    x += 52
+    matrix(f, x, y, P, c, "acc", 0, shade=lambda i, j: 0.6 if j > i else 0.08 + 0.7 * P[i, j], hl_row=2, upper_mask=True)
+    f.text(x + 1.5 * c, y + 3 * c + 22, "P：每行和为 1", 13, weight="bold")
+    f.text(x + 1.5 * c, y + 3 * c + 40, "第 t 行 = 位置 t 的注意力分配", 11, "t mu")
+    px = x
+    x += 3 * c + 8
+    f.text(x + 6, y + 1.5 * c + 7, "·", 22)
+    x += 18
+    matrix(f, x, y, V, c * 0.8, "v", 0.4, size=11)
+    f.text(x + 0.8 * c, y + 2.4 * c + 22, "V", 13, weight="bold")
+    x += 1.6 * c + 8
+    f.text(x + 6, y + 1.5 * c, "=", 18)
+    x += 22
+    matrix(f, x, y, O, c * 0.8 + 4, "v", 0.6, size=11, hl_row=2)
+    f.text(x + 0.8 * c + 4, y + 2.4 * c + 34, "输出 O", 13, weight="bold")
+    o = O[2]
+    f.rect(20, 262, 720, 56, "box", 6)
+    f.text(380, 283, f"「猫」那一行：o_{{3}} = {P[2,0]:.2f}·v_{{1}} + {P[2,1]:.2f}·v_{{2}} + {P[2,2]:.2f}·v_{{3}} "
+                     f"= {P[2,0]:.2f}·[2, 0] + {P[2,1]:.2f}·[0, 2] + {P[2,2]:.2f}·[2, 0] = [{o[0]:.2f}, {o[1]:.2f}]", 13, weight="bold")
+    f.text(380, 305, "第 1 行只能看自己，权重必然是 1；第 3 行能看三个位置，「养」的打分最高，拿到约一半的权重。（P 显示的是四舍五入后的值）", 12, "t mu")
+    f.save()
+
+
 if __name__ == "__main__":
-    fig_qkv(); fig_matrix(); fig_multihead(); fig_block(); fig_rope()
+    fig_projection(); fig_qkv(); fig_matrix(); fig_example(); fig_multihead(); fig_block(); fig_rope()

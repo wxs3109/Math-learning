@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 612" width="760" height="612" role="img">
+<style>
+.bg{fill:var(--paper,#fbfbfa)}
+.t{fill:var(--ink,#161c28);font-family:var(--font-body,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif)}
+.mu{fill:var(--muted,#586172)}
+.ln{stroke:var(--muted,#586172);fill:none;stroke-width:1.4}
+.lnb{stroke:var(--ink,#161c28);fill:none;stroke-width:3}
+.box{fill:var(--wash,#f1f2f4);stroke:var(--rule,#c9cdd4);stroke-width:1}
+.frame{fill:none;stroke:var(--rule,#c9cdd4);stroke-width:1}
+.q{fill:#cf3b25}.qs{stroke:#cf3b25}
+.k{fill:#d99a0b}.ks{stroke:#d99a0b}
+.v{fill:#2f6fb5}.vs{stroke:#2f6fb5}
+.acc{fill:var(--accent,#cf3b25)}
+.mask{fill:var(--rule,#d5d8dd)}
+.wh{fill:#ffffff}
+</style>
+<defs><marker id="ah-ch06-projection" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mu"/></marker></defs>
+<rect width="100%" height="100%" class="bg"/>
+<text x="380.0" y="28.0" font-size="16" text-anchor="middle" class="t" font-weight="bold" >self-attention 的第一步：同一个 X 乘三个不同的参数矩阵</text>
+<text x="380.0" y="50.0" font-size="13" text-anchor="middle" class="t mu" >例子：T = 3 个 token，d<tspan baseline-shift="sub" font-size="75%">model</tspan> = 4，每个 head 的维数 d = 2</text>
+<rect x="70.0" y="262.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="85.0" y="281.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="100.0" y="262.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="115.0" y="281.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="130.0" y="262.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="145.0" y="281.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="160.0" y="262.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="175.0" y="281.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="70.0" y="292.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="85.0" y="311.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="100.0" y="292.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="115.0" y="311.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="130.0" y="292.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="145.0" y="311.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="160.0" y="292.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="175.0" y="311.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="70.0" y="322.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="85.0" y="341.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="100.0" y="322.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="115.0" y="341.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="130.0" y="322.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="145.0" y="341.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="160.0" y="322.0" width="30.0" height="30.0" rx="0" class="box" opacity="1.00"/>
+<text x="175.0" y="341.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="70.0" y="262.0" width="120.0" height="90.0" rx="2" class="frame" />
+<rect x="68.0" y="320.0" width="124.0" height="34.0" rx="3" class="frame" style="stroke:#cf3b25;stroke-width:2.2"/>
+<text x="56.0" y="282.0" font-size="14" text-anchor="end" class="t" font-weight="bold" >我</text>
+<text x="56.0" y="312.0" font-size="14" text-anchor="end" class="t" font-weight="bold" >养</text>
+<text x="56.0" y="342.0" font-size="14" text-anchor="end" class="t" font-weight="bold" >猫</text>
+<text x="130.0" y="250.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >X（T × d<tspan baseline-shift="sub" font-size="75%">model</tspan> = 3 × 4）</text>
+<text x="130.0" y="374.0" font-size="12" text-anchor="middle" class="t mu" >每一行是一个 token 的向量</text>
+<text x="130.0" y="392.0" font-size="12" text-anchor="middle" class="t mu" >（embedding，或前一层的输出）</text>
+<path d="M196,307.0 C240,307.0 290,140 306,140" class="ln" marker-end="url(#ah-ch06-projection)" />
+<text x="326.0" y="147.0" font-size="20" text-anchor="end" class="t" >×</text>
+<rect x="336.0" y="80.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="351.0" y="99.5" font-size="12" text-anchor="middle" class="t" >0.5</text>
+<rect x="366.0" y="80.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="381.0" y="99.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="110.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="351.0" y="129.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="110.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="381.0" y="129.5" font-size="12" text-anchor="middle" class="t" >0.5</text>
+<rect x="336.0" y="140.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="351.0" y="159.5" font-size="12" text-anchor="middle" class="t" >0.5</text>
+<rect x="366.0" y="140.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="381.0" y="159.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="170.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="351.0" y="189.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="170.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.22"/>
+<text x="381.0" y="189.5" font-size="12" text-anchor="middle" class="t" >0.5</text>
+<rect x="336.0" y="80.0" width="60.0" height="120.0" rx="2" class="frame" />
+<text x="366.0" y="70.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >W<tspan baseline-shift="sub" font-size="75%">Q</tspan>（4 × 2）</text>
+<text x="418.0" y="147.0" font-size="20" text-anchor="middle" class="t" >=</text>
+<rect x="440.0" y="95.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.45"/>
+<text x="455.0" y="114.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="470.0" y="95.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.45"/>
+<text x="485.0" y="114.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="440.0" y="125.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.45"/>
+<text x="455.0" y="144.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="470.0" y="125.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.45"/>
+<text x="485.0" y="144.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="440.0" y="155.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.45"/>
+<text x="455.0" y="174.5" font-size="12" text-anchor="middle" class="t" >0.5</text>
+<rect x="470.0" y="155.0" width="30.0" height="30.0" rx="0" class="q" opacity="0.45"/>
+<text x="485.0" y="174.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="440.0" y="95.0" width="60.0" height="90.0" rx="2" class="frame" />
+<rect x="438.0" y="153.0" width="64.0" height="34.0" rx="3" class="frame" style="stroke:#cf3b25;stroke-width:2.2"/>
+<text x="470.0" y="85.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >Q（3 × 2）</text>
+<text x="516.0" y="129.0" font-size="13" text-anchor="start" class="t" >query：我在找什么</text>
+<text x="516.0" y="157.0" font-size="12" text-anchor="start" class="t mu" >第 t 行就是 q<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
+<path d="M196,307.0 C240,307.0 290,310 306,310" class="ln" marker-end="url(#ah-ch06-projection)" />
+<text x="326.0" y="317.0" font-size="20" text-anchor="end" class="t" >×</text>
+<rect x="336.0" y="250.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="351.0" y="269.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="250.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="381.0" y="269.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="336.0" y="280.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="351.0" y="299.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="366.0" y="280.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="381.0" y="299.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="310.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="351.0" y="329.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="310.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="381.0" y="329.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="336.0" y="340.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="351.0" y="359.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="366.0" y="340.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.22"/>
+<text x="381.0" y="359.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="250.0" width="60.0" height="120.0" rx="2" class="frame" />
+<text x="366.0" y="240.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >W<tspan baseline-shift="sub" font-size="75%">K</tspan>（4 × 2）</text>
+<text x="418.0" y="317.0" font-size="20" text-anchor="middle" class="t" >=</text>
+<rect x="440.0" y="265.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.45"/>
+<text x="455.0" y="284.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="470.0" y="265.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.45"/>
+<text x="485.0" y="284.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="440.0" y="295.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.45"/>
+<text x="455.0" y="314.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="470.0" y="295.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.45"/>
+<text x="485.0" y="314.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="440.0" y="325.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.45"/>
+<text x="455.0" y="344.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="470.0" y="325.0" width="30.0" height="30.0" rx="0" class="k" opacity="0.45"/>
+<text x="485.0" y="344.5" font-size="12" text-anchor="middle" class="t" >1</text>
+<rect x="440.0" y="265.0" width="60.0" height="90.0" rx="2" class="frame" />
+<rect x="438.0" y="323.0" width="64.0" height="34.0" rx="3" class="frame" style="stroke:#cf3b25;stroke-width:2.2"/>
+<text x="470.0" y="255.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >K（3 × 2）</text>
+<text x="516.0" y="299.0" font-size="13" text-anchor="start" class="t" >key：我这里有什么</text>
+<text x="516.0" y="327.0" font-size="12" text-anchor="start" class="t mu" >第 t 行就是 k<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
+<path d="M196,307.0 C240,307.0 290,480 306,480" class="ln" marker-end="url(#ah-ch06-projection)" />
+<text x="326.0" y="487.0" font-size="20" text-anchor="end" class="t" >×</text>
+<rect x="336.0" y="420.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="351.0" y="439.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="366.0" y="420.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="381.0" y="439.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="450.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="351.0" y="469.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="450.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="381.0" y="469.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="480.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="351.0" y="499.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="480.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="381.0" y="499.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="336.0" y="510.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="351.0" y="529.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="366.0" y="510.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.22"/>
+<text x="381.0" y="529.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="336.0" y="420.0" width="60.0" height="120.0" rx="2" class="frame" />
+<text x="366.0" y="410.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >W<tspan baseline-shift="sub" font-size="75%">V</tspan>（4 × 2）</text>
+<text x="418.0" y="487.0" font-size="20" text-anchor="middle" class="t" >=</text>
+<rect x="440.0" y="435.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.45"/>
+<text x="455.0" y="454.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="470.0" y="435.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.45"/>
+<text x="485.0" y="454.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="440.0" y="465.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.45"/>
+<text x="455.0" y="484.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="470.0" y="465.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.45"/>
+<text x="485.0" y="484.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="440.0" y="495.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.45"/>
+<text x="455.0" y="514.5" font-size="12" text-anchor="middle" class="t" >2</text>
+<rect x="470.0" y="495.0" width="30.0" height="30.0" rx="0" class="v" opacity="0.45"/>
+<text x="485.0" y="514.5" font-size="12" text-anchor="middle" class="t" >0</text>
+<rect x="440.0" y="435.0" width="60.0" height="90.0" rx="2" class="frame" />
+<rect x="438.0" y="493.0" width="64.0" height="34.0" rx="3" class="frame" style="stroke:#cf3b25;stroke-width:2.2"/>
+<text x="470.0" y="425.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >V（3 × 2）</text>
+<text x="516.0" y="469.0" font-size="13" text-anchor="start" class="t" >value：被选中时交出的内容</text>
+<text x="516.0" y="497.0" font-size="12" text-anchor="start" class="t mu" >第 t 行就是 v<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
+<rect x="20.0" y="562.0" width="720.0" height="40.0" rx="6" class="box" />
+<text x="380.0" y="580.0" font-size="12" text-anchor="middle" class="t" >W<tspan baseline-shift="sub" font-size="75%">Q</tspan>、W<tspan baseline-shift="sub" font-size="75%">K</tspan>、W<tspan baseline-shift="sub" font-size="75%">V</tspan> 是参数：训练学出来，所有位置共用同一份，大小和 T 无关。</text>
+<text x="380.0" y="596.0" font-size="12" text-anchor="middle" class="t" >Q、K、V 是中间结果：换一句输入就全变。红框：「猫」那一行只由 X 的第 3 行算出。</text>
+</svg>
