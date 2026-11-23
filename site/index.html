@@ -7810,7 +7810,18 @@ const nav = $("nav"), main = $("main"), toc = $("toc"), pager = $("pager"), inpu
 let heads = [];
 
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-function current() { const h = location.hash.slice(1); return byId[h] ? h : "home"; }
+/* 记住上次读到的页面和滚动位置：在 claude.ai 里刷新时，外层页面拿不到 iframe 里的 #地址，只能靠本地存储恢复 */
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem("ml:" + k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem("ml:" + k, JSON.stringify(v)); } catch (e) {} },
+};
+function current() {
+  const h = location.hash.slice(1);
+  if (byId[h]) return h;
+  if (h) return "home";
+  const last = store.get("last");
+  return last && byId[last] ? last : "home";
+}
 
 /* 侧栏导航：按分组列出页面，代码收进可展开的一组 */
 function buildNav() {
@@ -7841,9 +7852,18 @@ function show(id) {
   buildToc(id);
   buildPager(id);
   document.title = (id === "home" ? "Math learning 笔记" : byId[id].short + " · Math learning");
-  main.scrollTop = 0;
+  const pos = store.get("pos") || {};
+  main.scrollTop = restoring && pos[id] ? pos[id] : 0;
+  restoring = false;
+  store.set("last", id);
+  spy();
   document.body.classList.remove("nav-open");
 }
+let restoring = true, saveTimer = 0;
+main.addEventListener("scroll", () => {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { const pos = store.get("pos") || {}; pos[current()] = Math.round(main.scrollTop); store.set("pos", pos); }, 250);
+}, { passive: true });
 
 /* 本页目录：点击滚动到标题；滚动时高亮当前小节 */
 function buildToc(id) {
