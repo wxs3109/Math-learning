@@ -71,6 +71,31 @@
 
 **术语**：工程和 AI 领域里大家平时就说英文的词，保留英文（prompt、tool calling、embedding、KV cache、speculative decoding、reward model……）；数学概念和已经通行的中文词用中文（概率、梯度、交叉熵、微调、预训练、蒸馏、量化）。
 
+## 推荐的学习顺序（AI 工程岗）
+
+这条路线是为"有扎实的数学基础、做过多年前端、目标是 AI 工程师 / AI 全栈"设计的。按每周 10 小时左右，大约 12 周。原则有三条：数学只补用得到的部分；尽早把模型从头写一遍；项目和读书并行，而不是读完再做。
+
+| 阶段 | 时间 | 读什么 | 做什么 | 这一阶段结束时应该能 |
+|---|---|---|---|---|
+| 1 数学速通 | 第 1 周 | [附录 A](appendix-a-math-quick-reference.md)；第 1–4 章只读 [1.7](ch01-probability.md#1.7)、[2.2](ch02-statistics.md#2.2)、[2.5](ch02-statistics.md#2.5)、[3.5](ch03-linear-algebra.md#3.5)、[3.7](ch03-linear-algebra.md#3.7)、[4.3](ch04-calculus-optimization.md#4.3)、[4.7](ch04-calculus-optimization.md#4.7)、[4.8](ch04-calculus-optimization.md#4.8) | 跑附录 A 和第 4 章的代码 | 说清楚"最大似然 = 交叉熵 = KL"、softmax 的梯度、Adam |
+| 2 模型本身 | 第 2–4 周 | [第 5 章](ch05-language-model.md) → [第 6 章](ch06-self-attention.md) → [第 7 章](ch07-tiny-gpt.md) | 跑第 7 章的代码；自己改一处再跑（比如把 GQA 改回普通 multi-head attention、去掉 RoPE），看 loss 和 gradient check | 不看书手写 attention、KV cache、RMSNorm、采样；估算任意模型的参数量和 KV cache |
+| 3 应用核心 | 第 5–7 周 | [第 9 章](ch09-prompt-engineering.md) → [第 10 章](ch10-tool-calling.md) → [第 11 章](ch11-agent-harness.md) → [第 15 章](ch15-rag.md) → [第 16 章](ch16-evals-production.md) | 同时开始 [第 18 章](ch18-project-design.md) 的 M0、M1：骨架、模型网关、流式前端、问书 | 讲清楚 agent 循环和 harness；RAG 的每一步和评测；项目能流式问答、带出处 |
+| 4 生态工具 | 第 6–8 周，随项目需要穿插 | [第 12 章](ch12-mcp.md)、[第 13 章](ch13-skills.md)、[第 14 章](ch14-langchain.md) | 项目 M2：面试官 agent | 说清楚 MCP 和 tool calling、Skills 和 MCP、要不要用框架的取舍 |
+| 5 系统与训练 | 第 9–11 周 | [第 17 章](ch17-inference-serving.md) → [第 8 章](ch08-pre-post-training.md) | 项目 M3、M4：记忆、检索优化、评测进 CI；有空在 Kaggle 上跑 17.13 和 8.12 的 GPU 实验 | 用 roofline 和排队论估算服务容量；推一遍 DPO；回答"prompt、RAG、微调怎么选" |
+| 6 冲刺 | 第 12 周起 | [附录 C](appendix-c-interview-questions.md) 全部 ★ 题 | 项目上线；每周两道 [C.11](appendix-c-interview-questions.md#C.11) 系统设计题 | 用自己的项目回答"介绍一个你做过的项目"，每个设计决定都有数字 |
+
+**为什么是这个顺序**：
+- **第 7 章放在很前面**：后面几乎每一章都默认你知道模型内部在算什么。KV cache、prefill 和 decode、显存账本、LoRA 加在哪些层，都建立在它上面；
+- **第 8 章（训练）放在后面**：AI 工程岗很少要求亲手训练模型，但面试会问概念。它的数学（KL、策略梯度、Gibbs 分布）对有概率背景的人很快，等项目跑起来再读，更能体会"什么时候该微调"；
+- **第 17 章在第 8 章之前**：推理服务直接决定线上的延迟和成本，系统设计题里出现得比训练多得多；
+- **项目从第 5 周开始**：读到 RAG 和评测时就动手，读到的东西立刻在项目里用上，也立刻暴露出没读懂的地方。
+
+**每一章怎么读**：
+1. 读正文，推导亲手推一遍；
+2. 跑配套代码，对照"数值实验"一节的输出；
+3. 改一个参数或一处实现再跑，预测结果之后再看；
+4. 合上书，用自己的话回答附录 C 里链接到这一章的 ★ 题，再请 Claude 按面试的方式追问三层（原理、数字、线上会坏在哪）。
+
 ## 怎么读
 
 - **打地基**：按顺序读第 1–4 章，再读第 5、6 章。每章约一小时，读完跑一下配套代码，对照"数值实验"一节看输出。
