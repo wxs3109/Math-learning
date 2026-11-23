@@ -1,6 +1,6 @@
 # 大模型原理
 
-> 从概率论讲到 Transformer · 每章配可运行的 numpy 代码 · 更新：2026-11-22
+> 从数学基础到工程实践 · 每章配可运行的代码 · 更新：2026-11-22
 
 ## 这本笔记在讲什么
 
@@ -8,7 +8,7 @@
 - 参数 $\theta$ 用最大似然在海量文本上拟合；
 - 计算这个分布的函数是一个叫 Transformer 的神经网络。
 
-这本笔记把这句话从头拆开，目标是懂到"能自己从头推一遍、写一遍"的程度。
+这本笔记把这句话从头拆开，目标是懂到"能自己从头推一遍、写一遍"的程度；然后讲怎样把模型用进真实的系统：提示、工具、agent、MCP、Skills、检索和评测。
 
 ## 目录
 
@@ -30,6 +30,19 @@
 | 第 7 章 动手训练一个小 GPT（待写） | 把前六章组装起来，用反向传播真正训练，看损失下降、生成变好 | 计划跟 nanoGPT |
 | 第 8 章 "大"是怎么来的（待写） | scaling law；指令微调与 RLHF；推理（KV cache、采样、长上下文） | — |
 
+**第三部分 工程实践**
+
+| 章 | 内容 | 代码 |
+|---|---|---|
+| [第 9 章 提示工程](ch09-prompt-engineering.md) | 提示就是条件；聊天模板；写清楚、给例子、让模型先想；解码参数；受约束解码；上下文工程 | [`ch09_prompting.py`](code/ch09_prompting.py) |
+| [第 10 章 工具调用](ch10-tool-calling.md) | 模型只写出调用请求；工具定义与设计；`tool_use` / `tool_result`；错误处理；并行调用；严格模式 | [`ch10_tool_calling.py`](code/ch10_tool_calling.py) |
+| [第 11 章 Agent 与 harness](ch11-agent-harness.md) | workflow 还是 agent；agent 循环；上下文管理与压缩；权限、沙箱与钩子；提示缓存与成本 | [`ch11_agent_harness.py`](code/ch11_agent_harness.py) |
+| [第 12 章 MCP](ch12-mcp.md) | host / client / server；tools、resources、prompts；JSON-RPC 与无状态设计；stdio 与 Streamable HTTP；安全 | [`ch12_mcp_server.py`](code/ch12_mcp_server.py)、[`ch12_mcp_client.py`](code/ch12_mcp_client.py) |
+| [第 13 章 Agent Skills](ch13-skills.md) | SKILL.md；渐进式披露；description 决定触发；与 MCP、工具、子 agent 的分工 | [`ch13_skills.py`](code/ch13_skills.py) |
+| [第 14 章 LangChain 与 LangGraph](ch14-langchain.md) | 统一接口与 LCEL；`create_agent` 与中间件；状态图、检查点与人工介入；要不要用框架 | [`ch14_langchain.py`](code/ch14_langchain.py) |
+| [第 15 章 检索增强生成（RAG）](ch15-rag.md) | 何时用 RAG；BM25 与 embedding；混合检索、重排、上下文化分块；评测检索 | [`ch15_rag.py`](code/ch15_rag.py) |
+| [第 16 章 评测、安全与上线](ch16-evals-production.md) | 评测的组成；误差累积；pass@k 与 pass^k；置信区间与配对比较；LLM 评委；提示注入；成本与延迟 | [`ch16_evals.py`](code/ch16_evals.py) |
+
 **附录**
 
 | | 内容 | 代码 |
@@ -39,7 +52,7 @@
 ## 每章的结构
 
 - **导读**：这一章要回答什么问题，和大模型有什么关系，需要哪些前置知识。
-- **正文各节**（如 1.1、1.2……）：定义、推导和例子。节标题旁的标签说明可信程度：**[已证]** 给出了推导，**[事实]** 是标准结论，**[直觉]** 帮助理解、不严格。
+- **正文各节**（如 1.1、1.2……）：定义、推导和例子。节标题旁的标签说明可信程度：**[已证]** 给出了推导，**[事实]** 是标准结论，**[直觉]** 帮助理解、不严格，**[经验]** 是工程实践中总结的做法。
 - **数值实验**：用配套代码验证正文的结论，给出实际输出。
 - **小结与疑问**，以及**参考资料**。
 
@@ -47,4 +60,5 @@
 
 - **打地基**：按顺序读第 1–4 章，再读第 5、6 章。每章约一小时，读完跑一下配套代码，对照"数值实验"一节看输出。
 - **快速入门**：有概率和线性代数基础的话，先读附录 A，然后直接读第 5、6 章，遇到不懂的再回到第 1–4 章对应的小节。
-- 所有代码只依赖 numpy，进入 `code/` 目录后 `python3 文件名.py` 直接运行。
+- **关心工程**：第 9–16 章可以直接读，遇到数学时按链接回查第 1–6 章。
+- 代码进入 `code/` 目录后 `python3 文件名.py` 直接运行。第 1–11、13、15、16 章只依赖 numpy 或标准库；第 12 章的互操作部分需要 `pip install "mcp>=2"`（没装会自动跳过）；第 14 章需要 `pip install "langchain>=1" "langgraph>=1"`。都不需要 API key。

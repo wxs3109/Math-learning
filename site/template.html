@@ -135,6 +135,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .tag-conjecture { background: #efe6fa; color: #66399c; }
 .tag-verify { background: #fbe4df; color: #a2311d; }
 .tag-numeric { background: #def2f1; color: #1b6767; }
+.tag-practice { background: #fde8f1; color: #9b2c5e; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag { background: rgba(255,255,255,.08); color: var(--ink); } }
 :root[data-theme="dark"] .tag { background: rgba(255,255,255,.08); color: var(--ink); }
 
@@ -213,7 +214,7 @@ a.toc-chap-head:hover { text-decoration: none; color: var(--accent); }
 <body>
 <div class="shell">
   <aside class="side" id="side" aria-label="全书目录">
-    <a class="brand" href="#home"><b>大模型原理</b><span>从概率论到 Transformer</span></a>
+    <a class="brand" href="#home"><b>大模型原理</b><span>从数学基础到工程实践</span></a>
     <div class="search"><input id="search-input" type="search" placeholder="搜索全书和代码" aria-label="搜索全书和代码" autocomplete="off"></div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -306,13 +307,14 @@ function route() {
   if (changed) {
     document.querySelectorAll("article.doc").forEach(a => a.hidden = a.dataset.page !== page);
     current = page;
-    open.add(chapterOf(page));
+    open.clear(); open.add(chapterOf(page));   // 换章时只展开当前这一章
     buildPager(page);
     document.title = page === "home" ? "大模型原理" : `${byId[page].label} ${byId[page].title} · 大模型原理`;
     store.set("last", page);
     document.body.classList.remove("nav-open");
   }
   markNav();
+  if (changed) { const cur = nav.querySelector(".chap.current"); if (cur) cur.scrollIntoView({ block: "nearest" }); }
   const target = sec && document.getElementById(`${page}--${sec}`);
   if (target) main.scrollTop = offsetIn(target) - 24;
   else if (changed) {

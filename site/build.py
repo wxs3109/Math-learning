@@ -42,6 +42,24 @@ PARTS = [
         ("ch7", None, "7", "动手训练一个小 GPT", "把前六章组装起来，用反向传播真正训练。"),
         ("ch8", None, "8", "“大”是怎么来的", "scaling law、指令微调与 RLHF、推理优化。"),
     ]),
+    ("第三部分 · 工程实践", [
+        ("ch9", "ch09-prompt-engineering.md", "9", "提示工程",
+         "提示就是条件；写清楚、给例子、让模型先想；解码参数；受约束解码；上下文工程。"),
+        ("ch10", "ch10-tool-calling.md", "10", "工具调用",
+         "模型只写出调用请求；工具定义与设计；tool_use / tool_result；错误处理；严格模式。"),
+        ("ch11", "ch11-agent-harness.md", "11", "Agent 与 harness",
+         "workflow 还是 agent；agent 循环；上下文管理与压缩；权限与钩子；提示缓存。"),
+        ("ch12", "ch12-mcp.md", "12", "MCP",
+         "host / client / server；tools、resources、prompts；无状态的 2026-07-28 规范；安全。"),
+        ("ch13", "ch13-skills.md", "13", "Agent Skills",
+         "SKILL.md 与渐进式披露；description 决定触发；和 MCP、工具、子 agent 的分工。"),
+        ("ch14", "ch14-langchain.md", "14", "LangChain 与 LangGraph",
+         "统一接口与 LCEL；create_agent 与中间件；状态图、检查点与人工介入。"),
+        ("ch15", "ch15-rag.md", "15", "检索增强生成（RAG）",
+         "BM25 与 embedding；混合检索与重排；上下文化分块；recall@k 与 MRR。"),
+        ("ch16", "ch16-evals-production.md", "16", "评测、安全与上线",
+         "误差累积；pass@k 与 pass^k；置信区间；LLM 评委；提示注入；成本与延迟。"),
+    ]),
     ("附录", [
         ("appA", "appendix-a-math-quick-reference.md", "A", "数学速查",
          "一页讲完第 5、6 章要用的结论：交叉熵与 KL、最大似然、softmax、反向传播。"),
@@ -119,7 +137,7 @@ def rewrite_link(href):
 
 
 TAG_CLASS = [("已证", "proved"), ("事实", "fact"), ("直觉", "intuition"), ("猜想", "conjecture"),
-             ("需核实", "verify"), ("数值", "numeric")]
+             ("需核实", "verify"), ("数值", "numeric"), ("经验", "practice")]
 
 
 def tag_html(label):
@@ -225,13 +243,13 @@ def contents_html():
             codes = "".join(f'<li><a href="#{CODE_ID[c.name]}"><code>{c.name}</code></a></li>' for c in code_files)
             items.append(f'<li class="toc-chap"><a class="toc-chap-head" href="#{CODE_ID[code_files[0].name]}">'
                          f'<span class="toc-chap-num">B</span><span class="toc-chap-title">代码</span></a>'
-                         f'<p class="toc-dek">每章的配套代码，只依赖 numpy，可以直接运行。</p><ol class="toc-secs code-list">{codes}</ol></li>')
+                         f'<p class="toc-dek">每章的配套代码，可以直接运行。大多只依赖 numpy 或标准库。</p><ol class="toc-secs code-list">{codes}</ol></li>')
         out.append(f'<section class="toc-part"><h2 class="part-title">{part}</h2><ol class="toc-chaps">{"".join(items)}</ol></section>')
     return "".join(out)
 
 
 home = ('<header class="cover"><p class="eyebrow"><span>学习笔记</span></p><h1>大模型原理</h1>'
-        '<p class="dek">从概率论讲到 Transformer。每章都有完整推导和一份可以直接运行的 numpy 代码。</p></header>'
+        '<p class="dek">从概率论讲到 Transformer，再到提示、工具、agent、MCP、Skills、RAG 和评测。每章都有推导或原理，以及一份可以直接运行的代码。</p></header>'
         f'<div class="prose">{md(before, "home")}</div>'
         f'<h2 class="contents-title">目录</h2>{contents_html()}'
         f'<div class="prose">{md(after, "home")}</div>')
