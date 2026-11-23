@@ -91,7 +91,7 @@ $$\text{最大似然}\iff\text{最小化交叉熵 }H(\hat p,q_\theta)\iff\text{�
 
 写代码时先把每个张量的形状写清楚，大部分 bug 都是形状对不上。
 
-## A.5 softmax **[已证]**
+## A.5 Softmax **[已证]**
 
 把任意实数向量 $z\in\mathbb R^V$ 变成概率分布：
 $$\mathrm{softmax}(z)_j=\frac{e^{z_j}}{\sum_ke^{z_k}}.$$
@@ -166,7 +166,7 @@ $$a=XW_1+b_1,\qquad h=\tanh(a),\qquad z=hW_2+b_2,\qquad L=\frac1n\sum_i\ell_i(z_
 
 经验频率的似然最大，KL 为 0，和 A.3 一致。真实分布的似然反而稍低，因为 200 个样本有随机波动。这正是过拟合的最小例子：MLE 只对见过的数据负责。
 
-### A.8.2 softmax
+### A.8.2 Softmax
 
 - $\mathrm{softmax}(2,1,0.1)=(0.659,0.242,0.099)$，加 100 之后不变（平移不变）。
 - 加 1000 之后，朴素写法溢出成 `nan`，减最大值的写法仍然正确。

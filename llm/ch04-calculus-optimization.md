@@ -61,7 +61,7 @@ $$\frac{\partial L}{\partial W_{jk}}=\sum_i\frac{\partial L}{\partial Y_{ik}}\fr
 
 $X^\top\bar Y=\sum_iX_{i,:}^\top\bar Y_{i,:}$ 是**外积之和**（[3.2 节](ch03-linear-algebra.md#3.2)），每个样本（每个位置）贡献一个秩 1 的更新。
 
-## 4.3 softmax、log-sum-exp 与交叉熵的梯度 **[已证]**
+## 4.3 Softmax、log-sum-exp 与交叉熵的梯度 **[已证]**
 
 **softmax**：$p_i=e^{z_i}/\sum_je^{z_j}$。
 
@@ -98,7 +98,7 @@ $$f(x-\eta\nabla f)\le f(x)-\eta\big(1-\tfrac{L\eta}2\big)\|\nabla f\|^2.$$
 
 **在大模型里** **[直觉]**：
 - 不同参数、不同层的"曲率"可以相差几个数量级，条件数很大。
-- LayerNorm、残差连接、合适的初始化，都能让损失曲面更"圆"一些。
+- LayerNorm、residual connection、合适的初始化，都能让损失曲面更"圆"一些。
 - 训练中途出现的损失尖峰，常被解释为某个方向的曲率变大，使当前学习率超过了 $2/\lambda_{\max}$。
 
 ## 4.5 动量 **[事实 + 直觉]**
@@ -157,7 +157,7 @@ $$\hat m=\frac m{1-\beta_1^t},\quad\hat v=\frac v{1-\beta_2^t},\qquad\theta\left
 2. 令 $\bar L=1$；
 3. 按拓扑序**倒着**走，每个节点把收到的梯度 $\bar y$ 用 4.1 的链式法则分给它的输入，$\bar x\mathrel{+}=J^\top\bar y$。
 
-**为什么用"+="**：一个变量可能被多个后续节点使用（比如残差连接中的 $x$ 同时进入了 $f(x)$ 和 $x+f(x)$），它的梯度是所有路径的贡献之和。
+**为什么用"+="**：一个变量可能被多个后续节点使用（比如 residual connection 中的 $x$ 同时进入了 $f(x)$ 和 $x+f(x)$），它的梯度是所有路径的贡献之和。
 
 **常见节点的局部规则**：
 - 加法 $z=x+y$：$\bar x\mathrel{+}=\bar z$，$\bar y\mathrel{+}=\bar z$（原样分发）；
@@ -187,7 +187,7 @@ $$\bar z=(p-Y)/n,\quad \bar W_2=h_1^\top\bar z,\quad \bar h_1=\bar zW_2^\top,\qu
 
 **梯度检查**是写反向传播时最重要的调试手段：相对误差在 $10^{-6}$ 以下，基本说明公式写对了。
 
-### 4.9.2 softmax 的数值稳定性
+### 4.9.2 Softmax 的数值稳定性
 
 - $z=(1000,1001,1002)$ 直接算 softmax，得到 `nan`（$e^{1000}$ 溢出）。
 - 先减去最大值，得到 $(0.090,0.245,0.665)$。

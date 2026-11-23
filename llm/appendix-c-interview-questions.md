@@ -24,9 +24,9 @@
 
 | 岗位 | 重点 | 本清单中对应的节 |
 |---|---|---|
-| 大模型应用 / AI 工程师 | RAG、agent、工具调用、评测、成本、系统设计 | C.6–C.11、C.13 |
+| 大模型应用 / AI 工程师 | RAG、agent、tool calling、评测、成本、系统设计 | C.6–C.11、C.13 |
 | 大模型算法岗 | Transformer 细节、训练、微调、对齐、手撕代码 | C.2–C.4、C.12 |
-| 推理 / AI infra | KV cache、批处理、量化、并行、框架对比 | C.3.2、C.5、C.11 |
+| 推理 / AI infra | KV cache、batching、量化、并行、框架对比 | C.3.2、C.5、C.11 |
 | AI 前端 / 全栈 | 流式输出、SSE、中断、长对话渲染、异步后端 | C.10，以及 C.8 的工程化部分 |
 
 **怎么答** **[经验]**：几篇面经的共同观察是，第一问大家都能背，难在追问。面试官常沿三条线往下追：
@@ -42,9 +42,9 @@
 ### C.2.1 语言模型与生成
 
 1. ★ 什么是大语言模型？它的训练目标是什么？ —— ✅ [5.1 节](ch05-language-model.md#5.1)、[5.2 节](ch05-language-model.md#5.2)
-2. 自回归语言模型和掩码语言模型（BERT）有什么区别？ —— ◐ [5.1 节](ch05-language-model.md#5.1)
+2. autoregressive 语言模型和掩码语言模型（BERT）有什么区别？ —— ◐ [5.1 节](ch05-language-model.md#5.1)
 3. ★ 为什么最大似然就是最小化交叉熵？交叉熵、KL、熵之间是什么关系？ —— ✅ [1.7 节](ch01-probability.md#1.7)、[5.2 节](ch05-language-model.md#5.2)、[A.2 节](appendix-a-math-quick-reference.md#A.2)
-4. 困惑度是什么，怎么从交叉熵算出来？ —— ✅ [5.2 节](ch05-language-model.md#5.2)
+4. perplexity 是什么，怎么从交叉熵算出来？ —— ✅ [5.2 节](ch05-language-model.md#5.2)
 5. logits 是什么，在生成中起什么作用？ —— ✅ [9.6 节](ch09-prompt-engineering.md#9.6)、[A.5 节](appendix-a-math-quick-reference.md#A.5)
 6. ★ 贪心、beam search、top-k、top-p、温度各有什么取舍？什么时候把温度调到接近 0？ —— ◐ [9.6 节](ch09-prompt-engineering.md#9.6)（beam search 未讲）
 7. 你按下回车之后，ChatGPT 内部发生了什么？（从分词到流式返回） —— ◐ [9.2 节](ch09-prompt-engineering.md#9.2)、[17.1 节](ch17-inference-serving.md#17.1)
@@ -65,19 +65,19 @@
 7. 余弦相似度、点积、欧氏距离的区别是什么？归一化之后有什么关系？ —— ✅ [3.1 节](ch03-linear-algebra.md#3.1)、[15.4 节](ch15-rag.md#15.4)
 8. 为什么高维空间里随机向量几乎正交？这对检索意味着什么？ —— ✅ [3.7 节](ch03-linear-algebra.md#3.7)
 
-### C.2.3 注意力与位置编码
+### C.2.3 注意力与 positional encoding
 
 1. ★ Q、K、V 分别是什么？为什么要用三个不同的矩阵？ —— ✅ [6.2 节](ch06-self-attention.md#6.2)
 2. ★ 为什么注意力分数要除以 $\sqrt{d_k}$？不除会怎样？ —— ✅ [6.2 节](ch06-self-attention.md#6.2)、[6.5.2 节](ch06-self-attention.md#6.5.2)
-3. ★ 多头注意力"多"在哪里？参数量变了吗？ —— ✅ [6.2 节](ch06-self-attention.md#6.2)
-4. 因果掩码加在哪里？为什么在 softmax 之前加 $-\infty$，而不是之后置零？ —— ✅ [6.2 节](ch06-self-attention.md#6.2)、[6.5.1 节](ch06-self-attention.md#6.5.1)
-5. 自注意力和交叉注意力有什么区别？ —— ◐ [6.2 节](ch06-self-attention.md#6.2)
+3. ★ multi-head attention"多"在哪里？参数量变了吗？ —— ✅ [6.2 节](ch06-self-attention.md#6.2)
+4. causal mask 加在哪里？为什么在 softmax 之前加 $-\infty$，而不是之后置零？ —— ✅ [6.2 节](ch06-self-attention.md#6.2)、[6.5.1 节](ch06-self-attention.md#6.5.1)
+5. self-attention 和交叉注意力有什么区别？ —— ◐ [6.2 节](ch06-self-attention.md#6.2)
 6. 注意力的时间和空间复杂度是多少？长文本时怎么降？ —— ◐ [6.4 节](ch06-self-attention.md#6.4)、[17.9 节](ch17-inference-serving.md#17.9)
 7. ★ MHA、MQA、GQA、MLA 的区别是什么？为什么它们都围绕 KV cache 展开？ —— ✅ [17.9 节](ch17-inference-serving.md#17.9)
-8. ★ 为什么需要位置编码？正弦位置编码、可学习位置编码、RoPE 各有什么特点？ —— ✅ [6.1 节](ch06-self-attention.md#6.1)、[6.3 节](ch06-self-attention.md#6.3)
+8. ★ 为什么需要 positional encoding？正弦 positional encoding、可学习 positional encoding、RoPE 各有什么特点？ —— ✅ [6.1 节](ch06-self-attention.md#6.1)、[6.3 节](ch06-self-attention.md#6.3)
 9. ★ RoPE 的原理是什么？为什么它能表达相对位置？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 10. 长上下文外推：位置插值、NTK-aware、YaRN 分别做了什么？ —— ○
-11. 滑动窗口注意力、attention sink 是什么？ —— ○（计划第 17 章补充）
+11. sliding window 注意力、attention sink 是什么？ —— ○（计划第 17 章补充）
 12. FlashAttention 为什么快？它减少了计算还是减少了显存读写？ —— ✅ [17.3 节](ch17-inference-serving.md#17.3)
 
 ### C.2.4 Transformer 块与架构变体
@@ -86,12 +86,12 @@
 2. ★ encoder-only、decoder-only、encoder-decoder 的区别？为什么现在的大模型几乎都是 decoder-only？ —— ◐ [6.3 节](ch06-self-attention.md#6.3)
 3. ★ LayerNorm、RMSNorm、BatchNorm 的区别？为什么大模型不用 BatchNorm？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 4. ★ Pre-Norm 和 Post-Norm 有什么区别？各自的训练稳定性如何？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
-5. 残差连接为什么让深层网络训练得动？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)、[4.8 节](ch04-calculus-optimization.md#4.8)
+5. residual connection 为什么让深层网络训练得动？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)、[4.8 节](ch04-calculus-optimization.md#4.8)
 6. FFN 在 Transformer 里起什么作用？SwiGLU 相比 ReLU 有什么好处？ —— ✅ [6.3 节](ch06-self-attention.md#6.3)
 7. 给定层数、隐藏维度、词表大小，估算模型参数量。 —— ✅ [17.2 节](ch17-inference-serving.md#17.2)、[6.3 节](ch06-self-attention.md#6.3)
-8. ★ MoE（混合专家）是什么？稠密模型和稀疏模型怎么比较？负载均衡怎么做？ —— ○
+8. ★ MoE（Mixture of Experts）是什么？稠密模型和稀疏模型怎么比较？负载均衡怎么做？ —— ○
 9. 介绍 DeepSeek 系列模型在架构上的改动（MLA、MoE、多 token 预测）。 —— ◐ [17.9 节](ch17-inference-serving.md#17.9)
-10. 扩散语言模型和自回归模型有什么不同？ —— ○
+10. 扩散语言模型和 autoregressive 模型有什么不同？ —— ○
 11. Transformer 能理解图像吗？视觉 token 是怎么来的？ —— ○（多模态，暂未计划）
 
 ## C.3 预训练、分布式训练与微调 **[经验]**
@@ -101,20 +101,20 @@
 1. ★ 大模型的训练通常分哪几个阶段？每个阶段学到什么？ —— ✅ [8.1 节](ch08-pre-post-training.md#8.1)
 2. Chinchilla scaling law 讲了什么？参数量和数据量该怎么配比？ —— ✅ [8.2 节](ch08-pre-post-training.md#8.2)、[8.11.2 节](ch08-pre-post-training.md#8.11.2)
 3. 预训练数据怎么清洗、去重、配比？ —— ◐ [8.2 节](ch08-pre-post-training.md#8.2)
-4. 继续预训练（continual pre-training）和微调有什么区别？什么时候用？ —— ◐ [8.2 节](ch08-pre-post-training.md#8.2)
+4. continued pretraining（continual pre-training）和微调有什么区别？什么时候用？ —— ◐ [8.2 节](ch08-pre-post-training.md#8.2)
 5. 合成数据怎么生成和验证？ —— ◐ [8.9 节](ch08-pre-post-training.md#8.9)、[8.4 节](ch08-pre-post-training.md#8.4)
 6. 知识蒸馏是什么？蒸馏后的小模型推理能力差，怎么补？ —— ✅ [8.9 节](ch08-pre-post-training.md#8.9)
 
 ### C.3.2 显存与分布式训练
 
 1. ★ 训练时显存被哪些东西占用？给出模型状态和激活值的估算。 —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)、[8.11.1 节](ch08-pre-post-training.md#8.11.1)
-2. ★ 用 Adam 做混合精度训练，每个参数大约占多少字节？7B 模型全参微调大约要多少显存？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)、[8.11.1 节](ch08-pre-post-training.md#8.11.1)
-3. ★ 混合精度训练是怎么做的？FP16 和 BF16 有什么区别？为什么需要 loss scaling？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
+2. ★ 用 Adam 做 mixed precision 训练，每个参数大约占多少字节？7B 模型全参微调大约要多少显存？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)、[8.11.1 节](ch08-pre-post-training.md#8.11.1)
+3. ★ mixed precision 训练是怎么做的？FP16 和 BF16 有什么区别？为什么需要 loss scaling？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
 4. ★ ZeRO 的三个阶段分别切分什么？通信量怎么变？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
 5. FSDP 和 DeepSpeed ZeRO 有什么区别？ —— ◐ [8.3 节](ch08-pre-post-training.md#8.3)
-6. ★ 数据并行、张量并行、流水线并行、3D 并行分别适合什么场景？ —— ◐ [8.3 节](ch08-pre-post-training.md#8.3)、[17.10 节](ch17-inference-serving.md#17.10)
-7. 梯度检查点（重计算）用时间换了多少显存？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
-8. 梯度累积的作用是什么？和直接加大 batch 等价吗？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
+6. ★ data parallelism、tensor parallelism、pipeline parallelism、3D 并行分别适合什么场景？ —— ◐ [8.3 节](ch08-pre-post-training.md#8.3)、[17.10 节](ch17-inference-serving.md#17.10)
+7. gradient checkpointing（重计算）用时间换了多少显存？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
+8. gradient accumulation 的作用是什么？和直接加大 batch 等价吗？ —— ✅ [8.3 节](ch08-pre-post-training.md#8.3)
 9. 多机训练时网络带宽不够会怎样？单个节点挂掉怎么办？ —— ○
 10. 学习率预热和余弦衰减为什么有用？Adam 和 AdamW 的区别？ —— ✅ [4.7 节](ch04-calculus-optimization.md#4.7)
 
@@ -126,9 +126,9 @@
 4. ★ QLoRA 做了什么，为什么能在消费级显卡上微调？ —— ✅ [8.5 节](ch08-pre-post-training.md#8.5)
 5. Prefix tuning、prompt tuning、adapter 和 LoRA 怎么比较？ —— ◐ [8.5 节](ch08-pre-post-training.md#8.5)
 6. 多个 LoRA 适配器怎么合并？推理时怎么同时服务很多个 LoRA？ —— ◐ [8.5 节](ch08-pre-post-training.md#8.5)
-7. 指令微调是什么？和普通的任务微调有什么不同？ —— ✅ [8.1 节](ch08-pre-post-training.md#8.1)、[8.4 节](ch08-pre-post-training.md#8.4)
+7. instruction tuning 是什么？和普通的任务微调有什么不同？ —— ✅ [8.1 节](ch08-pre-post-training.md#8.1)、[8.4 节](ch08-pre-post-training.md#8.4)
 8. 微调数据怎么准备？需要多少条？质量和数量哪个更重要？ —— ✅ [8.4 节](ch08-pre-post-training.md#8.4)
-9. ★ 微调后通用能力下降（灾难性遗忘），怎么处理？ —— ✅ [8.4 节](ch08-pre-post-training.md#8.4)、[8.11.3 节](ch08-pre-post-training.md#8.11.3)
+9. ★ 微调后通用能力下降（catastrophic forgetting），怎么处理？ —— ✅ [8.4 节](ch08-pre-post-training.md#8.4)、[8.11.3 节](ch08-pre-post-training.md#8.11.3)
 10. 微调时过拟合、模型背下训练数据，怎么发现、怎么避免？ —— ✅ [8.11.3 节](ch08-pre-post-training.md#8.11.3)、[2.5 节](ch02-statistics.md#2.5)
 11. 有人想用微调让模型记住新出的政策条文，你怎么建议？ —— ✅ [8.4 节](ch08-pre-post-training.md#8.4)、[15.1 节](ch15-rag.md#15.1)
 12. 微调后的模型怎么评测？除了指标还看什么？ —— ◐ [8.10 节](ch08-pre-post-training.md#8.10)、[16.1 节](ch16-evals-production.md#16.1)
@@ -136,25 +136,25 @@
 
 ## C.4 对齐与强化学习 **[经验]**
 
-1. ★ 讲一遍 RLHF 的完整流程：SFT、奖励模型、PPO。每一步可能在哪里失败？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
-2. 奖励模型怎么训练？为什么只有分数之差有意义（Bradley–Terry）？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
-3. ★ PPO 的裁剪目标在防什么？为什么外面还要套一个 min？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
-4. ★ 为什么要加 KL 惩罚？它和参考模型的关系是什么？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)、[8.7 节](ch08-pre-post-training.md#8.7)
-5. ★ DPO 是怎么从 RLHF 的目标推出来的？为什么不需要显式奖励模型？ —— ✅ [8.7 节](ch08-pre-post-training.md#8.7)
+1. ★ 讲一遍 RLHF 的完整流程：SFT、reward model、PPO。每一步可能在哪里失败？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
+2. reward model 怎么训练？为什么只有分数之差有意义（Bradley–Terry）？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
+3. ★ PPO 的 clipped objective 在防什么？为什么外面还要套一个 min？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
+4. ★ 为什么要加 KL 惩罚？它和 reference model 的关系是什么？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)、[8.7 节](ch08-pre-post-training.md#8.7)
+5. ★ DPO 是怎么从 RLHF 的目标推出来的？为什么不需要显式 reward model？ —— ✅ [8.7 节](ch08-pre-post-training.md#8.7)
 6. ★ DPO 和 PPO 各自什么时候用？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)、[8.7 节](ch08-pre-post-training.md#8.7)
 7. DPO 训练后输出越来越长，是什么原因？怎么解决？ —— ✅ [8.7 节](ch08-pre-post-training.md#8.7)、[8.11.4 节](ch08-pre-post-training.md#8.11.4)
-8. ★ GRPO 是什么？它的优势函数怎么算？为什么可以不要价值网络？ —— ✅ [8.8 节](ch08-pre-post-training.md#8.8)
+8. ★ GRPO 是什么？它的优势函数怎么算？为什么可以不要 value network？ —— ✅ [8.8 节](ch08-pre-post-training.md#8.8)
 9. DAPO、GSPO、Dr. GRPO 分别修正了 GRPO 的什么问题？ —— ◐ [8.8 节](ch08-pre-post-training.md#8.8)（GSPO 未讲）
-10. ★ 奖励作弊（reward hacking）是什么？实际中怎么发现和修？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)、[8.11.4 节](ch08-pre-post-training.md#8.11.4)
-11. RLVR（可验证奖励）是什么？什么时候可以不用奖励模型？ —— ✅ [8.8 节](ch08-pre-post-training.md#8.8)
+10. ★ reward hacking 是什么？实际中怎么发现和修？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)、[8.11.4 节](ch08-pre-post-training.md#8.11.4)
+11. RLVR（verifiable reward）是什么？什么时候可以不用 reward model？ —— ✅ [8.8 节](ch08-pre-post-training.md#8.8)
 12. RLAIF、Constitutional AI 和 RLHF 有什么区别？ —— ○
 13. 对齐税（alignment tax）是什么？ —— ○
 14. 推理能力是在哪个训练阶段出现的？RL 是扩大了能力边界，还是只把已有能力变得更稳定？ —— ◐ [8.8 节](ch08-pre-post-training.md#8.8)、[8.13 节](ch08-pre-post-training.md#8.13)
 15. 拒绝采样微调和推理时的 best-of-N 有什么区别？ —— ○
 16. 一次 GRPO 训练先涨后崩，你会看哪些日志？ —— ◐ [8.11.5 节](ch08-pre-post-training.md#8.11.5)
-17. 多轮工具调用的 agentic RL，为什么信用分配更难？ —— ○（计划 agent 深入章）
+17. 多轮 tool calling 的 agentic RL，为什么信用分配更难？ —— ○（计划 agent 深入章）
 18. 偏好数据的质量怎么保证？标注者意见不一致怎么办？ —— ◐ [8.11.4 节](ch08-pre-post-training.md#8.11.4)、[16.5 节](ch16-evals-production.md#16.5)
-19. 重要性采样在 PPO 里起什么作用？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
+19. importance sampling 在 PPO 里起什么作用？ —— ✅ [8.6 节](ch08-pre-post-training.md#8.6)
 20. 手写 DPO 损失和 PPO 裁剪损失。 —— ◐ [8.7 节](ch08-pre-post-training.md#8.7)、`ch08_post_training.py`（PPO 裁剪未实现）
 
 ## C.5 推理与部署 **[经验]**
@@ -168,20 +168,20 @@
 5. 长对话把 KV cache 撑爆、显存溢出，怎么办？ —— ✅ [17.5 节](ch17-inference-serving.md#17.5)、[17.9 节](ch17-inference-serving.md#17.9)
 6. KV cache 压缩与驱逐（H2O、SnapKV、StreamingLLM）分别是什么思路？ —— ◐ [17.9 节](ch17-inference-serving.md#17.9)
 
-### C.5.2 批处理与调度
+### C.5.2 Batching 与调度
 
-1. ★ 静态批处理和连续批处理（continuous batching）有什么区别？ —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.12.4 节](ch17-inference-serving.md#17.12.4)
+1. ★ static batching 和 continuous batching（continuous batching）有什么区别？ —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.12.4 节](ch17-inference-serving.md#17.12.4)
 2. ★ PagedAttention 解决了什么问题？它借鉴了操作系统的什么机制？ —— ✅ [17.5 节](ch17-inference-serving.md#17.5)
-3. ★ 前缀缓存（prefix caching / prompt caching）的原理？怎样设计提示才能命中？ —— ✅ [17.5 节](ch17-inference-serving.md#17.5)、[11.6 节](ch11-agent-harness.md#11.6)
+3. ★ prefix caching（prefix caching / prompt caching）的原理？怎样设计提示才能命中？ —— ✅ [17.5 节](ch17-inference-serving.md#17.5)、[11.6 节](ch11-agent-harness.md#11.6)
 4. chunked prefill 为什么能改善尾延迟？ —— ✅ [17.6 节](ch17-inference-serving.md#17.6)
 5. prefill 和 decode 分离部署（disaggregation）有什么好处和代价？ —— ✅ [17.6 节](ch17-inference-serving.md#17.6)
-6. ★ 设计一个单卡上的推理批处理系统，同步用户，每批最多 100 个请求。（Anthropic） —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)
-7. 设计一个端到端的 LLM 请求批处理系统，包括排队和调度。（Anthropic） —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)
+6. ★ 设计一个单卡上的推理 batching 系统，同步用户，每批最多 100 个请求。（Anthropic） —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)
+7. 设计一个端到端的 LLM 请求 batching 系统，包括排队和调度。（Anthropic） —— ✅ [17.4 节](ch17-inference-serving.md#17.4)、[17.11 节](ch17-inference-serving.md#17.11)
 8. 请求优先级和公平调度怎么做？ —— ◐ [17.11 节](ch17-inference-serving.md#17.11)
 
-### C.5.3 加速：投机解码、量化
+### C.5.3 加速：speculative decoding、量化
 
-1. ★ 投机解码的原理是什么？为什么输出分布不变？接受率怎么算？ —— ✅ [17.7 节](ch17-inference-serving.md#17.7)
+1. ★ speculative decoding 的原理是什么？为什么输出分布不变？接受率怎么算？ —— ✅ [17.7 节](ch17-inference-serving.md#17.7)
 2. Medusa、EAGLE、n-gram 投机分别怎么产生草稿？ —— ◐ [17.7 节](ch17-inference-serving.md#17.7)
 3. ★ INT8、INT4、FP8、BF16 各有什么取舍？量化损失了什么？ —— ✅ [17.8 节](ch17-inference-serving.md#17.8)、[8.3 节](ch08-pre-post-training.md#8.3)
 4. ★ 权重量化和激活量化有什么区别？为什么激活更难量化（离群值）？ —— ✅ [17.8 节](ch17-inference-serving.md#17.8)
@@ -193,7 +193,7 @@
 
 1. ★ vLLM、SGLang、TensorRT-LLM、llama.cpp、Ollama 怎么选？ —— ◐ [17.5 节](ch17-inference-serving.md#17.5)（计划第 17 章补充对比表）
 2. SGLang 的 RadixAttention 和 vLLM 的 PagedAttention 在前缀复用上有什么差别？ —— ◐ [17.5 节](ch17-inference-serving.md#17.5)
-3. ★ 张量并行和流水线并行在推理时怎么用？通信发生在哪里？ —— ✅ [17.10 节](ch17-inference-serving.md#17.10)
+3. ★ tensor parallelism 和 pipeline parallelism 在推理时怎么用？通信发生在哪里？ —— ✅ [17.10 节](ch17-inference-serving.md#17.10)
 4. ★ TTFT、TPOT、吞吐之间是什么关系？在线服务优先看吞吐还是延迟？ —— ✅ [17.11 节](ch17-inference-serving.md#17.11)
 5. 用排队论估算需要几张卡，为什么利用率接近 100% 时延迟会爆炸？ —— ✅ [17.11 节](ch17-inference-serving.md#17.11)、[17.12.9 节](ch17-inference-serving.md#17.12.9)
 6. 自建推理和调用 API 的成本怎么比较？ —— ◐ [16.8 节](ch16-evals-production.md#16.8)、[17.11 节](ch17-inference-serving.md#17.11)
@@ -202,26 +202,26 @@
 9. 同步推理和异步推理（批量离线任务）的架构有什么不同？ —— ◐ [17.4 节](ch17-inference-serving.md#17.4)
 10. 实现一个 GPU 额度管理系统，事件里有发放、使用和过期。（OpenAI） —— ○（编码题，见 C.12）
 
-## C.6 提示工程与结构化输出 **[经验]**
+## C.6 Prompt engineering 与 structured output **[经验]**
 
-1. ★ 提示工程是什么？它在数学上改变了什么？ —— ✅ [9.1 节](ch09-prompt-engineering.md#9.1)
-2. 系统提示、用户消息、助手消息分别起什么作用？聊天模板是什么？ —— ✅ [9.2 节](ch09-prompt-engineering.md#9.2)
-3. ★ 零样本、少样本、思维链分别是什么？少样本例子怎么挑？ —— ✅ [9.4 节](ch09-prompt-engineering.md#9.4)、[9.5 节](ch09-prompt-engineering.md#9.5)
-4. ★ 思维链为什么能提升推理？什么时候它反而没用？ —— ✅ [9.5 节](ch09-prompt-engineering.md#9.5)
+1. ★ prompt engineering 是什么？它在数学上改变了什么？ —— ✅ [9.1 节](ch09-prompt-engineering.md#9.1)
+2. system prompt、用户消息、助手消息分别起什么作用？chat template 是什么？ —— ✅ [9.2 节](ch09-prompt-engineering.md#9.2)
+3. ★ zero-shot、few-shot、chain-of-thought 分别是什么？few-shot 例子怎么挑？ —— ✅ [9.4 节](ch09-prompt-engineering.md#9.4)、[9.5 节](ch09-prompt-engineering.md#9.5)
+4. ★ chain-of-thought 为什么能提升推理？什么时候它反而没用？ —— ✅ [9.5 节](ch09-prompt-engineering.md#9.5)
 5. self-consistency、tree-of-thought 分别是什么？和 CoT 怎么递进？ —— ◐ [9.5 节](ch09-prompt-engineering.md#9.5)
-6. ★ 怎样让模型稳定输出合法 JSON？受约束解码是怎么做的？ —— ✅ [9.7 节](ch09-prompt-engineering.md#9.7)、[10.6 节](ch10-tool-calling.md#10.6)
+6. ★ 怎样让模型稳定输出合法 JSON？constrained decoding 是怎么做的？ —— ✅ [9.7 节](ch09-prompt-engineering.md#9.7)、[10.6 节](ch10-tool-calling.md#10.6)
 7. 模型输出了不合法的 JSON，线上怎么兜底？ —— ✅ [10.5 节](ch10-tool-calling.md#10.5)、[9.7 节](ch09-prompt-engineering.md#9.7)
 8. 角色提示有用吗？什么时候有用？ —— ✅ [9.3 节](ch09-prompt-engineering.md#9.3)
-9. 提示链（prompt chaining）是什么？和 agent 有什么区别？ —— ✅ [11.1 节](ch11-agent-harness.md#11.1)
+9. prompt chaining 是什么？和 agent 有什么区别？ —— ✅ [11.1 节](ch11-agent-harness.md#11.1)
 10. ★ "lost in the middle" 是什么？长上下文提示里信息该放在哪里？ —— ◐ [9.8 节](ch09-prompt-engineering.md#9.8)
-11. 从提示工程到上下文工程，变的是什么？ —— ✅ [9.8 节](ch09-prompt-engineering.md#9.8)
-12. 少样本结果不稳定、对措辞很敏感，怎么办？ —— ◐ [9.4 节](ch09-prompt-engineering.md#9.4)、[16.4 节](ch16-evals-production.md#16.4)
+11. 从 prompt engineering 到 context engineering，变的是什么？ —— ✅ [9.8 节](ch09-prompt-engineering.md#9.8)
+12. few-shot 结果不稳定、对措辞很敏感，怎么办？ —— ◐ [9.4 节](ch09-prompt-engineering.md#9.4)、[16.4 节](ch16-evals-production.md#16.4)
 13. 怎么系统地评估和迭代一个提示？改提示或换模型后怎么防退化？ —— ✅ [16.1 节](ch16-evals-production.md#16.1)、[16.4 节](ch16-evals-production.md#16.4)
-14. 怎样防止系统提示泄露？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)
+14. 怎样防止 system prompt 泄露？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)
 15. 怎样让模型在不知道时说"不知道"？怎样控制回答长度？ —— ◐ [9.3 节](ch09-prompt-engineering.md#9.3)
-16. 提示工程和 prompt tuning（软提示）有什么区别？ —— ◐ [8.5 节](ch08-pre-post-training.md#8.5)
+16. prompt engineering 和 prompt tuning（软提示）有什么区别？ —— ◐ [8.5 节](ch08-pre-post-training.md#8.5)
 17. 提示的成本和延迟怎么优化？ —— ✅ [11.6 节](ch11-agent-harness.md#11.6)、[16.8 节](ch16-evals-production.md#16.8)
-18. 多语言提示要注意什么？跨语言零样本迁移为什么会失败？ —— ○
+18. 多语言提示要注意什么？跨语言 zero-shot 迁移为什么会失败？ —— ○
 
 ## C.7 RAG 与向量检索 **[经验]**
 
@@ -235,23 +235,23 @@
 6. 小块检索准但上下文太碎，大块上下文完整但检索不准，怎么调和（父子块）？ —— ◐ [15.5 节](ch15-rag.md#15.5)
 7. 含表格和复杂版式的 PDF 怎么解析？ —— ○（计划数据与检索基础设施章）
 
-### C.7.2 检索、混合检索与重排
+### C.7.2 检索、hybrid search 与 rerank
 
 1. ★ 稠密向量和稀疏向量的区别？BM25 的原理？ —— ✅ [15.3 节](ch15-rag.md#15.3)、[15.4 节](ch15-rag.md#15.4)
-2. ★ 混合检索两路分数量纲不同，怎么融合？RRF 的 k 怎么取？ —— ✅ [15.5 节](ch15-rag.md#15.5)
-3. ★ 初召回之后为什么还要重排？cross-encoder、ColBERT、LLM 重排有什么区别？ —— ◐ [15.5 节](ch15-rag.md#15.5)（ColBERT 未讲）
-4. 重排太慢，线上扛得住吗？能不能省掉？精排取多少条？ —— ◐ [15.5 节](ch15-rag.md#15.5)、[15.8 节](ch15-rag.md#15.8)
+2. ★ hybrid search 两路分数量纲不同，怎么融合？RRF 的 k 怎么取？ —— ✅ [15.5 节](ch15-rag.md#15.5)
+3. ★ 初召回之后为什么还要 rerank？cross-encoder、ColBERT、LLM rerank 有什么区别？ —— ◐ [15.5 节](ch15-rag.md#15.5)（ColBERT 未讲）
+4. rerank 太慢，线上扛得住吗？能不能省掉？精排取多少条？ —— ◐ [15.5 节](ch15-rag.md#15.5)、[15.8 节](ch15-rag.md#15.8)
 5. ★ embedding 模型怎么选？召回率低的常见原因有哪些？ —— ◐ [15.4 节](ch15-rag.md#15.4)
-6. 上下文化检索（contextual retrieval）是什么？ —— ✅ [15.5 节](ch15-rag.md#15.5)、[15.8.3 节](ch15-rag.md#15.8.3)
+6. contextual 检索（contextual retrieval）是什么？ —— ✅ [15.5 节](ch15-rag.md#15.5)、[15.8.3 节](ch15-rag.md#15.8.3)
 7. ★ 向量数据库和传统数据库的区别？ANN 是什么？HNSW、IVF、暴力检索怎么取舍？ —— ◐ [15.4 节](ch15-rag.md#15.4)（计划数据与检索基础设施章）
 8. 十亿级向量检索怎么做？向量库内存太大怎么压（量化、PQ）？ —— ○（计划数据与检索基础设施章）
 9. 相似度很高但结果不相关，可能是什么原因？短查询的语义检索为什么难？ —— ◐ [15.4 节](ch15-rag.md#15.4)、[15.8.2 节](ch15-rag.md#15.8.2)
 10. 元数据过滤怎么和向量检索结合？ —— ○（计划数据与检索基础设施章）
 
-### C.7.3 查询改写与进阶 RAG
+### C.7.3 Query rewriting 与进阶 RAG
 
 1. ★ HyDE 的原理是什么？假设文档写错了会不会把检索带偏？ —— ○（计划第 15 章补充）
-2. 查询改写、多查询、查询分解、step-back 有什么区别？ —— ○（计划第 15 章补充）
+2. query rewriting、多查询、查询分解、step-back 有什么区别？ —— ○（计划第 15 章补充）
 3. 多轮对话里用户省略指代（"那它还能退吗"），怎么补全成可检索的问题？ —— ○（计划第 15 章补充）
 4. 多跳问题怎么检索？ —— ○（计划第 15 章补充）
 5. ★ Agentic RAG、Self-RAG、GraphRAG 和普通 RAG 有什么区别？ —— ◐ [11.1 节](ch11-agent-harness.md#11.1)（计划 agent 深入章）
@@ -265,7 +265,7 @@
 3. 上下文是对的，模型还是答错，可能是什么原因？ —— ◐ [15.6 节](ch15-rag.md#15.6)
 4. 多个来源互相矛盾，怎么处理？ —— ○（计划第 15 章补充）
 5. ★ RAG 怎么评测？检索和生成分别看什么指标（召回率、MRR、nDCG、忠实度、相关性）？ —— ✅ [15.6 节](ch15-rag.md#15.6)、[16.5 节](ch16-evals-production.md#16.5)
-6. ★ 没有标注数据时，评测集从哪来？ —— ◐ [16.1 节](ch16-evals-production.md#16.1)
+6. ★ 没有标注数据时，eval set 从哪来？ —— ◐ [16.1 节](ch16-evals-production.md#16.1)
 7. RAGAS 这类框架的指标是怎么算的？ —— ◐ [16.5 节](ch16-evals-production.md#16.5)
 8. ★ 检索召回了错误的文档，或者正确文档明明在库里却没召回，你从哪里查起？ —— ✅ [15.6 节](ch15-rag.md#15.6)、[15.8.2 节](ch15-rag.md#15.8.2)
 
@@ -278,7 +278,7 @@
 5. 知识库频繁更新，怎么做版本管理，怎么保证答案是最新的？ —— ○（计划数据与检索基础设施章）
 6. 记忆和 RAG 知识库要不要放在同一个库？ —— ○（计划 agent 深入章）
 
-## C.8 Agent、工具调用与协议 **[经验]**
+## C.8 Agent、tool calling 与协议 **[经验]**
 
 ### C.8.1 Agent 基础
 
@@ -293,15 +293,15 @@
 9. computer-use agent、浏览器 agent 的难点在哪里？ —— ○（计划 agent 深入章）
 10. 让 LLM 当 agent 的核心有哪些局限？ —— ✅ [11.9 节](ch11-agent-harness.md#11.9)
 
-### C.8.2 工具调用
+### C.8.2 Tool calling
 
 1. ★ function calling 的底层原理是什么？模型是怎么学会调用工具的？ —— ✅ [10.1 节](ch10-tool-calling.md#10.1)
 2. ★ 一个工具定义包含哪些字段？从模型决定调用到结果回到上下文，消息是怎么一条条走的？ —— ✅ [10.2 节](ch10-tool-calling.md#10.2)、[10.4 节](ch10-tool-calling.md#10.4)
 3. ★ 怎样设计好用的工具？工具粒度该多细（一个万能 SQL 工具还是多个专用工具）？ —— ✅ [10.3 节](ch10-tool-calling.md#10.3)
-4. 结构化输出和 function calling 有什么区别？ —— ✅ [10.6 节](ch10-tool-calling.md#10.6)
+4. structured output 和 function calling 有什么区别？ —— ✅ [10.6 节](ch10-tool-calling.md#10.6)
 5. ★ 模型生成的参数格式错误或缺失，怎么处理？ —— ✅ [10.5 节](ch10-tool-calling.md#10.5)
-6. 并行工具调用怎么实现？工具之间有依赖怎么办？ —— ✅ [10.4 节](ch10-tool-calling.md#10.4)
-7. ★ 工具调用失败、超时、返回异常，怎么重试和降级？ —— ✅ [10.5 节](ch10-tool-calling.md#10.5)
+6. 并行 tool calling 怎么实现？工具之间有依赖怎么办？ —— ✅ [10.4 节](ch10-tool-calling.md#10.4)
+7. ★ tool calling 失败、超时、返回异常，怎么重试和降级？ —— ✅ [10.5 节](ch10-tool-calling.md#10.5)
 8. 模型调用了错误的工具，参数还看起来很合理，怎么防？ —— ◐ [10.3 节](ch10-tool-calling.md#10.3)、[11.5 节](ch11-agent-harness.md#11.5)
 9. 怎样防止模型臆造出不存在的工具能力？ —— ◐ [10.3 节](ch10-tool-calling.md#10.3)
 10. 工具返回的结果很大，怎么交给模型？ —— ✅ [10.3 节](ch10-tool-calling.md#10.3)、[11.4 节](ch11-agent-harness.md#11.4)
@@ -310,18 +310,18 @@
 
 1. ★ agent 的记忆分哪几类？工作记忆、短期记忆、长期记忆分别怎么实现？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)（计划 agent 深入章）
 2. ★ 上下文有限时，怎么设计分层记忆的写入、读取、压缩和过期？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)
-3. 滑动窗口、摘要、向量检索三种记忆方案怎么比较？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)
+3. sliding window、摘要、向量检索三种记忆方案怎么比较？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)
 4. 新旧记忆冲突时听谁的？"值不值得存"由规则判断还是模型判断？ —— ○（计划 agent 深入章）
 5. 摘要会不会把细节合丢？检索记忆时相关性和时间远近怎么平衡？ —— ○（计划 agent 深入章）
-6. ★ 什么是上下文工程？上下文压缩（compaction）怎么做？ —— ✅ [9.8 节](ch09-prompt-engineering.md#9.8)、[11.4 节](ch11-agent-harness.md#11.4)
+6. ★ 什么是 context engineering？上下文压缩（compaction）怎么做？ —— ✅ [9.8 节](ch09-prompt-engineering.md#9.8)、[11.4 节](ch11-agent-harness.md#11.4)
 7. 长期运行的 agent 会"漂移"，怎么处理？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)
 8. 设计一个跨会话的个人助理记忆系统。 —— ○（计划 agent 深入章）
 
 ### C.8.4 多 agent
 
-1. ★ 单 agent 和多 agent 怎么选？多 agent 什么时候会崩？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)（子 agent）
+1. ★ 单 agent 和多 agent 怎么选？多 agent 什么时候会崩？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)（subagent）
 2. 层级、辩论、市场三种协作模式分别适合什么？ —— ○（计划 agent 深入章）
-3. 子 agent 和 agent 团队有什么区别？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)
+3. subagent 和 agent 团队有什么区别？ —— ◐ [11.4 节](ch11-agent-harness.md#11.4)
 4. 多 agent 之间共享记忆还是各自独立？ —— ○（计划 agent 深入章）
 5. 多 agent 的死锁、信息过载、目标冲突怎么解决？ —— ○（计划 agent 深入章）
 6. 多 agent 的工具输出互相矛盾，怎么协调？ —— ○（计划 agent 深入章）
@@ -338,13 +338,13 @@
 8. 设计一个面向分析师 agent、连接内部数仓的 MCP 服务器：用共享账号还是按用户鉴权？大结果和错误怎么返回？ —— ◐ [12.2 节](ch12-mcp.md#12.2)、[12.5 节](ch12-mcp.md#12.5)、[10.3 节](ch10-tool-calling.md#10.3)
 9. agent 反复调用 list_tables，延迟很高，怎么优化？ —— ◐ [12.3 节](ch12-mcp.md#12.3)（缓存提示）
 10. A2A 协议是什么？和 MCP 是什么关系？ —— ○（计划 agent 深入章）
-11. ★ Agent Skills 是什么？渐进式披露怎样节省上下文？和 MCP 怎么分工？ —— ✅ [13.1 节](ch13-skills.md#13.1)、[13.3 节](ch13-skills.md#13.3)、[13.5 节](ch13-skills.md#13.5)
+11. ★ Agent Skills 是什么？progressive disclosure 怎样节省上下文？和 MCP 怎么分工？ —— ✅ [13.1 节](ch13-skills.md#13.1)、[13.3 节](ch13-skills.md#13.3)、[13.5 节](ch13-skills.md#13.5)
 
 ### C.8.6 框架
 
 1. ★ LangChain、LangGraph、LlamaIndex 有什么区别？怎么选？ —— ◐ [14.1 节](ch14-langchain.md#14.1)、[14.5 节](ch14-langchain.md#14.5)（LlamaIndex 未讲）
 2. LangChain 的核心组件有哪些？链和 agent 有什么区别？ —— ✅ [14.2 节](ch14-langchain.md#14.2)
-3. LangChain 1.x 的 `create_agent` 和中间件是怎么工作的？ —— ✅ [14.3 节](ch14-langchain.md#14.3)
+3. LangChain 1.x 的 `create_agent` 和 middleware 是怎么工作的？ —— ✅ [14.3 节](ch14-langchain.md#14.3)
 4. LangGraph 的 StateGraph 是什么？检查点和人工中断怎么实现？ —— ✅ [14.4 节](ch14-langchain.md#14.4)
 5. LCEL、输出解析器、文本切分器是做什么的？ —— ◐ [14.2 节](ch14-langchain.md#14.2)
 6. AutoGen、CrewAI、MetaGPT 各有什么特点？ —— ○
@@ -354,10 +354,10 @@
 
 1. ★ agent 陷入死循环，怎么检测和打断？ —— ✅ [11.2 节](ch11-agent-harness.md#11.2)、[14.3 节](ch14-langchain.md#14.3)
 2. ★ 长任务的检查点和断点续跑怎么设计？ —— ✅ [14.4 节](ch14-langchain.md#14.4)、[11.4 节](ch11-agent-harness.md#11.4)
-3. ★ 删库、执行命令这类高危操作怎么防？人在回路怎么设计？ —— ✅ [11.5 节](ch11-agent-harness.md#11.5)
-4. 安全地执行模型生成的代码：沙箱怎么做？ —— ✅ [11.5 节](ch11-agent-harness.md#11.5)
+3. ★ 删库、执行命令这类高危操作怎么防？human-in-the-loop 怎么设计？ —— ✅ [11.5 节](ch11-agent-harness.md#11.5)
+4. 安全地执行模型生成的代码：sandbox 怎么做？ —— ✅ [11.5 节](ch11-agent-harness.md#11.5)
 5. ★ 长流程里的 token 成本怎么控制？每个任务的预算怎么强制执行？ —— ✅ [11.6 节](ch11-agent-harness.md#11.6)、[16.8 节](ch16-evals-production.md#16.8)
-6. agent 的可观测性：日志、链路追踪、监控指标看什么？ —— ✅ [16.6 节](ch16-evals-production.md#16.6)
+6. agent 的 observability：日志、链路追踪、监控指标看什么？ —— ✅ [16.6 节](ch16-evals-production.md#16.6)
 7. ★ 怎么评测一个 agent？SWE-bench 这类基准有什么局限？ —— ✅ [16.1 节](ch16-evals-production.md#16.1)、[16.3 节](ch16-evals-production.md#16.3)
 8. agent 任务太慢，怎么提速？ —— ◐ [10.4 节](ch10-tool-calling.md#10.4)、[16.8 节](ch16-evals-production.md#16.8)
 
@@ -366,7 +366,7 @@
 ### C.9.1 评测
 
 1. ★ 为什么 LLM 评测难？没有唯一正确答案时怎么评？ —— ✅ [16.1 节](ch16-evals-production.md#16.1)
-2. ★ LLM 当评委（LLM-as-a-judge）怎么用？有哪些失效方式（位置偏差、长度偏差、偏爱自家模型）？怎么加固？ —— ✅ [16.5 节](ch16-evals-production.md#16.5)、[16.9.4 节](ch16-evals-production.md#16.9.4)
+2. ★ LLM-as-a-judge 怎么用？有哪些失效方式（位置偏差、长度偏差、偏爱自家模型）？怎么加固？ —— ✅ [16.5 节](ch16-evals-production.md#16.5)、[16.9.4 节](ch16-evals-production.md#16.9.4)
 3. ★ 改了提示或换了模型，怎么发现退化？托管模型更新后行为变了，什么能发现？ —— ✅ [16.4 节](ch16-evals-production.md#16.4)、[16.6 节](ch16-evals-production.md#16.6)
 4. 怎么从统计上比较两个模型或两个提示？分数差多少才算显著？ —— ✅ [16.4 节](ch16-evals-production.md#16.4)、[2.3 节](ch02-statistics.md#2.3)
 5. pass@k 和 pass^k 的区别？为什么上线更该看 pass^k？ —— ✅ [16.3 节](ch16-evals-production.md#16.3)
@@ -389,10 +389,10 @@
 
 ### C.9.3 安全
 
-1. ★ 提示注入的原理是什么？直接注入和间接注入有什么区别？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)
-2. ★ 在架构层面怎样防提示注入和数据外泄？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)、[16.9.5 节](ch16-evals-production.md#16.9.5)、[11.5 节](ch11-agent-harness.md#11.5)
-3. 越狱有哪些常见手法？红队测试怎么做？ —— ○（计划安全章）
-4. 输入和输出护栏（guardrails）怎么设计？PII 怎么处理？ —— ◐ [16.7 节](ch16-evals-production.md#16.7)（计划安全章）
+1. ★ prompt injection 的原理是什么？直接注入和间接注入有什么区别？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)
+2. ★ 在架构层面怎样防 prompt injection 和数据外泄？ —— ✅ [16.7 节](ch16-evals-production.md#16.7)、[16.9.5 节](ch16-evals-production.md#16.9.5)、[11.5 节](ch11-agent-harness.md#11.5)
+3. jailbreak 有哪些常见手法？red teaming 测试怎么做？ —— ○（计划安全章）
+4. 输入和输出 guardrails 怎么设计？PII 怎么处理？ —— ◐ [16.7 节](ch16-evals-production.md#16.7)（计划安全章）
 5. 怎样防止模型输出训练数据中记住的隐私或受版权保护的内容？ —— ○（计划安全章）
 6. 数据投毒、开源模型后门是什么？怎么防？ —— ○（计划安全章）
 7. 消费级产品里的生成式 AI 安全怎么做？（OpenAI、Anthropic、Google） —— ◐ [16.7 节](ch16-evals-production.md#16.7)（计划安全章）
@@ -406,14 +406,14 @@
 
 这一类题集中出现在"前端转 AI 全栈"和 AI 应用开发的面经里，和你的前端背景最相关。
 
-1. ★ 流式输出的原理是什么？为什么"打字机效果"不是前端动画，而是自回归生成的直接体现？ —— ◐ [17.1 节](ch17-inference-serving.md#17.1)（计划 AI 前端章）
-2. ★ SSE、WebSocket、HTTP 分块传输怎么选？为什么 AI 回复多用 SSE？ —— ○（计划 AI 前端章）
+1. ★ 流式输出的原理是什么？为什么"打字机效果"不是前端动画，而是 autoregressive 生成的直接体现？ —— ◐ [17.1 节](ch17-inference-serving.md#17.1)（计划 AI 前端章）
+2. ★ SSE、WebSocket、HTTP chunking 传输怎么选？为什么 AI 回复多用 SSE？ —— ○（计划 AI 前端章）
 3. ★ `EventSource` 只能发 GET，为什么很多实现改用 `fetch` + `ReadableStream`？怎么手写一个 SSE 解析器？ —— ○（计划 AI 前端章）
 4. ★ 用户点"停止生成"、切换页面或组件卸载时，怎么中断请求（`AbortController`）并避免内存泄漏？后端怎么停止推理？ —— ○（计划 AI 前端章）
 5. 用户快速连点发送，导致多个流交错，怎么处理？ —— ○（计划 AI 前端章）
 6. 流式 Markdown 怎么增量渲染？代码块没闭合时怎么办？怎么防 XSS？ —— ○（计划 AI 前端章）
 7. 很长的对话怎么做虚拟滚动和懒加载？自动滚动到底部和用户手动上翻怎么兼容？ —— ○（计划 AI 前端章）
-8. 流式输出时如何同时展示工具调用的进度？Function calling 给流式带来什么挑战？ —— ◐ [10.4 节](ch10-tool-calling.md#10.4)（计划 AI 前端章）
+8. 流式输出时如何同时展示 tool calling 的进度？Function calling 给流式带来什么挑战？ —— ◐ [10.4 节](ch10-tool-calling.md#10.4)（计划 AI 前端章）
 9. 部署到 nginx 后流式变成一次性返回，可能是什么原因？ —— ○（计划 AI 前端章）
 10. 设计一个 AI 聊天应用的文件上传：大文件、多模态，最终放进模型上下文。（xAI） —— ○（计划 AI 前端章）
 11. 设计 OpenAI Playground。（OpenAI） —— ○（计划 AI 前端章）
@@ -449,9 +449,9 @@
 ### C.11.3 平台与基础设施类
 
 1. ★ 端到端设计 ChatGPT。 —— ◐ 第 9、17 章、C.10
-2. ★ 设计一个 LLM 推理平台；设计一个高效采样的 API，支持批处理和请求编排。（Anthropic） —— ✅ 第 17 章
+2. ★ 设计一个 LLM 推理平台；设计一个高效采样的 API，支持 batching 和请求编排。（Anthropic） —— ✅ 第 17 章
 3. 设计一个 LLM 评测平台；设计一个实验追踪平台。（Google） —— ◐ 第 16 章
-4. ★ LLM 应用的缓存策略：精确缓存、语义缓存、提示缓存。 —— ◐ [11.6 节](ch11-agent-harness.md#11.6)、[17.5 节](ch17-inference-serving.md#17.5)
+4. ★ LLM 应用的缓存策略：精确缓存、语义缓存、prompt caching。 —— ◐ [11.6 节](ch11-agent-harness.md#11.6)、[17.5 节](ch17-inference-serving.md#17.5)
 5. ★ 限流、配额与成本管理怎么设计？厂商限流时怎么办？ —— ◐ [16.8 节](ch16-evals-production.md#16.8)
 6. ★ 主模型挂了怎么回退？怎么在不停机的情况下换厂商或换模型？ —— ◐ [16.8 节](ch16-evals-production.md#16.8)
 7. 语义路由：按难度把请求分给大模型或小模型。 —— ✅ [16.8 节](ch16-evals-production.md#16.8)、[16.9.6 节](ch16-evals-production.md#16.9.6)
@@ -463,7 +463,7 @@
 
 1. 设计一个实时语音 AI 应用：延迟预算怎么分？ —— ○
 2. 级联（ASR→LLM→TTS）和端到端语音模型怎么选？打断（barge-in）和轮次判断怎么做？ —— ○
-3. 工具调用很慢时，语音 agent 怎么"填空"？ —— ○
+3. tool calling 很慢时，语音 agent 怎么"填空"？ —— ○
 
 ## C.12 手撕代码 **[经验]**
 
@@ -471,9 +471,9 @@
 
 ### C.12.1 模型相关
 
-1. ★ 实现缩放点积注意力，带因果掩码和 padding 掩码。 —— ✅ [6.5.1 节](ch06-self-attention.md#6.5.1)、`ch05_06_lm_attention.py`
-2. ★ 实现多头注意力，讲清每一步的张量形状。 —— ◐ [6.2 节](ch06-self-attention.md#6.2)（计划第 7 章给出完整实现）
-3. 把多头注意力改成 GQA / MQA。 —— ○（计划第 7 章）
+1. ★ 实现缩放点积注意力，带 causal mask 和 padding 掩码。 —— ✅ [6.5.1 节](ch06-self-attention.md#6.5.1)、`ch05_06_lm_attention.py`
+2. ★ 实现 multi-head attention，讲清每一步的张量形状。 —— ◐ [6.2 节](ch06-self-attention.md#6.2)（计划第 7 章给出完整实现）
+3. 把 multi-head attention 改成 GQA / MQA。 —— ○（计划第 7 章）
 4. ★ 实现 KV cache 和单步解码。 —— ○（计划第 7 章）
 5. ★ 实现数值稳定的 softmax 和交叉熵。 —— ✅ [4.3 节](ch04-calculus-optimization.md#4.3)、[A.5 节](appendix-a-math-quick-reference.md#A.5)
 6. 实现 LayerNorm、RMSNorm。 —— ○（计划第 7 章）
@@ -482,7 +482,7 @@
 9. 实现 beam search。 —— ○（计划第 7 章）
 10. 实现 BPE 的训练和编码。 —— ○（计划第 7 章）
 11. 实现一个 LoRA 线性层。 —— ✅ [8.5 节](ch08-pre-post-training.md#8.5)、`ch08_post_training.py`
-12. 实现 DPO 损失、PPO 的裁剪目标。 —— ◐ [8.7 节](ch08-pre-post-training.md#8.7)、`ch08_post_training.py`（PPO 裁剪未实现）
+12. 实现 DPO 损失、PPO 的 clipped objective。 —— ◐ [8.7 节](ch08-pre-post-training.md#8.7)、`ch08_post_training.py`（PPO 裁剪未实现）
 13. 实现一个最小的 decoder-only Transformer 并训练它。 —— ○（计划第 7 章）
 14. 实现 Adam 优化器。 —— ✅ [4.7 节](ch04-calculus-optimization.md#4.7)
 
@@ -490,16 +490,16 @@
 
 1. ★ 实现一个最小的 RAG：切块、向量化、余弦检索。 —— ✅ `ch15_rag.py`
 2. 实现 BM25 和 RRF 融合。 —— ✅ [15.3 节](ch15-rag.md#15.3)、[15.5 节](ch15-rag.md#15.5)
-3. ★ 实现一个带工具调用和预算上限的最小 agent 循环。 —— ✅ [11.2 节](ch11-agent-harness.md#11.2)、`ch11_agent_harness.py`
+3. ★ 实现一个带 tool calling 和预算上限的最小 agent 循环。 —— ✅ [11.2 节](ch11-agent-harness.md#11.2)、`ch11_agent_harness.py`
 4. 实现一个 function calling 处理器（解析、校验、执行、回填）。 —— ✅ `ch10_tool_calling.py`
-5. 实现对话记忆：滑动窗口、摘要、缓冲。 —— ◐ `ch11_agent_harness.py`
-6. 实现一个 LLM 评委流水线，并消除位置偏差。 —— ✅ [16.9.4 节](ch16-evals-production.md#16.9.4)、`ch16_evals.py`
+5. 实现对话记忆：sliding window、摘要、缓冲。 —— ◐ `ch11_agent_harness.py`
+6. 实现一个 LLM-as-a-judge 流水线，并消除位置偏差。 —— ✅ [16.9.4 节](ch16-evals-production.md#16.9.4)、`ch16_evals.py`
 7. ★ 实现带指数退避和抖动的重试。 —— ○（计划实战项目章）
 8. 实现流式 SSE 解析器。 —— ○（计划 AI 前端章）
 9. 实现带 TTL 的 LRU 缓存、语义缓存。 —— ○（计划实战项目章）
 10. 实现令牌桶限流器，再改成分布式的。 —— ○（计划实战项目章）
-11. 实现一个处理五万篇文档的异步批处理器（控制并发）。 —— ○（计划实战项目章）
-12. 实现提示注入检测、PII 输出过滤。 —— ◐ [16.9.5 节](ch16-evals-production.md#16.9.5)
+11. 实现一个处理五万篇文档的异步 batching 器（控制并发）。 —— ○（计划实战项目章）
+12. 实现 prompt injection 检测、PII 输出过滤。 —— ◐ [16.9.5 节](ch16-evals-production.md#16.9.5)
 
 ### C.12.3 大厂通用编码题（AI 公司真题）
 
@@ -552,19 +552,19 @@
 | C.4 对齐与强化学习 | 20 | 11 | 5 | 4 | RLAIF 与 Constitutional AI、对齐税、拒绝采样 |
 | C.5 推理与部署 | 31 | 19 | 8 | 4 | 框架对比、端侧推理 |
 | C.6 提示 | 18 | 12 | 5 | 1 | 多语言 |
-| C.7 RAG | 38 | 9 | 15 | 14 | 查询改写、引用、增量索引、向量库内部 |
+| C.7 RAG | 38 | 9 | 15 | 14 | query rewriting、引用、增量索引、向量库内部 |
 | C.8 Agent 与协议 | 60 | 34 | 15 | 11 | 记忆系统、多 agent、A2A |
-| C.9 评测与安全 | 30 | 7 | 13 | 10 | 传统指标与基准、红队、护栏 |
+| C.9 评测与安全 | 30 | 7 | 13 | 10 | 传统指标与基准、red teaming、guardrails |
 | C.10 AI 前端 | 16 | 0 | 3 | 13 | SSE、流式渲染、中断、长对话 |
 | C.11 系统设计 | 26 | 5 | 11 | 10 | 需要把多章串起来练 |
-| C.12 手撕代码 | 34 | 10 | 4 | 20 | 多头注意力、KV cache、BPE、重试与限流 |
+| C.12 手撕代码 | 34 | 10 | 4 | 20 | multi-head attention、KV cache、BPE、重试与限流 |
 
 **结论** **[经验]**：
 
 1. **工程实践部分（第 9–17 章）覆盖得最好**。RAG、agent、MCP、推理这几类高频题，大部分已经能在书里找到原理和数字。
 2. **训练和对齐（C.3、C.4）已由第 8 章补上**，剩下的是 RLAIF、对齐税这类概念题和多机训练的容错。
-3. **AI 前端（C.10）是现在最大的空白**，而且和你的背景最贴近：这些题本质上是前端工程问题加上一点对自回归生成的理解，补起来成本低、区分度高。第 18 章的项目会把它做出来。
-4. **第 7 章（动手训练一个小 GPT）能一次补上手撕代码里的大半**（原理已在 5.1、6.3 节补上，第 7 章负责写成代码）：多头注意力、KV cache、RoPE、RMSNorm、BPE、采样，都可以在同一份代码里实现。
+3. **AI 前端（C.10）是现在最大的空白**，而且和你的背景最贴近：这些题本质上是前端工程问题加上一点对 autoregressive 生成的理解，补起来成本低、区分度高。第 18 章的项目会把它做出来。
+4. **第 7 章（动手训练一个小 GPT）能一次补上手撕代码里的大半**（原理已在 5.1、6.3 节补上，第 7 章负责写成代码）：multi-head attention、KV cache、RoPE、RMSNorm、BPE、采样，都可以在同一份代码里实现。
 5. 系统设计题不需要新章节，需要的是练习：拿 C.11 里的题，按"需求 → 架构图 → 关键数字 → 失效方式 → 评测"的顺序各写一页。
 
 **建议的补课顺序**（按 AI 工程岗的路线）：
@@ -572,13 +572,13 @@
 | 顺序 | 内容 | 补上的题 |
 |---|---|---|
 | 已完成 | 第 8 章：预训练与后训练 | C.3、C.4 的大部分 |
-| 1 | 第 18 章的项目，含 AI 前端和真实 API | C.10、C.12.2 的重试与限流、C.14 的项目介绍、C.7 的查询改写与引用 |
+| 1 | 第 18 章的项目，含 AI 前端和真实 API | C.10、C.12.2 的重试与限流、C.14 的项目介绍、C.7 的 query rewriting 与引用 |
 | 2 | 第 7 章：动手训练一个小 GPT | C.2 的 tokenizer 实现；C.12.1 的大部分 |
 | 3 | 系统设计练习，贯穿全程 | C.11 |
 | 4 | Agent 深入（记忆、多 agent、A2A） | C.8.3、C.8.4 |
 | 5 | 数据与检索基础设施、评测工程、安全 | C.7.5、C.9 的剩余部分 |
 
-**关于"介绍你的项目"** **[经验]**：几篇面经里，一个带记忆的 RAG 项目被追问了四十多个问题，从记忆冲突、指代补全、混合检索打分、增量索引，一直问到 asyncio 和 SGLang。所以实战项目那一章最好做成一个能被这样追问的项目：每个设计决定都留下理由和一个实测数字。
+**关于"介绍你的项目"** **[经验]**：几篇面经里，一个带记忆的 RAG 项目被追问了四十多个问题，从记忆冲突、指代补全、hybrid search 打分、增量索引，一直问到 asyncio 和 SGLang。所以实战项目那一章最好做成一个能被这样追问的项目：每个设计决定都留下理由和一个实测数字。
 
 ## 参考资料
 
@@ -600,9 +600,9 @@
 9. wdndev. *llm_interview_note*（GitHub）。大模型算法与应用工程师知识点与面试题，按基础、架构、数据、分布式训练、微调、推理、强化学习、RAG、评估、应用分章。
 10. km1994. *LLMs_interview_notes*（GitHub）；jackaduma. *awesome_LLMs_interview_notes*（GitHub）。
 11. ricardokevins. *大模型面试题库*（GitHub Pages）。十个核心模块、手撕代码专项、分布式训练专项、RL 专项。
-12. 阿里云开发者社区. *AI Agent 面试题*（基础、记忆、工具调用、RAG、框架、多 agent、工程化、全栈）；*大模型推理加速面试题.*
+12. 阿里云开发者社区. *AI Agent 面试题*（基础、记忆、tool calling、RAG、框架、多 agent、工程化、全栈）；*大模型推理加速面试题.*
 13. CSDN. *大模型应用开发面试题*（agent、部署、评测、微调、LangChain、提示、RAG 共七十余题）。
 14. CSDN. 字节跳动大模型应用岗面经（带记忆的对话 agent + RAG 项目追问）；腾讯大模型算法岗面经。
 15. 80aj. *大模型面试 100 问：推理与部署篇*，2026-01。
 16. 掘金、CSDN 上"前端转 AI 全栈"系列：SSE 流式输出、fetch + ReadableStream、React/Vue 流式渲染。
-17. CSDN、掘金. DeepSpeed ZeRO、混合精度与显存计算相关面试整理。
+17. CSDN、掘金. DeepSpeed ZeRO、mixed precision 与显存计算相关面试整理。

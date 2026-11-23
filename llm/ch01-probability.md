@@ -21,7 +21,7 @@
 | 方差、协方差 | 参数初始化、LayerNorm、为什么注意力打分要除以 $\sqrt d$ |
 | 高斯分布 | 参数初始化、扩散模型、噪声分析 |
 | 大数定律 | 用一小批样本的平均损失代替全体数据的期望（随机梯度下降） |
-| 熵、交叉熵、KL | 训练损失、困惑度、知识蒸馏、RLHF 里的 KL 惩罚 |
+| 熵、交叉熵、KL | 训练损失、perplexity、知识蒸馏、RLHF 里的 KL 惩罚 |
 
 **前置知识**
 
@@ -164,7 +164,7 @@ $$D_{\mathrm{KL}}(p\|q)=\mathbb E_p\Big[-\log\frac{q(x)}{p(x)}\Big]\ \ge\ -\log\
 **总变差距离** **[事实 + 已证]**：另一种衡量两个分布差多远的方式，
 $$\mathrm{TV}(p,q)=\frac12\sum_x|p(x)-q(x)|=\max_{A}\,|p(A)-q(A)|,$$
 即"任何一个事件，在两个分布下的概率最多差多少"。它是对称的，取值在 0 到 1 之间。两个常用的事实：
-- $\sum_x\min(p(x),q(x))=1-\mathrm{TV}(p,q)$。证明：$\min(a,b)=\frac{a+b-|a-b|}{2}$，对 $x$ 求和即得。投机解码的接受率就是这个量（[17.7 节](ch17-inference-serving.md#17.7)）；
+- $\sum_x\min(p(x),q(x))=1-\mathrm{TV}(p,q)$。证明：$\min(a,b)=\frac{a+b-|a-b|}{2}$，对 $x$ 求和即得。speculative decoding 的接受率就是这个量（[17.7 节](ch17-inference-serving.md#17.7)）；
 - **Pinsker 不等式**：$\mathrm{TV}(p,q)\le\sqrt{D_{\mathrm{KL}}(p\|q)/2}$。KL 小，总变差一定小；反过来不成立。
 
 **互信息**：知道 $Y$ 之后，$X$ 的不确定性减少了多少：

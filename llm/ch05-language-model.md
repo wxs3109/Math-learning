@@ -39,7 +39,7 @@ BPE 的实现和更多细节放在第 7 章。
 $$p(x_1,\dots,x_T)=\prod_{t=1}^T p(x_t\mid x_1,\dots,x_{t-1}).$$
 所以只要会算"给定前文，下一个 token 的分布"，就等于会算整段文本的概率。**语言模型就是这个条件分布。**
 
-**生成文本**：从这个分布里抽一个 token，接到末尾，再抽下一个，如此重复。这叫自回归（autoregressive）生成。生成时调的"温度"，就是对 logits 除以 $T$ 再做 softmax（[A.5 节](appendix-a-math-quick-reference.md#A.5)）。
+**生成文本**：从这个分布里抽一个 token，接到末尾，再抽下一个，如此重复。这叫 autoregressive 生成。生成时调的"温度"，就是对 logits 除以 $T$ 再做 softmax（[A.5 节](appendix-a-math-quick-reference.md#A.5)）。
 
 ## 5.2 训练目标：最大似然 = 最小化交叉熵 **[已证]**
 
@@ -47,7 +47,7 @@ $$p(x_1,\dots,x_T)=\prod_{t=1}^T p(x_t\mid x_1,\dots,x_{t-1}).$$
 $$\mathcal L(\theta)=-\frac1N\sum_t\log p_\theta(x_t\mid x_{<t}).$$
 这就是"交叉熵损失"。它的含义是：模型给**真实出现的下一个 token** 分配的概率，取对数后求平均，再加负号。等价性的证明见 [A.3 节](appendix-a-math-quick-reference.md#A.3)。
 
-**困惑度**（perplexity）定义为 $\mathrm{PPL}=e^{\mathcal L}$。直观上，它相当于"模型平均在多少个候选里犹豫"：
+**perplexity**定义为 $\mathrm{PPL}=e^{\mathcal L}$。直观上，它相当于"模型平均在多少个候选里犹豫"：
 - 完全瞎猜（均匀分布）时 $\mathrm{PPL}=V$；
 - 完美预测时 $\mathrm{PPL}=1$。
 
@@ -70,7 +70,7 @@ $$\hat P(b\mid a)=\frac{\#\{a\text{ 后面紧跟 }b\}}{\#\{a\}}.$$
 
 一段长度为 $T$ 的文本于是变成矩阵 $X\in\mathbb R^{T\times d}$，第 $t$ 行是第 $t$ 个 token 的向量。$f_\theta$ 要做的就是：读入 $X$，在每个位置输出"下一个 token"的 logits。
 
-**剩下的问题**：$f_\theta$ 怎样才能在每个位置有效地利用整段前文？这就是 Transformer 要解决的，见 [第 6 章 自注意力与 Transformer](ch06-self-attention.md)。
+**剩下的问题**：$f_\theta$ 怎样才能在每个位置有效地利用整段前文？这就是 Transformer 要解决的，见 [第 6 章 Self-attention 与 Transformer](ch06-self-attention.md)。
 
 ## 5.5 数值实验
 
@@ -78,21 +78,21 @@ $$\hat P(b\mid a)=\frac{\#\{a\text{ 后面紧跟 }b\}}{\#\{a\}}.$$
 
 在一小段《哈姆雷特》独白上训练字符级 bigram 模型（词表 $V=19$），后一小段做测试：
 
-| 平滑 $\alpha$ | 训练集困惑度 | 测试集困惑度 |
+| 平滑 $\alpha$ | 训练集 perplexity | 测试集 perplexity |
 |---|---|---|
 | 0.01 | 3.88 | **134.51** |
 | 0.1 | 4.65 | 34.27 |
 | 1.0 | 8.74 | 18.67 |
 
 - 平滑越弱，训练集越好，测试集越差。
-- $\alpha=0.01$ 时测试集困惑度是 134，**比瞎猜（19）还差得多**。原因是测试集里出现了训练集没见过的字符对，模型给了它们几乎为 0 的概率，于是 $-\log p$ 非常大。这就是 5.3 的局限 2，也是最朴素的过拟合。
+- $\alpha=0.01$ 时测试集 perplexity 是 134，**比瞎猜（19）还差得多**。原因是测试集里出现了训练集没见过的字符对，模型给了它们几乎为 0 的概率，于是 $-\log p$ 非常大。这就是 5.3 的局限 2，也是最朴素的过拟合。
 - 采样结果是 `tin atrherrr t tgsind bliofwwslin ...`：局部像英文（字母组合合理），整体没有意义，因为模型只看前一个字符。
 
 ## 5.6 小结与疑问
 
 **搞懂了什么**：
 - 大模型 = 下一个 token 的条件分布；训练 = 最大似然；生成 = 逐个采样。
-- 用困惑度衡量模型好坏，瞎猜是 $V$，完美是 1。
+- 用 perplexity 衡量模型好坏，瞎猜是 $V$，完美是 1。
 - bigram 模型的两个局限（看不远、没见过就是 0），正好说明了为什么需要神经网络和 embedding。
 
 **疑问**：
