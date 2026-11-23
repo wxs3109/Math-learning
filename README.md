@@ -30,4 +30,4 @@
 | 类型 | 标题 | 状态 | 更新日期 |
 |---|---|---|---|
 | 问题 | [弦图上 hardcore model 的快速混合：能否去掉 bounded separator 限制？](problems/chordal-hardcore-mixing.md) | 文献梳理 + 小规模实验 | 2026-11-22 |
-| 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | (⋆) 被推翻，改为加法形式 (⋆′)（仍给出多项式）；K 精确化为迹链 Green 范数；远足分解 + 孪生阻挡族已证；复合检验：单层指数 α<1，分层待定 | 2026-11-22 |
+| 问题 | [去掉 bounded separator 限制：基于团分解的路线](problems/chordal-remove-b.md) | (⋆) 被推翻，改为加法形式 (⋆′)（仍给出多项式）；K 精确化为迹链 Green 范数；远足分解 + 孪生阻挡族已证；⚠️ 分层星套星：减速指数随深度线性增长 ⇒ 很可能存在 n^{Θ(log n)} 下界，b 可能去不掉（数值，待严格证明） | 2026-11-22 |
