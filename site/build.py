@@ -40,7 +40,8 @@ PARTS = [
         ("ch6", "ch06-self-attention.md", "6", "自注意力与 Transformer",
          "query / key / value；因果掩码；为什么除以 √d；Transformer 块。"),
         ("ch7", None, "7", "动手训练一个小 GPT", "把前六章组装起来，用反向传播真正训练。"),
-        ("ch8", None, "8", "“大”是怎么来的", "scaling law、指令微调与 RLHF、推理优化。"),
+        ("ch8", "ch08-pre-post-training.md", "8", "预训练与后训练",
+         "scaling law 与 6ND；训练显存账本与 ZeRO；SFT、LoRA、QLoRA；RLHF 与 PPO；DPO 推导；GRPO；蒸馏；什么时候该微调。"),
     ]),
     ("第三部分 · 工程实践", [
         ("ch9", "ch09-prompt-engineering.md", "9", "提示工程",
