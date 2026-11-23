@@ -1,5 +1,5 @@
 r"""
-前置知识 P2 · 统计的配套代码（topics/llm-p2-statistics.md）。只依赖 numpy：python3 llm_p2_statistics.py
+第 2 章 · 统计的配套代码（llm/ch02-statistics.md）。只依赖 numpy：python3 ch02_statistics.py
 
 1. 估计量的偏差：样本方差除以 n 有偏，除以 n−1 无偏。
 2. 最大似然：高斯的 MLE；标准误差 ∝ 1/√n；bootstrap 置信区间。

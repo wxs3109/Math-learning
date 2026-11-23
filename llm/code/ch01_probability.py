@@ -1,5 +1,5 @@
 r"""
-前置知识 P1 · 概率论的配套代码（topics/llm-p1-probability.md）。只依赖 numpy：python3 llm_p1_probability.py
+第 1 章 · 概率论的配套代码（llm/ch01-probability.md）。只依赖 numpy：python3 ch01_probability.py
 
 1. 贝叶斯公式：检测阳性时真正患病的概率（基础比率的作用）。
 2. 期望、方差、协方差；"不相关"不等于"独立"。

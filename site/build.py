@@ -1,10 +1,11 @@
 r"""
-把 Math learning 仓库里的笔记和代码生成成一个单文件网页：site/index.html。
+把 llm/ 里的《大模型原理》笔记和代码生成成一个单文件网页：site/index.html。
 
+结构是一本书：部分 → 章 → 节。侧栏是可展开的章节目录，地址 #ch1/1.3 直接定位到第 1 章 1.3 节。
 设计原则：网页**不依赖任何外部脚本**，打开即正确显示。
 - 公式：构建时用 KaTeX（Node，site/tools/render_math.js）渲染成 HTML，KaTeX 字体以 data URI 嵌入页面。
 - 代码：构建时用 Pygments 高亮。
-- 导航、搜索、本页目录、上一篇 / 下一篇：页面里的一小段原生 JS。
+- 导航、搜索、上一章 / 下一章：页面里的一小段原生 JS。
 依赖：pip install markdown pygments；cd site/tools && npm install katex@0.16.11
 用法：python3 site/build.py
 """
@@ -16,50 +17,46 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 
 ROOT = Path(__file__).resolve().parent.parent
+BOOK = ROOT / "llm"
 SITE = ROOT / "site"
 KATEX = SITE / "tools" / "node_modules" / "katex" / "dist"
 
-# ---------------------------------------------------------------- 页面清单
-# (页面 id, 源文件, 分组, 侧栏短标题, 一句话简介)
-PAGES = [
-    ("llm", "topics/llm.md", "大模型原理", "学习路线",
-     "整个系列的目录和阅读顺序。"),
-    ("llm-00", "topics/llm-00-prerequisites.md", "大模型原理", "00 前置知识速览",
-     "一篇讲完正文要用的结论：交叉熵与 KL、最大似然、softmax、反向传播。"),
-    ("llm-01", "topics/llm-01-language-model.md", "大模型原理", "01 语言模型",
-     "预测下一个 token；困惑度；bigram 模型及其局限；embedding。"),
-    ("llm-02", "topics/llm-02-self-attention.md", "大模型原理", "02 自注意力",
-     "query / key / value；因果掩码；为什么除以 √d；Transformer 块。"),
-    ("llm-p1", "topics/llm-p1-probability.md", "前置知识", "P1 概率论",
-     "贝叶斯；期望、方差、协方差；多元高斯；大数定律与中心极限定理；熵与 KL。"),
-    ("llm-p2", "topics/llm-p2-statistics.md", "前置知识", "P2 统计",
-     "偏差与方差；最大似然；bootstrap；过拟合；正则化就是先验；验证集与测试集。"),
-    ("llm-p3", "topics/llm-p3-linear-algebra.md", "前置知识", "P3 线性代数",
-     "矩阵乘法的四种读法；谱分解；SVD 与 LoRA；投影；高维几何；张量形状。"),
-    ("llm-p4", "topics/llm-p4-calculus-optimization.md", "前置知识", "P4 微积分与优化",
-     "矩阵微积分；步长与条件数；动量、SGD、Adam；自动微分。"),
-    ("chordal-remove-b", "problems/chordal-remove-b.md", "研究笔记", "去掉 b 的尝试",
-     "团分解路线的全过程：归约、反例、迹链刻画，以及 n^Θ(log n) 下界的数值证据。"),
-    ("chordal-survey", "problems/chordal-hardcore-mixing.md", "研究笔记", "文献梳理",
-     "弦图上 hardcore 模型的快速混合：已有结果与小规模实验。"),
+# ---------------------------------------------------------------- 全书结构
+# 每章：(页面 id, 源文件, 章号, 章名, 一句话简介)；源文件为 None 表示待写
+PARTS = [
+    ("第一部分 · 数学基础", [
+        ("ch1", "ch01-probability.md", "1", "概率论",
+         "贝叶斯；期望、方差、协方差；多元高斯；大数定律与中心极限定理；熵与 KL。"),
+        ("ch2", "ch02-statistics.md", "2", "统计",
+         "偏差与方差；最大似然；bootstrap；过拟合；正则化就是先验；验证集与测试集。"),
+        ("ch3", "ch03-linear-algebra.md", "3", "线性代数",
+         "矩阵乘法的四种读法；谱分解；SVD 与 LoRA；投影；高维几何；张量形状。"),
+        ("ch4", "ch04-calculus-optimization.md", "4", "微积分与优化",
+         "矩阵微积分；步长与条件数；动量、SGD、Adam；自动微分。"),
+    ]),
+    ("第二部分 · 语言模型与 Transformer", [
+        ("ch5", "ch05-language-model.md", "5", "语言模型",
+         "预测下一个 token；交叉熵与困惑度；bigram 模型及其局限；embedding。"),
+        ("ch6", "ch06-self-attention.md", "6", "自注意力与 Transformer",
+         "query / key / value；因果掩码；为什么除以 √d；Transformer 块。"),
+        ("ch7", None, "7", "动手训练一个小 GPT", "把前六章组装起来，用反向传播真正训练。"),
+        ("ch8", None, "8", "“大”是怎么来的", "scaling law、指令微调与 RLHF、推理优化。"),
+    ]),
+    ("附录", [
+        ("appA", "appendix-a-math-quick-reference.md", "A", "数学速查",
+         "一页讲完第 5、6 章要用的结论：交叉熵与 KL、最大似然、softmax、反向传播。"),
+    ]),
 ]
-SERIES = ["llm", "llm-00", "llm-p1", "llm-p2", "llm-p3", "llm-p4", "llm-01", "llm-02"]
-PLANNED = [("03", "动手训练一个小 GPT", "把 00–02 组装起来，用反向传播真正训练。"),
-           ("04", "“大”是怎么来的", "scaling law、指令微调与 RLHF、推理优化。")]
-CODE_FIRST = ["llm_prereq.py", "llm_p1_probability.py", "llm_p2_statistics.py", "llm_p3_linear_algebra.py",
-              "llm_p4_calculus_optimization.py", "llm_basics.py"]
-
-FILE_TO_ID = {Path(src).name: pid for pid, src, *_ in PAGES}
+CHAPTERS = [c for _, cs in PARTS for c in cs]
+FILE_TO_ID = {src: pid for pid, src, *_ in CHAPTERS if src}
 FILE_TO_ID["README.md"] = "home"
-code_files = sorted((ROOT / "code").glob("*.py"),
-                    key=lambda p: (p.name not in CODE_FIRST,
-                                   CODE_FIRST.index(p.name) if p.name in CODE_FIRST else 0, p.name))
+code_files = sorted((BOOK / "code").glob("*.py"))
 CODE_ID = {p.name: "code-" + p.stem.replace("_", "-") for p in code_files}
 
 # ---------------------------------------------------------------- 公式
 MATH_RE = re.compile(r"\$\$(.+?)\$\$|\$(?!\s)([^$\n]+?)(?<!\s)\$", re.S)
 CODE_RE = re.compile(r"(```.*?```|`[^`\n]+`)", re.S)
-MATH = []          # 全站所有公式：{"tex", "display"}，最后一次性交给 KaTeX
+MATH = []          # 全书所有公式：{"tex", "display"}，最后一次性交给 KaTeX
 
 
 def protect_math(text):
@@ -77,8 +74,14 @@ def protect_math(text):
 def tex_to_plain(tex):
     """公式的纯文本近似，用于目录和搜索。"""
     t = re.sub(r"\\(mathrm|mathbf|text|operatorname|mathcal|mathbb)\{([^}]*)\}", r"\2", tex)
+    t = t.replace(r"\sqrt", "√").replace(r"\top", "ᵀ")
     t = re.sub(r"\\[a-zA-Z]+", " ", t)
     return re.sub(r"\s+", " ", re.sub(r"[{}_^\\]", "", t)).strip()
+
+
+def plain_title(t):
+    t = re.sub(r"\$(.+?)\$", lambda m: tex_to_plain(m.group(1)), t)
+    return re.sub(r"\*\*\[[^\]]*\]\*\*|\*\*|`", "", t).strip()
 
 
 # ---------------------------------------------------------------- Markdown 处理
@@ -106,14 +109,17 @@ def normalize_lists(text):
 
 
 def rewrite_link(href):
-    name = href.split("/")[-1].split("#")[0]
-    if name in FILE_TO_ID: return "#" + FILE_TO_ID[name]
+    """书内链接 → #页面 或 #页面/节号。"""
+    path, _, frag = href.partition("#")
+    name = path.split("/")[-1]
+    if name in FILE_TO_ID:
+        return "#" + FILE_TO_ID[name] + (f"/{frag}" if frag else "")
     if name in CODE_ID: return "#" + CODE_ID[name]
     return href
 
 
 TAG_CLASS = [("已证", "proved"), ("事实", "fact"), ("直觉", "intuition"), ("猜想", "conjecture"),
-             ("需核实", "verify"), ("数值", "numeric"), ("推论", "conjecture"), ("V", "fact"), ("I", "verify")]
+             ("需核实", "verify"), ("数值", "numeric")]
 
 
 def tag_html(label):
@@ -121,41 +127,27 @@ def tag_html(label):
     return f'<span class="tag tag-{cls}">{label}</span>'
 
 
-def postprocess(body):
-    """把 Markdown 生成的 HTML 改成本站的结构。"""
+NUM = r"([0-9A]+(?:\.\d+)+)"
+
+
+def postprocess(body, pid):
+    """把 Markdown 生成的 HTML 改成本站的结构：节号、锚点、标签、表格、代码块。"""
     body = re.sub(r'href="([^"]+)"', lambda m: f'href="{rewrite_link(m.group(1))}"', body)
     body = re.sub(r"<strong>\[([^\]<]{1,40})\]</strong>", lambda m: tag_html(m.group(1)), body)
     body = body.replace("<hr />", "")
-    body = re.sub(r"<h2>(\d+)\.\s*(.*?)</h2>", r'<h2><span class="secnum">\1</span><span>\2</span></h2>', body)
-    body = re.sub(r"<h3>(\d+\.\d+)\s*(.*?)</h3>", r'<h3><span class="subnum">\1</span><span>\2</span></h3>', body)
+    body = re.sub(rf"<h([23])>{NUM}\s+(.*?)</h\1>",
+                  lambda m: f'<h{m.group(1)} id="{pid}--{m.group(2)}"><span class="secnum">{m.group(2)}</span>'
+                            f'<span>{m.group(3)}</span></h{m.group(1)}>', body)
+    body = re.sub(r"<h2>(导读|参考资料)</h2>", lambda m: f'<h2 class="plain" id="{pid}--{m.group(1)}">{m.group(1)}</h2>', body)
     body = re.sub(r"<blockquote>\s*<p>⚠️\s*", '<blockquote class="callout"><p>', body)
     body = body.replace("<table>", '<div class="table-wrap"><table>').replace("</table>", "</table></div>")
     body = re.sub(r"<pre><code>", '<pre class="output"><span class="pre-label">输出</span><code>', body)
     return body
 
 
-def split_header(body):
-    """拆出 <h1> 和紧跟的元信息引用块：(标题, 元信息行, 其余正文)。"""
-    m = re.match(r"\s*<h1>(.*?)</h1>\s*(<blockquote>(.*?)</blockquote>)?", body, re.S)
-    if not m: return "", [], body
-    return m.group(1), re.findall(r"<p>(.*?)</p>", m.group(3) or "", re.S), body[m.end():]
-
-
-def page_header(eyebrow, title, meta, dek=""):
-    meta_html = "".join(f'<p class="meta-line">{x}</p>' for x in meta)
-    dek_html = f'<p class="dek">{dek}</p>' if dek else ""
-    return (f'<header class="page-head"><p class="eyebrow">{eyebrow}</p>'
-            f'<h1>{title}</h1>{dek_html}<div class="meta">{meta_html}</div></header>')
-
-
-def toc_texts(raw):
-    """从 Markdown 源里取二、三级标题，作为右侧目录的文字。"""
-    out = []
-    for lvl, t in re.findall(r"^(##|###) (.+)$", raw, re.M):
-        t = re.sub(r"\$(.+?)\$", lambda m: tex_to_plain(m.group(1)), t)
-        t = re.sub(r"\*\*\[[^\]]*\]\*\*|\*\*|`", "", t).strip()
-        out.append({"level": len(lvl), "text": t})
-    return out
+def md(raw, pid):
+    return postprocess(markdown.markdown(normalize_lists(protect_math(raw)),
+                                         extensions=["tables", "fenced_code", "sane_lists"]), pid)
 
 
 def plain_text(src):
@@ -164,78 +156,93 @@ def plain_text(src):
     return re.sub(r"\s+", " ", re.sub(r"[#>*`|\[\]()]", " ", t))
 
 
-# ---------------------------------------------------------------- 笔记页面
-pages = []
-for pid, src, group, short, dek in PAGES:
-    raw = (ROOT / src).read_text(encoding="utf-8")
-    body = postprocess(markdown.markdown(normalize_lists(protect_math(raw)),
-                                         extensions=["tables", "fenced_code", "sane_lists"]))
-    title, meta, rest = split_header(body)
-    title = re.sub(r"^大模型原理\s*·\s*\d+\s*", "", title)
-    eyebrow = (f"大模型原理 · 前置知识 {pid[-2:].upper()}" if pid.startswith("llm-p")
-               else f"大模型原理 · 第 {pid[-2:]} 篇" if pid in SERIES[1:] else group)
-    pages.append({"id": pid, "group": group, "short": short, "dek": dek, "toc": toc_texts(raw),
-                  "html": page_header(eyebrow, title, meta, dek) + f'<div class="prose">{rest}</div>',
-                  "text": plain_text(raw)})
+def sections_of(raw):
+    """从 Markdown 源里取带编号的二级标题：[{id: "1.3", title}]。"""
+    return [{"id": n, "title": plain_title(t)} for n, t in re.findall(rf"^## {NUM} (.+)$", raw, re.M)]
 
-# ---------------------------------------------------------------- 代码页面
+
+# ---------------------------------------------------------------- 各章页面
+pages, order = [], ["home"]
+for part, chs in PARTS:
+    for pid, src, num, title, dek in chs:
+        label = f"附录 {num}" if num.isalpha() else f"第 {num} 章"
+        if not src:
+            pages.append({"id": pid, "kind": "planned", "num": num, "title": title, "label": label,
+                          "part": part, "dek": dek, "sections": [], "html": "", "text": ""})
+            continue
+        raw = (BOOK / src).read_text(encoding="utf-8")
+        body = md(raw, pid)
+        m = re.match(r"\s*<h1>.*?</h1>\s*(<blockquote>(.*?)</blockquote>)?", body, re.S)
+        meta = re.findall(r"<p>(.*?)</p>", m.group(2) or "", re.S)
+        rest = body[m.end():]
+        head = (f'<header class="page-head chapter-head"><p class="eyebrow"><span>{label}</span>{part}</p>'
+                f'<h1>{title}</h1><p class="dek">{dek}</p>'
+                + "".join(f'<p class="meta-line">{x}</p>' for x in meta) + "</header>")
+        pages.append({"id": pid, "kind": "chapter", "num": num, "title": title, "label": label, "part": part,
+                      "dek": dek, "sections": sections_of(raw), "html": head + f'<div class="prose">{rest}</div>',
+                      "text": plain_text(raw)})
+        order.append(pid)
+
+# ---------------------------------------------------------------- 代码页面（附录 B）
 fmt = HtmlFormatter(nowrap=True)
 for p in code_files:
     code = p.read_text(encoding="utf-8")
     doc = re.search(r'r?"""(.*?)"""', code, re.S)
     summary = html.escape(doc.group(1).strip().splitlines()[0]) if doc else ""
-    body = (page_header("代码", f"<code>{p.name}</code>",
-                        [f"运行：<code>cd code &amp;&amp; python3 {p.name}</code>"], summary)
-            + f'<div class="prose"><pre class="code"><span class="pre-label">code/{p.name}</span>'
-              f'<code>{highlight(code, PythonLexer(), fmt)}</code></pre></div>')
-    pages.append({"id": CODE_ID[p.name], "group": "代码", "short": p.name, "dek": summary, "toc": [],
-                  "html": body, "text": plain_text(code)})
+    body = (f'<header class="page-head"><p class="eyebrow"><span>附录 B</span>代码</p>'
+            f'<h1><code>{p.name}</code></h1><p class="dek">{summary}</p>'
+            f'<p class="meta-line">运行：<code>cd llm/code &amp;&amp; python3 {p.name}</code></p></header>'
+            f'<div class="prose"><pre class="code"><span class="pre-label">llm/code/{p.name}</span>'
+            f'<code>{highlight(code, PythonLexer(), fmt)}</code></pre></div>')
+    pages.append({"id": CODE_ID[p.name], "kind": "code", "num": "", "title": p.name, "label": "附录 B",
+                  "part": "附录", "dek": summary, "sections": [], "html": body, "text": plain_text(code)})
 
-# ---------------------------------------------------------------- 首页
+# ---------------------------------------------------------------- 封面与目录
+readme = (BOOK / "README.md").read_text(encoding="utf-8")
+intro_md = re.split(r"^## 目录\s*$", readme, flags=re.M)
+before = re.sub(r"^# .*\n(>.*\n)?", "", intro_md[0])
+after = re.split(r"^## ", intro_md[1], maxsplit=1, flags=re.M)
+after = "## " + after[1] if len(after) > 1 else ""
 by = {p["id"]: p for p in pages}
 
 
-def card(pid, num=None, status="已写", status_cls="done"):
-    p = by[pid]
-    title = p["short"].split(" ", 1)[-1] if num else p["short"]
-    n = f'<span class="card-num">{num}</span>' if num else ""
-    return (f'<a class="card" href="#{pid}">{n}<span class="card-title">{title}</span>'
-            f'<span class="card-dek">{p["dek"]}</span><span class="status status-{status_cls}">{status}</span></a>')
+def contents_html():
+    out = []
+    for part, chs in PARTS:
+        items = []
+        for pid, src, num, title, dek in chs:
+            p = by[pid]
+            secs = "".join(f'<li><a href="#{pid}/{s["id"]}"><span class="toc-num">{s["id"]}</span>{html.escape(s["title"])}</a></li>'
+                           for s in p["sections"])
+            if not src:
+                items.append(f'<li class="toc-chap planned"><div class="toc-chap-head"><span class="toc-chap-num">{num}</span>'
+                             f'<span class="toc-chap-title">{title}</span><span class="status">待写</span></div>'
+                             f'<p class="toc-dek">{dek}</p></li>')
+                continue
+            items.append(f'<li class="toc-chap"><a class="toc-chap-head" href="#{pid}"><span class="toc-chap-num">{num}</span>'
+                         f'<span class="toc-chap-title">{title}</span></a><p class="toc-dek">{dek}</p><ol class="toc-secs">{secs}</ol></li>')
+        if part == "附录":
+            codes = "".join(f'<li><a href="#{CODE_ID[c.name]}"><code>{c.name}</code></a></li>' for c in code_files)
+            items.append(f'<li class="toc-chap"><a class="toc-chap-head" href="#{CODE_ID[code_files[0].name]}">'
+                         f'<span class="toc-chap-num">B</span><span class="toc-chap-title">代码</span></a>'
+                         f'<p class="toc-dek">每章的配套代码，只依赖 numpy，可以直接运行。</p><ol class="toc-secs code-list">{codes}</ol></li>')
+        out.append(f'<section class="toc-part"><h2 class="part-title">{part}</h2><ol class="toc-chaps">{"".join(items)}</ol></section>')
+    return "".join(out)
 
 
-planned = "".join(f'<div class="card card-planned"><span class="card-num">{n}</span><span class="card-title">{t}</span>'
-                  f'<span class="card-dek">{d}</span><span class="status">待写</span></div>' for n, t, d in PLANNED)
-home = f"""
-<header class="hero">
-  <p class="eyebrow">学习与研究笔记</p>
-  <h1>Math learning</h1>
-  <p class="dek">每篇按同一个顺序写：问题、背景、前置知识、推导、数值实验、结论与疑问、参考资料。每篇都配一份可以直接运行的代码。</p>
-</header>
-<section class="track">
-  <div class="track-head"><h2>大模型原理</h2><a href="#llm">学习路线 →</a></div>
-  <p class="track-dek">从"预测下一个词"讲到 Transformer，目标是能自己从头推一遍、写一遍。</p>
-  <div class="cards">{card("llm-00", "00")}{card("llm-01", "01")}{card("llm-02", "02")}{planned}</div>
-</section>
-<section class="track">
-  <div class="track-head"><h2>前置知识</h2><a href="#llm-00">先看速览 →</a></div>
-  <p class="track-dek">概率、统计、线性代数、微积分与优化各一章：完整推导，每章配一份可运行的实验代码。</p>
-  <div class="cards">{card("llm-p1", "P1")}{card("llm-p2", "P2")}{card("llm-p3", "P3")}{card("llm-p4", "P4")}</div>
-</section>
-<section class="track">
-  <div class="track-head"><h2>研究笔记：弦图上的混合时间</h2></div>
-  <p class="track-dek">能否去掉 bounded separator 限制，得到弦图上 Glauber 动力学的多项式混合？</p>
-  <div class="cards cards-2">{card("chordal-remove-b", status="进行中", status_cls="active")}{card("chordal-survey")}</div>
-</section>
-<section class="track">
-  <div class="track-head"><h2>代码</h2><a href="#{CODE_ID['llm_prereq.py']}">浏览代码 →</a></div>
-  <p class="track-dek">仓库里全部 {len(code_files)} 个 Python 文件，只依赖 numpy、scipy、networkx，均可直接运行。</p>
-</section>"""
-pages.insert(0, {"id": "home", "group": "首页", "short": "首页", "dek": "", "toc": [], "html": home,
-                 "text": plain_text((ROOT / "README.md").read_text(encoding="utf-8"))})
+home = ('<header class="cover"><p class="eyebrow"><span>学习笔记</span></p><h1>大模型原理</h1>'
+        '<p class="dek">从概率论讲到 Transformer。每章都有完整推导和一份可以直接运行的 numpy 代码。</p></header>'
+        f'<div class="prose">{md(before, "home")}</div>'
+        f'<h2 class="contents-title">目录</h2>{contents_html()}'
+        f'<div class="prose">{md(after, "home")}</div>')
+pages.insert(0, {"id": "home", "kind": "home", "num": "", "title": "封面与目录", "label": "", "part": "",
+                 "dek": "", "sections": [], "html": home, "text": plain_text(readme)})
 
 # ---------------------------------------------------------------- 一次性渲染全部公式
 rendered = json.loads(subprocess.run(["node", str(SITE / "tools" / "render_math.js")],
                                      input=json.dumps(MATH), capture_output=True, text=True, check=True).stdout)
+
+
 def glue(m):
     """行内公式和紧跟的中文标点放进同一个不换行的盒子，避免句号被挤到下一行开头。"""
     html_math, punct = rendered[int(m.group(1))], m.group(2)
@@ -258,16 +265,19 @@ katex_css = re.sub(r'src:url\(fonts/([^.]+)\.woff2\) format\("woff2"\)(,url\([^)
                    embed_font, css)
 
 # ---------------------------------------------------------------- 写出
-meta = [{k: p[k] for k in ("id", "group", "short", "dek", "toc")} for p in pages]
-search = [{"id": p["id"], "text": p["text"]} for p in pages]
+nav = [{"part": part, "items": [pid for pid, *_ in chs]} for part, chs in PARTS]
+meta = [{k: p[k] for k in ("id", "kind", "num", "title", "label", "part", "dek", "sections")} for p in pages]
+search = [{"id": p["id"], "text": p["text"]} for p in pages if p["text"]]
 articles = "\n".join(f'<article class="doc" id="page-{p["id"]}" data-page="{p["id"]}" hidden>{p["html"]}</article>'
-                     for p in pages)
+                     for p in pages if p["html"])
 tpl = (SITE / "template.html").read_text(encoding="utf-8")
 out = (tpl.replace("/*__KATEX_CSS__*/", katex_css)
           .replace("/*__META__*/", json.dumps(meta, ensure_ascii=False))
+          .replace("/*__NAV__*/", json.dumps(nav, ensure_ascii=False))
           .replace("/*__SEARCH__*/", json.dumps(search, ensure_ascii=False))
-          .replace("/*__SERIES__*/", json.dumps(SERIES))
+          .replace("/*__ORDER__*/", json.dumps(order))
           .replace("<!--__ARTICLES__-->", articles))
 (SITE / "index.html").write_text(out, encoding="utf-8")
-errors = sum(r.count("katex-error") + r.count("math-error") for r in rendered)
-print(f"写出 site/index.html：{len(pages)} 个页面，{len(MATH)} 个公式（渲染报错 {errors} 个），{len(out) / 1024 / 1024:.2f} MB")
+errors = sum("katex-error" in h for h in rendered)
+print(f"写出 site/index.html：{len(order) - 1} 章，{len(code_files)} 个代码文件，"
+      f"{len(MATH)} 个公式（渲染报错 {errors} 个），{len(out) / 1e6:.2f} MB")

@@ -1,5 +1,5 @@
 r"""
-前置知识 P4 · 微积分与优化的配套代码（topics/llm-p4-calculus-optimization.md）。只依赖 numpy：python3 llm_p4_calculus_optimization.py
+第 4 章 · 微积分与优化的配套代码（llm/ch04-calculus-optimization.md）。只依赖 numpy：python3 ch04_calculus_optimization.py
 
 1. 数值梯度检查；三个矩阵微积分恒等式。
 2. softmax 的数值稳定性（log-sum-exp）与梯度 p − y。

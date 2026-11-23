@@ -1,11 +1,8 @@
-# 大模型原理 · 前置知识 P4 微积分与优化
+# 第 4 章 微积分与优化
 
-> 系列：[大模型原理](llm.md) · 上一篇：[P3 线性代数](llm-p3-linear-algebra.md) · 下一篇：[01 语言模型](llm-01-language-model.md) · 更新：2026-11-22
 > 标注：**[已证]** 给出了推导 · **[事实]** 标准结论 · **[直觉]** 帮助理解、不严格
 
----
-
-## 1. 问题
+## 导读
 
 训练大模型就是：写出一个损失函数 $L(\theta)$，然后让 $\theta$ 沿着负梯度方向一步步走。要真正理解这一过程，需要回答四个问题：
 - 梯度是什么，向量和矩阵的梯度怎样求；
@@ -13,9 +10,7 @@
 - 每一步走多远、往哪走（步长、条件数、动量、Adam）；
 - 为什么每次只用一小批数据也能训练（随机梯度下降）。
 
----
-
-## 2. 背景与动机
+**与大模型的关系**
 
 | 概念 | 在大模型里出现的地方 |
 |---|---|
@@ -27,21 +22,15 @@
 | Adam、warmup、学习率衰减 | 几乎所有大模型的默认优化器设置 |
 | log-sum-exp | softmax 和交叉熵的数值稳定实现 |
 
----
+**前置知识**
 
-## 3. 前置知识
+单变量导数；[第 3 章 线性代数](ch03-linear-algebra.md)（矩阵乘法、谱分解）；[第 1 章 概率论](ch01-probability.md)（期望、方差）。
 
-单变量导数；[P3 线性代数](llm-p3-linear-algebra.md)（矩阵乘法、谱分解）；[P1 概率论](llm-p1-probability.md)（期望、方差）。
-
----
-
-## 4. 推导
-
-### 4.1 梯度、Jacobian、链式法则 **[事实]**
+## 4.1 梯度、Jacobian、链式法则 **[事实]**
 
 **梯度**：$f:\mathbb R^n\to\mathbb R$，梯度 $\nabla f(x)=\big(\partial f/\partial x_1,\dots,\partial f/\partial x_n\big)$。它满足一阶近似
 $$f(x+\Delta)\approx f(x)+\nabla f(x)^\top\Delta.$$
-由 Cauchy–Schwarz（[P3](llm-p3-linear-algebra.md) 4.1），在 $\|\Delta\|$ 固定时，$\Delta$ 取 $-\nabla f$ 方向能让 $f$ 下降得最快。这就是"梯度下降"名字的来历。
+由 Cauchy–Schwarz（[3.1 节](ch03-linear-algebra.md#3.1)），在 $\|\Delta\|$ 固定时，$\Delta$ 取 $-\nabla f$ 方向能让 $f$ 下降得最快。这就是"梯度下降"名字的来历。
 
 **Jacobian**：$g:\mathbb R^n\to\mathbb R^m$，Jacobian $J_g$ 是 $m\times n$ 矩阵，$(J_g)_{ij}=\partial g_i/\partial x_j$。它满足 $g(x+\Delta)\approx g(x)+J_g\Delta$。
 
@@ -51,7 +40,7 @@ $$f(x+\Delta)\approx f(x)+\nabla f(x)^\top\Delta.$$
 $$\nabla_xL=J_g^\top\,\nabla_gL.$$
 意思是：知道了 $L$ 对中间变量 $g$ 的梯度，乘上 $J_g^\top$，就得到 $L$ 对输入 $x$ 的梯度。**反向传播就是从输出往输入反复使用这个公式。**
 
-### 4.2 矩阵微积分：几条够用的恒等式 **[已证]**
+## 4.2 矩阵微积分：几条够用的恒等式 **[已证]**
 
 **约定**：$L$ 是标量；$\partial L/\partial W$ 和 $W$ 同形状，第 $(i,j)$ 个元素是 $\partial L/\partial W_{ij}$。
 
@@ -70,9 +59,9 @@ $$\frac{\partial L}{\partial W_{jk}}=\sum_i\frac{\partial L}{\partial Y_{ik}}\fr
 
 **检查形状的窍门**：$X$ 是 $(n,d)$，$W$ 是 $(d,k)$，$\bar Y$ 是 $(n,k)$。要得到 $(d,k)$ 的 $\partial W$，只能是 $X^\top\bar Y$；要得到 $(n,d)$ 的 $\partial X$，只能是 $\bar YW^\top$。
 
-$X^\top\bar Y=\sum_iX_{i,:}^\top\bar Y_{i,:}$ 是**外积之和**（[P3](llm-p3-linear-algebra.md) 4.2），每个样本（每个位置）贡献一个秩 1 的更新。
+$X^\top\bar Y=\sum_iX_{i,:}^\top\bar Y_{i,:}$ 是**外积之和**（[3.2 节](ch03-linear-algebra.md#3.2)），每个样本（每个位置）贡献一个秩 1 的更新。
 
-### 4.3 softmax、log-sum-exp 与交叉熵的梯度 **[已证]**
+## 4.3 softmax、log-sum-exp 与交叉熵的梯度 **[已证]**
 
 **softmax**：$p_i=e^{z_i}/\sum_je^{z_j}$。
 
@@ -88,7 +77,7 @@ $$\frac{\partial L}{\partial z}=p-e_y,$$
 
 这个梯度结构简单，而且每个分量都落在 $[-1,1]$ 里，不会爆炸。这是交叉熵和 softmax 总是一起用的原因之一。
 
-### 4.4 泰勒展开与步长：为什么学习率不能太大 **[已证]**
+## 4.4 泰勒展开与步长：为什么学习率不能太大 **[已证]**
 
 **二阶泰勒展开**：
 $$f(x+\Delta)\approx f(x)+\nabla f^\top\Delta+\tfrac12\Delta^\top H\Delta,$$
@@ -112,7 +101,7 @@ $$f(x-\eta\nabla f)\le f(x)-\eta\big(1-\tfrac{L\eta}2\big)\|\nabla f\|^2.$$
 - LayerNorm、残差连接、合适的初始化，都能让损失曲面更"圆"一些。
 - 训练中途出现的损失尖峰，常被解释为某个方向的曲率变大，使当前学习率超过了 $2/\lambda_{\max}$。
 
-### 4.5 动量 **[事实 + 直觉]**
+## 4.5 动量 **[事实 + 直觉]**
 
 **更新规则**（heavy-ball 动量）：
 $$v\leftarrow\beta v+\nabla f(x),\qquad x\leftarrow x-\eta v.$$
@@ -124,7 +113,7 @@ $$v\leftarrow\beta v+\nabla f(x),\qquad x\leftarrow x-\eta v.$$
 
 **理论** **[事实]**：在二次函数上，调好参数的动量法只需要约 $\sqrt\kappa\log(1/\varepsilon)$ 步，而不是 $\kappa\log(1/\varepsilon)$ 步。
 
-### 4.6 随机梯度下降 **[已证 + 事实]**
+## 4.6 随机梯度下降 **[已证 + 事实]**
 
 **设定**：损失是 $N$ 个样本的平均，$L(\theta)=\frac1N\sum_i\ell_i(\theta)$。$N$ 可以是万亿个 token，每步都算全量梯度不现实。
 
@@ -134,14 +123,14 @@ $$g_B=\frac1B\sum_{i\in\text{batch}}\nabla\ell_i$$
 
 **两条性质** **[已证]**：
 - **无偏**：$\mathbb E[g_B]=g$。
-- **方差**：$\mathrm{Var}(g_B)=\frac1B\mathrm{Var}(\nabla\ell_i)$（[P1](llm-p1-probability.md) 4.3，独立变量的平均），所以噪声的标准差按 $1/\sqrt B$ 缩小。
+- **方差**：$\mathrm{Var}(g_B)=\frac1B\mathrm{Var}(\nabla\ell_i)$（[1.3 节](ch01-probability.md#1.3)，独立变量的平均），所以噪声的标准差按 $1/\sqrt B$ 缩小。
 
 **结论** **[事实 + 直觉]**：
 - batch 加大 4 倍，噪声只减半，但计算量是 4 倍。所以 batch 并不是越大越好。
 - 常用的经验规则是：batch 增大时，学习率按比例或按平方根增大。
 - 噪声并不全是坏事：它帮助跳出尖锐的极小值，可能带来更好的泛化。
 
-### 4.7 Adam，以及大模型训练的标准配方 **[事实]**
+## 4.7 Adam，以及大模型训练的标准配方 **[事实]**
 
 **Adam** 对每个参数分别维护梯度的一阶矩 $m$ 和二阶矩 $v$：
 $$m\leftarrow\beta_1m+(1-\beta_1)g,\qquad v\leftarrow\beta_2v+(1-\beta_2)g^2,$$
@@ -151,7 +140,7 @@ $$\hat m=\frac m{1-\beta_1^t},\quad\hat v=\frac v{1-\beta_2^t},\qquad\theta\left
 - **偏差修正** $1-\beta^t$：$m,v$ 从 0 开始，前几步会偏小，除以这个因子补回来。
 - **默认值**：$\beta_1=0.9$，$\beta_2=0.95\sim0.999$，$\epsilon=10^{-8}$。
 
-**AdamW**：把 weight decay（[P2](llm-p2-statistics.md) 4.6 的 L2 正则化）从梯度里拿出来，单独做 $\theta\leftarrow\theta-\eta\lambda\theta$。这是训练大模型的默认优化器。
+**AdamW**：把 weight decay（[2.6 节](ch02-statistics.md#2.6) 的 L2 正则化）从梯度里拿出来，单独做 $\theta\leftarrow\theta-\eta\lambda\theta$。这是训练大模型的默认优化器。
 
 **学习率调度**：
 - **warmup**：前几千步学习率从 0 线性升到峰值。一开始 $v$ 的估计不准，参数也处于很"陡"的区域，大步长容易发散。
@@ -159,7 +148,7 @@ $$\hat m=\frac m{1-\beta_1^t},\quad\hat v=\frac v{1-\beta_2^t},\qquad\theta\left
 
 **梯度裁剪**：若 $\|g\|$ 超过阈值（常取 1.0），就把 $g$ 缩放到阈值。这是防止偶发尖峰的保险措施。
 
-### 4.8 反向传播与自动微分 **[事实 + 已证]**
+## 4.8 反向传播与自动微分 **[事实 + 已证]**
 
 **计算图**：前向计算的每一步都是一个节点，它记录自己的输入和输出。
 
@@ -183,30 +172,28 @@ $$\hat m=\frac m{1-\beta_1^t},\quad\hat v=\frac v{1-\beta_2^t},\qquad\theta\left
 
 **代价**：反向传播要保存前向计算的所有中间结果，这是训练比推理耗显存得多的主要原因。"激活重计算"（activation checkpointing）是用多算一次前向换取少存。
 
-**两层网络的反向传播**（5.6 节代码）。前向：
+**两层网络的反向传播**（4.9.6 节代码）。前向：
 $$a_1=XW_1+b_1,\quad h_1=\mathrm{ReLU}(a_1),\quad z=h_1W_2+b_2,\quad L=\mathrm{CE}(z,y).$$
 反向（从上往下逐行使用 4.2、4.3）：
 $$\bar z=(p-Y)/n,\quad \bar W_2=h_1^\top\bar z,\quad \bar h_1=\bar zW_2^\top,\quad \bar a_1=\bar h_1\odot\mathbb 1[a_1>0],\quad \bar W_1=X^\top\bar a_1.$$
 
----
+## 4.9 数值实验
 
-## 5. 数值实验
+代码：[`code/ch04_calculus_optimization.py`](code/ch04_calculus_optimization.py)，只依赖 numpy，`python3 ch04_calculus_optimization.py` 直接运行（不到 1 秒）。
 
-代码：[`code/llm_p4_calculus_optimization.py`](../code/llm_p4_calculus_optimization.py)，只依赖 numpy，`python3 llm_p4_calculus_optimization.py` 直接运行（不到 1 秒）。
-
-### 5.1 矩阵微积分恒等式
+### 4.9.1 矩阵微积分恒等式
 
 用中心差分 $\big(f(x+\epsilon e_i)-f(x-\epsilon e_i)\big)/2\epsilon$ 做数值梯度检查。4.2 节表格里的四条公式（$a^\top x$、$x^\top Ax$、$\partial W$、$\partial X$），相对误差都在 $10^{-10}$ 量级。
 
 **梯度检查**是写反向传播时最重要的调试手段：相对误差在 $10^{-6}$ 以下，基本说明公式写对了。
 
-### 5.2 softmax 的数值稳定性
+### 4.9.2 softmax 的数值稳定性
 
 - $z=(1000,1001,1002)$ 直接算 softmax，得到 `nan`（$e^{1000}$ 溢出）。
 - 先减去最大值，得到 $(0.090,0.245,0.665)$。
 - 交叉熵梯度 $p-e_y$ 与数值梯度的相对误差是 $2\times10^{-10}$。
 
-### 5.3 步长与条件数
+### 4.9.3 步长与条件数
 
 $f=\frac12(x_1^2+10x_2^2)$，$L=10$，阈值 $2/L=0.2$。100 步后的 $f$：
 
@@ -225,7 +212,7 @@ $f=\frac12(x_1^2+10x_2^2)$，$L=10$，阈值 $2/L=0.2$。100 步后的 $f$：
 
 步数与 $\kappa$ 成正比，和 4.4 的推导一致。
 
-### 5.4 动量、SGD、Adam
+### 4.9.4 动量、SGD、Adam
 
 $\kappa=100$ 的二次函数，降到 $f<10^{-8}$ 的步数：
 - 梯度下降：882 步；
@@ -241,7 +228,7 @@ $\kappa=100$ 的二次函数，降到 $f<10^{-8}$ 的步数：
 
 $B\ge10$ 时，乘以 $\sqrt B$ 后几乎是常数，即噪声按 $1/\sqrt B$ 缩小。$B=1$ 偏低，是因为单个样本的梯度分布有重尾，"范数的平均"明显小于"均方根"。
 
-### 5.5 标量自动微分
+### 4.9.5 标量自动微分
 
 代码里的 `Value` 类大约 60 行，支持加、乘、幂、tanh、exp、log，以及按拓扑序反向传播。用它搭一个 $3\to4\to3$ 的 tanh 网络加交叉熵：
 - 前向损失 0.924386，与 numpy 计算一致；
@@ -249,7 +236,7 @@ $B\ge10$ 时，乘以 $\sqrt B$ 后几乎是常数，即噪声按 $1/\sqrt B$ �
 
 PyTorch 的 autograd 原理相同，只是节点是张量而不是标量。
 
-### 5.6 两层网络
+### 4.9.6 两层网络
 
 三条螺旋臂、300 个点（线性不可分），2 → 64（ReLU）→ 3 的网络，矩阵形式的手写反向传播，用 Adam 训练：
 - 反向传播与数值梯度的相对误差 $1.4\times10^{-8}$；
@@ -260,9 +247,7 @@ PyTorch 的 autograd 原理相同，只是节点是张量而不是标量。
 | 损失 | 1.118 | 0.185 | 0.0098 | 0.0002 |
 | 训练准确率 | 28.3% | 95.0% | 100% | 100% |
 
----
-
-## 6. 结论与疑问
+## 4.10 小结与疑问
 
 **搞懂了什么**：
 - 反向传播 = 从输出往回反复使用链式法则 $\bar x=J^\top\bar y$。矩阵乘法的梯度就是 $\bar W=X^\top\bar Y$ 和 $\bar X=\bar YW^\top$。
@@ -275,12 +260,10 @@ PyTorch 的 autograd 原理相同，只是节点是张量而不是标量。
 - 大模型的损失曲面并不是凸的，为什么梯度下降几乎总能找到好的解？
 - Adam 的"逐参数归一化"在什么意义上接近二阶方法？Shampoo、Muon 等新优化器改进了什么？
 
----
-
-## 7. 参考资料
+## 参考资料
 
 1. S. Boyd, L. Vandenberghe. *Convex Optimization.* 第 9 章（梯度下降、条件数）。
 2. K. B. Petersen, M. S. Pedersen. *The Matrix Cookbook.* 矩阵求导公式速查。
 3. D. P. Kingma, J. Ba. *Adam: A Method for Stochastic Optimization.* ICLR 2015。I. Loshchilov, F. Hutter. *Decoupled Weight Decay Regularization.* ICLR 2019（AdamW）。
-4. A. Karpathy. *micrograd*（GitHub）与视频 *The spelled-out intro to neural networks and backpropagation*。5.5 节的 `Value` 类就是这个思路。
+4. A. Karpathy. *micrograd*（GitHub）与视频 *The spelled-out intro to neural networks and backpropagation*。4.9.5 节的 `Value` 类就是这个思路。
 5. G. Goh. *Why Momentum Really Works.* Distill, 2017。动量的可视化讲解。

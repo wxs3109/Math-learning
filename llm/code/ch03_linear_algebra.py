@@ -1,5 +1,5 @@
 r"""
-前置知识 P3 · 线性代数的配套代码（topics/llm-p3-linear-algebra.md）。只依赖 numpy：python3 llm_p3_linear_algebra.py
+第 3 章 · 线性代数的配套代码（llm/ch03-linear-algebra.md）。只依赖 numpy：python3 ch03_linear_algebra.py
 
 1. 矩阵乘法的四种读法，逐一验证。
 2. 秩：外积之和的秩；随机矩阵满秩。

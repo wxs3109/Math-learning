@@ -1,35 +1,24 @@
-# 大模型原理 · 01 语言模型：预测下一个 token
+# 第 5 章 语言模型：预测下一个 token
 
-> 系列：[大模型原理](llm.md) · 上一篇：[00 前置知识](llm-00-prerequisites.md) · 下一篇：[02 自注意力](llm-02-self-attention.md) · 更新：2026-11-22
 > 标注：**[已证]** 给出了推导 · **[事实]** 标准结论 · **[直觉]** 帮助理解、不严格
 
----
-
-## 1. 问题
+## 导读
 
 大模型在数学上到底是什么？
 
-一句话的答案：**它是一个条件概率分布 $p_\theta(\text{下一个 token}\mid\text{前文})$，参数 $\theta$ 用最大似然在海量文本上拟合。** 本篇讲清楚这句话的前半部分：什么是语言模型、怎么训练、怎么评价、怎么生成，以及为什么需要神经网络。
+一句话的答案：**它是一个条件概率分布 $p_\theta(\text{下一个 token}\mid\text{前文})$，参数 $\theta$ 用最大似然在海量文本上拟合。** 本章讲清楚这句话的前半部分：什么是语言模型、怎么训练、怎么评价、怎么生成，以及为什么需要神经网络。
 
----
-
-## 2. 背景与动机
+**与大模型的关系**
 
 - 语言模型本质是一个随机过程。n-gram 模型就是有限阶的马尔可夫链，训练就是最大似然估计，生成文本就是从这个链里采样。
 - 大模型的新东西在于：条件分布不再是一张查表，而是一个能"看整段上下文"的参数化函数。
-- 不懂这一层，很多现象只能死记，比如为什么模型会一本正经地编造（见 [02](llm-02-self-attention.md) 的 4.4）。
+- 不懂这一层，很多现象只能死记，比如为什么模型会一本正经地编造（见 [6.4 节](ch06-self-attention.md#6.4)）。
 
----
+**前置知识**
 
-## 3. 前置知识
+链式法则（[1.1 节](ch01-probability.md#1.1)）、交叉熵与 KL（[1.7 节](ch01-probability.md#1.7)）、最大似然（[2.2 节](ch02-statistics.md#2.2)）、softmax 及其梯度（[4.3 节](ch04-calculus-optimization.md#4.3)）。只想尽快读下去的话，[附录 A](appendix-a-math-quick-reference.md) 把这些结论压缩在一页里。
 
-见 [00 前置知识](llm-00-prerequisites.md)：链式法则（4.1）、交叉熵与最大似然（4.2–4.3）、softmax（4.5）。
-
----
-
-## 4. 推导
-
-### 4.1 语言模型 = 下一个 token 的条件分布 **[事实]**
+## 5.1 语言模型 = 下一个 token 的条件分布 **[事实]**
 
 **token**：文本先被切成一个个 token（大致是词或词的片段），每个 token 对应词表里的一个编号。词表大小记为 $V$，现实中的模型一般是几万到十几万。
 
@@ -37,44 +26,42 @@
 $$p(x_1,\dots,x_T)=\prod_{t=1}^T p(x_t\mid x_1,\dots,x_{t-1}).$$
 所以只要会算"给定前文，下一个 token 的分布"，就等于会算整段文本的概率。**语言模型就是这个条件分布。**
 
-**生成文本**：从这个分布里抽一个 token，接到末尾，再抽下一个，如此重复。这叫自回归（autoregressive）生成。生成时调的"温度"，就是对 logits 除以 $T$ 再做 softmax（[00](llm-00-prerequisites.md) 的 4.5）。
+**生成文本**：从这个分布里抽一个 token，接到末尾，再抽下一个，如此重复。这叫自回归（autoregressive）生成。生成时调的"温度"，就是对 logits 除以 $T$ 再做 softmax（[A.5 节](appendix-a-math-quick-reference.md#A.5)）。
 
-### 4.2 训练目标：最大似然 = 最小化交叉熵 **[已证]**
+## 5.2 训练目标：最大似然 = 最小化交叉熵 **[已证]**
 
 给定训练文本 $x_1,\dots,x_N$，最大化对数似然 $\sum_t\log p_\theta(x_t\mid x_{<t})$。等价地，最小化平均负对数似然：
 $$\mathcal L(\theta)=-\frac1N\sum_t\log p_\theta(x_t\mid x_{<t}).$$
-这就是"交叉熵损失"。它的含义是：模型给**真实出现的下一个 token** 分配的概率，取对数后求平均，再加负号。等价性的证明见 [00](llm-00-prerequisites.md) 的 4.3。
+这就是"交叉熵损失"。它的含义是：模型给**真实出现的下一个 token** 分配的概率，取对数后求平均，再加负号。等价性的证明见 [A.3 节](appendix-a-math-quick-reference.md#A.3)。
 
 **困惑度**（perplexity）定义为 $\mathrm{PPL}=e^{\mathcal L}$。直观上，它相当于"模型平均在多少个候选里犹豫"：
 - 完全瞎猜（均匀分布）时 $\mathrm{PPL}=V$；
 - 完美预测时 $\mathrm{PPL}=1$。
 
-### 4.3 最简单的例子：bigram 模型 **[已证]**
+## 5.3 最简单的例子：bigram 模型 **[已证]**
 
 假设下一个字符只依赖前一个字符：$p(x_t\mid x_{<t})=p(x_t\mid x_{t-1})$。这就是一阶马尔可夫链，参数是一个 $V\times V$ 的转移矩阵 $P$。
 
 **最大似然解就是数频率**：
 $$\hat P(b\mid a)=\frac{\#\{a\text{ 后面紧跟 }b\}}{\#\{a\}}.$$
-证明：对每一行分别最大化 $\sum_b n_{ab}\log P(b\mid a)$，约束是 $\sum_bP(b\mid a)=1$。用拉格朗日乘子即得 $P(b\mid a)\propto n_{ab}$。也可以直接用 [00](llm-00-prerequisites.md) 4.3 的结论：每一行都是一个类别分布。$\blacksquare$
+证明：对每一行分别最大化 $\sum_b n_{ab}\log P(b\mid a)$，约束是 $\sum_bP(b\mid a)=1$。用拉格朗日乘子即得 $P(b\mid a)\propto n_{ab}$。也可以直接用 [A.3 节](appendix-a-math-quick-reference.md#A.3) 的结论：每一行都是一个类别分布。$\blacksquare$
 
 **它的两个根本局限**：
 1. **只看一个字符**。想看前 $k$ 个，参数量变成 $V^{k+1}$，指数爆炸。
 2. **没见过的组合概率为 0**。测试集里一出现就是 $\log0=-\infty$，只能靠平滑（给所有计数加一个 $\alpha$）硬补。
 
-### 4.4 神经语言模型怎样解决这两个局限 **[事实 + 直觉]**
+## 5.4 神经语言模型怎样解决这两个局限 **[事实 + 直觉]**
 
 - **用参数量固定的函数代替查表**：$p_\theta(\cdot\mid x_{<t})=\mathrm{softmax}\big(f_\theta(x_{<t})\big)$，其中 $f_\theta$ 是一个神经网络，输出 $V$ 维的 logits。参数量不随上下文长度指数增长，所以能看很长的上下文。
 - **把 token 映射成向量（embedding）**：每个 token 编号 $i$ 对应一个可学习的向量 $e_i\in\mathbb R^{d}$（$d$ 通常是几百到几千）。训练后，意思相近的 token 向量也相近。于是没见过的组合也能"类比"出合理的概率，不再是硬性的 0。
 
 一段长度为 $T$ 的文本于是变成矩阵 $X\in\mathbb R^{T\times d}$，第 $t$ 行是第 $t$ 个 token 的向量。$f_\theta$ 要做的就是：读入 $X$，在每个位置输出"下一个 token"的 logits。
 
-**剩下的问题**：$f_\theta$ 怎样才能在每个位置有效地利用整段前文？这就是 Transformer 要解决的，见 [02 自注意力](llm-02-self-attention.md)。
+**剩下的问题**：$f_\theta$ 怎样才能在每个位置有效地利用整段前文？这就是 Transformer 要解决的，见 [第 6 章 自注意力与 Transformer](ch06-self-attention.md)。
 
----
+## 5.5 数值实验
 
-## 5. 数值实验
-
-代码：[`code/llm_basics.py`](../code/llm_basics.py) 第 1 部分，`python3 llm_basics.py` 直接运行。
+代码：[`code/ch05_06_lm_attention.py`](code/ch05_06_lm_attention.py) 第 1 部分，`python3 ch05_06_lm_attention.py` 直接运行。
 
 在一小段《哈姆雷特》独白上训练字符级 bigram 模型（词表 $V=19$），后一小段做测试：
 
@@ -85,12 +72,10 @@ $$\hat P(b\mid a)=\frac{\#\{a\text{ 后面紧跟 }b\}}{\#\{a\}}.$$
 | 1.0 | 8.74 | 18.67 |
 
 - 平滑越弱，训练集越好，测试集越差。
-- $\alpha=0.01$ 时测试集困惑度是 134，**比瞎猜（19）还差得多**。原因是测试集里出现了训练集没见过的字符对，模型给了它们几乎为 0 的概率，于是 $-\log p$ 非常大。这就是 4.3 的局限 2，也是最朴素的过拟合。
+- $\alpha=0.01$ 时测试集困惑度是 134，**比瞎猜（19）还差得多**。原因是测试集里出现了训练集没见过的字符对，模型给了它们几乎为 0 的概率，于是 $-\log p$ 非常大。这就是 5.3 的局限 2，也是最朴素的过拟合。
 - 采样结果是 `tin atrherrr t tgsind bliofwwslin ...`：局部像英文（字母组合合理），整体没有意义，因为模型只看前一个字符。
 
----
-
-## 6. 结论与疑问
+## 5.6 小结与疑问
 
 **搞懂了什么**：
 - 大模型 = 下一个 token 的条件分布；训练 = 最大似然；生成 = 逐个采样。
@@ -100,9 +85,7 @@ $$\hat P(b\mid a)=\frac{\#\{a\text{ 后面紧跟 }b\}}{\#\{a\}}.$$
 **疑问**：
 - token 化是怎么做的（BPE 等算法）？它对模型的能力有什么影响，比如为什么大模型数不清一个单词里有几个字母？
 
----
-
-## 7. 参考资料
+## 参考资料
 
 1. Y. Bengio et al. *A Neural Probabilistic Language Model.* JMLR 2003。最早用 embedding + 神经网络做语言模型的工作之一。
-2. Andrej Karpathy. *Neural Networks: Zero to Hero* 第二集（makemore）：从 bigram 计数模型讲到神经网络版本，和本篇完全对应。
+2. Andrej Karpathy. *Neural Networks: Zero to Hero* 第二集（makemore）：从 bigram 计数模型讲到神经网络版本，和本章完全对应。

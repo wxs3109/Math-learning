@@ -1,0 +1,50 @@
+# 大模型原理
+
+> 从概率论讲到 Transformer · 每章配可运行的 numpy 代码 · 更新：2026-11-22
+
+## 这本笔记在讲什么
+
+大模型（GPT、Claude、Llama 等）在数学上是一个条件概率分布 $p_\theta(\text{下一个 token}\mid\text{前文})$：
+- 参数 $\theta$ 用最大似然在海量文本上拟合；
+- 计算这个分布的函数是一个叫 Transformer 的神经网络。
+
+这本笔记把这句话从头拆开，目标是懂到"能自己从头推一遍、写一遍"的程度。
+
+## 目录
+
+**第一部分 数学基础**
+
+| 章 | 内容 | 代码 |
+|---|---|---|
+| [第 1 章 概率论](ch01-probability.md) | 概率空间与贝叶斯；期望、方差、协方差；常见分布；多元高斯；大数定律与中心极限定理；熵、KL、互信息 | [`ch01_probability.py`](code/ch01_probability.py) |
+| [第 2 章 统计](ch02-statistics.md) | 偏差与方差；最大似然与 Fisher 信息；bootstrap；线性回归；过拟合；MAP = 正则化；验证集与测试集 | [`ch02_statistics.py`](code/ch02_statistics.py) |
+| [第 3 章 线性代数](ch03-linear-algebra.md) | 矩阵乘法的四种读法；秩；谱分解；SVD、低秩近似与 LoRA；投影与最小二乘；高维几何；张量形状 | [`ch03_linear_algebra.py`](code/ch03_linear_algebra.py) |
+| [第 4 章 微积分与优化](ch04-calculus-optimization.md) | 矩阵微积分；log-sum-exp；步长与条件数；动量；SGD；Adam 与训练配方；自动微分 | [`ch04_calculus_optimization.py`](code/ch04_calculus_optimization.py) |
+
+**第二部分 语言模型与 Transformer**
+
+| 章 | 内容 | 代码 |
+|---|---|---|
+| [第 5 章 语言模型](ch05-language-model.md) | 预测下一个 token；交叉熵与困惑度；bigram 模型及其局限；embedding | [`ch05_06_lm_attention.py`](code/ch05_06_lm_attention.py) 第 1 部分 |
+| [第 6 章 自注意力与 Transformer](ch06-self-attention.md) | query / key / value；因果掩码；为什么除以 $\sqrt d$；多头；Transformer 块；KV cache | [`ch05_06_lm_attention.py`](code/ch05_06_lm_attention.py) 第 2 部分 |
+| 第 7 章 动手训练一个小 GPT（待写） | 把前六章组装起来，用反向传播真正训练，看损失下降、生成变好 | 计划跟 nanoGPT |
+| 第 8 章 "大"是怎么来的（待写） | scaling law；指令微调与 RLHF；推理（KV cache、采样、长上下文） | — |
+
+**附录**
+
+| | 内容 | 代码 |
+|---|---|---|
+| [附录 A 数学速查](appendix-a-math-quick-reference.md) | 一页讲完第 5、6 章要用的结论：链式法则；熵、交叉熵、KL；最大似然；矩阵乘法；softmax；梯度下降；反向传播 | [`appendix_a_quick_reference.py`](code/appendix_a_quick_reference.py) |
+
+## 每章的结构
+
+- **导读**：这一章要回答什么问题，和大模型有什么关系，需要哪些前置知识。
+- **正文各节**（如 1.1、1.2……）：定义、推导和例子。节标题旁的标签说明可信程度：**[已证]** 给出了推导，**[事实]** 是标准结论，**[直觉]** 帮助理解、不严格。
+- **数值实验**：用配套代码验证正文的结论，给出实际输出。
+- **小结与疑问**，以及**参考资料**。
+
+## 怎么读
+
+- **打地基**：按顺序读第 1–4 章，再读第 5、6 章。每章约一小时，读完跑一下配套代码，对照"数值实验"一节看输出。
+- **快速入门**：有概率和线性代数基础的话，先读附录 A，然后直接读第 5、6 章，遇到不懂的再回到第 1–4 章对应的小节。
+- 所有代码只依赖 numpy，进入 `code/` 目录后 `python3 文件名.py` 直接运行。

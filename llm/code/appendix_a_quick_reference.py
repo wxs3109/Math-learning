@@ -1,5 +1,5 @@
 r"""
-大模型原理 · 前置知识的配套代码（topics/llm-00-prerequisites.md）。只依赖 numpy：python3 llm_prereq.py
+附录 A · 数学速查的配套代码（llm/appendix-a-math-quick-reference.md）。只依赖 numpy：python3 appendix_a_quick_reference.py
 
 1. 最大似然：类别分布的 MLE 就是频率；它等价于最小化"经验分布到模型"的 KL 散度。
 2. softmax：平移不变、温度的作用、log-sum-exp 的数值稳定写法。

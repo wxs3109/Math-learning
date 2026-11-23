@@ -1,5 +1,5 @@
 r"""
-大模型原理入门的配套代码（topics/llm.md）。只依赖 numpy，可以直接运行：python3 llm_basics.py
+第 5、6 章的配套代码（llm/ch05-language-model.md、llm/ch06-self-attention.md）。只依赖 numpy，可以直接运行：python3 ch05_06_lm_attention.py
 
 第 1 部分：字符级 bigram 语言模型 —— "预测下一个 token" 的最小例子
   - 最大似然估计就是数频率；交叉熵 = 平均负对数似然；困惑度 = exp(交叉熵)。
