@@ -172,7 +172,18 @@ def postprocess(body, pid):
     body = re.sub(r"<blockquote>\s*<p>⚠️\s*", '<blockquote class="callout"><p>', body)
     body = body.replace("<table>", '<div class="table-wrap"><table>').replace("</table>", "</table></div>")
     body = re.sub(r"<pre><code>", '<pre class="output"><span class="pre-label">输出</span><code>', body)
+    body = re.sub(r'<p><img alt="([^"]*)" src="figures/([\w.-]+\.svg)" ?/?></p>', inline_figure, body)
     return body
+
+
+FIG_DIR = ROOT / "llm" / "figures"
+
+
+def inline_figure(m):
+    """Markdown 里的 ![说明](figures/x.svg)：把 SVG 直接嵌进页面（单文件网站），说明放进 figcaption。"""
+    svg = (FIG_DIR / m.group(2)).read_text(encoding="utf-8")
+    svg = re.sub(r'<svg ([^>]*?) width="\d+" height="\d+"', r'<svg \1', svg, count=1)
+    return f'<figure class="fig">{svg}<figcaption>{m.group(1)}</figcaption></figure>'
 
 
 def md(raw, pid):

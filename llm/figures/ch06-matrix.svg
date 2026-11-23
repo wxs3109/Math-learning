@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 262" width="760" height="262" role="img">
+<style>
+.bg{fill:var(--paper,#fbfbfa)}
+.t{fill:var(--ink,#161c28);font-family:var(--font-body,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif)}
+.mu{fill:var(--muted,#586172)}
+.ln{stroke:var(--muted,#586172);fill:none;stroke-width:1.4}
+.lnb{stroke:var(--ink,#161c28);fill:none;stroke-width:3}
+.box{fill:var(--wash,#f1f2f4);stroke:var(--rule,#c9cdd4);stroke-width:1}
+.frame{fill:none;stroke:var(--rule,#c9cdd4);stroke-width:1}
+.q{fill:#cf3b25}.qs{stroke:#cf3b25}
+.k{fill:#d99a0b}.ks{stroke:#d99a0b}
+.v{fill:#2f6fb5}.vs{stroke:#2f6fb5}
+.acc{fill:var(--accent,#cf3b25)}
+.mask{fill:var(--rule,#d5d8dd)}
+.wh{fill:#ffffff}
+</style>
+<defs><marker id="ah-ch06-matrix" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mu"/></marker></defs>
+<rect width="100%" height="100%" class="bg"/>
+<text x="380.0" y="30.0" font-size="16" text-anchor="middle" class="t" font-weight="bold" >一次算完所有位置：softmax(QK<tspan baseline-shift="super" font-size="75%">⊤</tspan>/√d + M) V</text>
+<rect x="30.0" y="70.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="48.0" y="70.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="66.0" y="70.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="30.0" y="88.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="48.0" y="88.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="66.0" y="88.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="30.0" y="106.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="48.0" y="106.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="66.0" y="106.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="30.0" y="124.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="48.0" y="124.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="66.0" y="124.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="30.0" y="142.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="48.0" y="142.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="66.0" y="142.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="30.0" y="160.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="48.0" y="160.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="66.0" y="160.0" width="18.0" height="18.0" rx="0" class="q" opacity="0.55"/>
+<rect x="30.0" y="70.0" width="54.0" height="108.0" rx="0" class="frame" />
+<text x="57.0" y="200.0" font-size="15" text-anchor="middle" class="t" font-weight="bold" >Q</text>
+<text x="57.0" y="218.0" font-size="12" text-anchor="middle" class="t mu" >T×d</text>
+<text x="102.0" y="130.0" font-size="22" text-anchor="middle" class="t" >·</text>
+<rect x="112.0" y="97.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="130.0" y="97.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="148.0" y="97.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="166.0" y="97.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="184.0" y="97.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="202.0" y="97.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="112.0" y="115.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="130.0" y="115.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="148.0" y="115.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="166.0" y="115.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="184.0" y="115.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="202.0" y="115.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="112.0" y="133.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="130.0" y="133.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="148.0" y="133.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="166.0" y="133.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="184.0" y="133.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="202.0" y="133.0" width="18.0" height="18.0" rx="0" class="k" opacity="0.55"/>
+<rect x="112.0" y="97.0" width="108.0" height="54.0" rx="0" class="frame" />
+<text x="166.0" y="200.0" font-size="15" text-anchor="middle" class="t" font-weight="bold" >K<tspan baseline-shift="super" font-size="75%">⊤</tspan></text>
+<text x="166.0" y="218.0" font-size="12" text-anchor="middle" class="t mu" >d×T</text>
+<text x="236.0" y="130.0" font-size="18" text-anchor="middle" class="t" >=</text>
+<rect x="252.0" y="70.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="270.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="288.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="306.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="324.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="342.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="252.0" y="88.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="270.0" y="88.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="288.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="306.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="324.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="342.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="252.0" y="106.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.38"/>
+<rect x="270.0" y="106.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="288.0" y="106.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="306.0" y="106.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="324.0" y="106.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="342.0" y="106.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="252.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.28"/>
+<rect x="270.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.38"/>
+<rect x="288.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="306.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="324.0" y="124.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="342.0" y="124.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="252.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="270.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.28"/>
+<rect x="288.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.38"/>
+<rect x="306.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="324.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="342.0" y="142.0" width="18.0" height="18.0" rx="0" class="mask" opacity="1.00"/>
+<rect x="252.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="270.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="288.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.28"/>
+<rect x="306.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.38"/>
+<rect x="324.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="342.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.18"/>
+<rect x="252.0" y="70.0" width="108.0" height="108.0" rx="0" class="frame" />
+<text x="279.0" y="83.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="297.0" y="83.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="315.0" y="83.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="333.0" y="83.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="351.0" y="83.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="297.0" y="101.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="315.0" y="101.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="333.0" y="101.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="351.0" y="101.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="315.0" y="119.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="333.0" y="119.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="351.0" y="119.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="333.0" y="137.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="351.0" y="137.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="351.0" y="155.0" font-size="8" text-anchor="middle" class="t mu" >−∞</text>
+<text x="306.0" y="200.0" font-size="13" text-anchor="middle" class="t" font-weight="bold" >打分 S（加上 mask）</text>
+<text x="306.0" y="218.0" font-size="12" text-anchor="middle" class="t mu" >T×T</text>
+<line x1="368.0" y1="124.0" x2="434.0" y2="124.0" class="ln" marker-end="url(#ah-ch06-matrix)" />
+<text x="401.0" y="116.0" font-size="12" text-anchor="middle" class="t mu" >softmax</text>
+<text x="401.0" y="144.0" font-size="12" text-anchor="middle" class="t mu" >按行</text>
+<rect x="444.0" y="70.0" width="18.0" height="18.0" rx="0" class="acc" opacity="1.00"/>
+<rect x="462.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="480.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="498.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="516.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="534.0" y="70.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="444.0" y="88.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.74"/>
+<rect x="462.0" y="88.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.34"/>
+<rect x="480.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="498.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="516.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="534.0" y="88.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="444.0" y="106.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.42"/>
+<rect x="462.0" y="106.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.23"/>
+<rect x="480.0" y="106.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.52"/>
+<rect x="498.0" y="106.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="516.0" y="106.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="534.0" y="106.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="444.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.13"/>
+<rect x="462.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.19"/>
+<rect x="480.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.39"/>
+<rect x="498.0" y="124.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.52"/>
+<rect x="516.0" y="124.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="534.0" y="124.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="444.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.13"/>
+<rect x="462.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.17"/>
+<rect x="480.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.34"/>
+<rect x="498.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.43"/>
+<rect x="516.0" y="142.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.25"/>
+<rect x="534.0" y="142.0" width="18.0" height="18.0" rx="0" class="mask" opacity="0.35"/>
+<rect x="444.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.48"/>
+<rect x="462.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.20"/>
+<rect x="480.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.16"/>
+<rect x="498.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.14"/>
+<rect x="516.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.15"/>
+<rect x="534.0" y="160.0" width="18.0" height="18.0" rx="0" class="acc" opacity="0.25"/>
+<rect x="444.0" y="70.0" width="108.0" height="108.0" rx="0" class="frame" />
+<text x="498.0" y="200.0" font-size="15" text-anchor="middle" class="t" font-weight="bold" >权重 P</text>
+<text x="498.0" y="218.0" font-size="12" text-anchor="middle" class="t mu" >T×T，每行和为 1</text>
+<text x="566.0" y="130.0" font-size="22" text-anchor="middle" class="t" >·</text>
+<rect x="576.0" y="70.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="594.0" y="70.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="612.0" y="70.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="576.0" y="88.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="594.0" y="88.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="612.0" y="88.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="576.0" y="106.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="594.0" y="106.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="612.0" y="106.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="576.0" y="124.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="594.0" y="124.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="612.0" y="124.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="576.0" y="142.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="594.0" y="142.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="612.0" y="142.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="576.0" y="160.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="594.0" y="160.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="612.0" y="160.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.55"/>
+<rect x="576.0" y="70.0" width="54.0" height="108.0" rx="0" class="frame" />
+<text x="603.0" y="200.0" font-size="15" text-anchor="middle" class="t" font-weight="bold" >V</text>
+<text x="603.0" y="218.0" font-size="12" text-anchor="middle" class="t mu" >T×d</text>
+<text x="646.0" y="130.0" font-size="18" text-anchor="middle" class="t" >=</text>
+<rect x="662.0" y="70.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.25"/>
+<rect x="680.0" y="70.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.37"/>
+<rect x="698.0" y="70.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.49"/>
+<rect x="662.0" y="88.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.37"/>
+<rect x="680.0" y="88.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.49"/>
+<rect x="698.0" y="88.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.25"/>
+<rect x="662.0" y="106.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.49"/>
+<rect x="680.0" y="106.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.25"/>
+<rect x="698.0" y="106.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.37"/>
+<rect x="662.0" y="124.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.25"/>
+<rect x="680.0" y="124.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.37"/>
+<rect x="698.0" y="124.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.49"/>
+<rect x="662.0" y="142.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.37"/>
+<rect x="680.0" y="142.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.49"/>
+<rect x="698.0" y="142.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.25"/>
+<rect x="662.0" y="160.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.49"/>
+<rect x="680.0" y="160.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.25"/>
+<rect x="698.0" y="160.0" width="18.0" height="18.0" rx="0" class="v" opacity="0.37"/>
+<rect x="662.0" y="70.0" width="54.0" height="108.0" rx="0" class="frame" />
+<text x="689.0" y="200.0" font-size="15" text-anchor="middle" class="t" font-weight="bold" >输出 O</text>
+<text x="689.0" y="218.0" font-size="12" text-anchor="middle" class="t mu" >T×d</text>
+<rect x="442.0" y="122.0" width="112.0" height="22.0" rx="2" class="frame" style="stroke:#cf3b25;stroke-width:2"/>
+<text x="498.0" y="58.0" font-size="11" text-anchor="middle" class="t mu" >第 4 行：位置 4 分给 1…4 的权重</text>
+<text x="306.0" y="58.0" font-size="11" text-anchor="middle" class="t mu" >灰格 s &gt; t：未来，置为 −∞</text>
+<text x="380.0" y="248.0" font-size="12" text-anchor="middle" class="t mu" >P 的颜色深浅是 6.5.1 节实际算出的权重。右上角全为 0，所以注意力矩阵是下三角的。</text>
+</svg>

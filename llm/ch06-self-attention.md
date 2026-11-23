@@ -31,10 +31,23 @@ Transformer 的回答是**self-attention**：每个位置按相关性，从之�
 - **key** $k_s=x_sW_K$："我这里有什么"；
 - **value** $v_s=x_sW_V$："如果你选中我，我给你的内容"。
 
-位置 $t$ 对位置 $s$ 的打分是内积 $q_t\cdot k_s$，经 softmax 变成权重。输出是 value 按这些权重的加权平均。写成矩阵形式：
+位置 $t$ 对位置 $s$ 的打分是内积 $q_t\cdot k_s$，经 softmax 变成权重。输出是 value 按这些权重的加权平均。
+
+![图 6-1　一个位置怎样读取前文。「它」的 query 和每个位置的 key 做内积，「猫」的 key 最匹配，打分最高；softmax 之后「猫」拿到 0.70 的权重，输出主要由「猫」的 value 组成。](figures/ch06-qkv.svg)
+
+**看图 6-1 要注意三点** **[直觉]**：
+- 打分只看 query 和 key 是否"对得上"，读取的却是 value。key 和 value 是同一个位置的两种不同投影：一个负责"被找到"，一个负责"被读走"，所以可以学成不同的东西；
+- softmax 把打分变成一组加起来等于 1 的权重，最高的那个会被放大（$e^{2.9}$ 比 $e^{0.7}$ 大 9 倍），所以输出往往由少数几个位置主导，但又不是硬性地只选一个，梯度能传到每个位置；
+- 每个位置都在同时做这件事，各自用自己的 query。同一个"猫"，被"它"读的时候和被"一只"读的时候，拿到的权重完全不同。
+
+写成矩阵形式，所有位置一次算完：
 $$\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\Big(\frac{QK^\top}{\sqrt{d}}+M\Big)V.$$
 
 形状：$Q,K,V$ 都是 $T\times d$（$d$ 是每个头的维数），打分矩阵 $QK^\top$ 是 $T\times T$，输出是 $T\times d$。
+
+![图 6-2　矩阵形式。QK 转置的第 t 行第 s 列就是位置 t 对位置 s 的打分；加上 mask 再按行 softmax，得到每行和为 1 的权重 P；P 的第 t 行乘 V，就是图 6-1 里对 value 的加权平均。](figures/ch06-matrix.svg)
+
+图 6-2 把图 6-1 的一行变成了整张表：图 6-1 是 $P$ 的最后一行（位置 7 看前 7 个位置），矩阵乘法把 $T$ 行同时算掉。$T\times T$ 这张表就是长上下文贵的原因（6.4 节）：$T$ 翻倍，它的面积变成 4 倍。
 
 **三个关键细节**：
 1. **causal mask $M$**：语言模型预测第 $t+1$ 个 token 时不能偷看后面。所以 $M$ 在 $s>t$ 处取 $-\infty$，softmax 之后这些位置的权重恰好为 0。注意力矩阵因此是**下三角**的。另一种 mask 是 **padding mask**：一个 batch 里的序列长短不一，短的要补齐（padding）到同样长度，补齐的位置作为 key 也要设成 $-\infty$，否则真实 token 会去"注意"这些填充物。两种 mask 可以相加后一起用。
@@ -46,6 +59,8 @@ $$\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\Big(\frac{QK^\top}{\sqrt{d}}+M\Big)
 
 **multi-head attention**：把上面的计算在 $h$ 组较小的 $W_Q,W_K,W_V$ 上并行做 $h$ 次，输出拼起来，再乘一个输出矩阵 $W_O$。不同的头可以学到不同类型的关系，比如一个头看语法、一个头看指代。
 
+![图 6-3　multi-head attention。输入分给 h 个 head，每个 head 用自己的一组较小的矩阵算出一张注意力图，各自关注不同的关系；结果拼接回原来的宽度，再乘 W_O 混合。](figures/ch06-multihead.svg)
+
 "多"的是**注意力分布**，不是参数：模型维度为 $d_{\text{model}}$ 时，每个头的维度取 $d_{\text{model}}/h$，$h$ 个头的 $W_Q$ 拼起来仍是 $d_{\text{model}}\times d_{\text{model}}$，$W_K,W_V,W_O$ 也一样。所以参数量（约 $4d_{\text{model}}^2$）和计算量与单头相同，只是一个位置可以同时按 $h$ 种不同的权重去看其他位置，而单头只能给出一种加权平均。代价是每个头的维度变小了。
 
 ## 6.3 一个 Transformer 块 **[事实]**
@@ -55,6 +70,13 @@ $$X\leftarrow X+\mathrm{MultiHeadAttention}(\mathrm{LN}(X)),\qquad X\leftarrow X
 - **注意力子层**：在位置之间交换信息。
 - **FFN 子层**（feed-forward network）：对每个位置单独做一个两层的全连接网络（结构和 [A.7 节](appendix-a-math-quick-reference.md#A.7) 的例子一样），可以理解成"对取到的信息做加工"。
 - **residual connection**：让信息和梯度能直接穿过很多层，深层网络才训练得动。
+
+![图 6-4　左：整个 GPT 是同样的块堆 L 层，底下是 embedding，顶上是输出层。右：一个块的内部（Pre-Norm）。中间那条粗线是残差流，两个分支各读一次、处理后加回去，形状始终是 T × d。](figures/ch06-block.svg)
+
+**怎么读图 6-4** **[直觉]**：把中间那条粗线（**residual stream**，残差流）想成一条传送带，每个位置一个 $d$ 维向量，从下往上走。每个子层都只是"读一下传送带，算出一个修改量，加回去"：
+- 注意力分支是唯一让不同位置互相交换信息的地方；
+- FFN 分支对每个位置单独做同样的计算，位置之间互不影响；
+- 两个分支都是"加"回去，不是"替换"，所以下面几层写进去的东西会一直留在传送带上，上面的层随时可以读到；反向传播时，梯度也能沿着这条线直接传到底层。
 
 GPT 类模型就是把这样的块堆几十到上百层，最后接一个输出层，在每个位置得到下一个 token 的 logits，再用 [第 5 章](ch05-language-model.md) 的交叉熵损失训练。
 
@@ -76,6 +98,8 @@ $$\mathrm{FFN}(x)=W_{\text{down}}\big(\mathrm{SiLU}(W_{\text{gate}}x)\odot W_{\t
 $$\big(R(m\theta)q\big)^\top\big(R(n\theta)k\big)=q^\top R(m\theta)^\top R(n\theta)k=q^\top R\big((n-m)\theta\big)k,$$
 只和 $n-m$ 有关。每一对分量都是如此，加起来也是。
 4. **grouped-query attention（GQA）**：多个查询头共用一组 K、V，KV cache 变小几倍（[17.9 节](ch17-inference-serving.md#17.9)）。
+
+![图 6-5　RoPE 的几何意义（第 3 点）。query 按自己的位置转 mθ，key 按自己的位置转 nθ。两个例子的绝对位置不同，但 n − m 都是 2，转完以后夹角相同，内积也就相同。](figures/ch06-rope.svg)
 
 另外，输入的 embedding 矩阵和输出层的矩阵各是 $V\times d$，词表大时它们占参数量的不小一部分。按这些结构数一遍参数量，见 [17.2 节](ch17-inference-serving.md#17.2)。[第 7 章](ch07-tiny-gpt.md) 把这些都写成了代码，包括反向传播。
 
