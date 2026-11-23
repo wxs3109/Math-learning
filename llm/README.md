@@ -49,6 +49,12 @@
 |---|---|---|
 | [第 17 章 推理服务](ch17-inference-serving.md) | prefill 与 decode；显存账本与 KV cache；roofline；连续批处理、PagedAttention、前缀缓存；投机解码（含证明）；量化；多卡并行；排队论与容量规划 | [`ch17_inference_serving.py`](code/ch17_inference_serving.py)、[`ch17_gpu_benchmark.py`](code/ch17_gpu_benchmark.py)（在 GPU 上运行） |
 
+**第五部分 实战项目**
+
+| 章 | 内容 | 代码 |
+|---|---|---|
+| [第 18 章 实战项目：设计](ch18-project-design.md) | 读书与面试陪练助手：自定义 SSE 与流式前端；模型网关；问书用 workflow、面试用 agent；记忆与间隔复习；用附录 C 做评测集；成本、延迟与安全；里程碑 | [`ch18_eval_baseline.py`](code/ch18_eval_baseline.py) |
+
 **附录**
 
 | | 内容 | 代码 |
@@ -68,5 +74,5 @@
 - **打地基**：按顺序读第 1–4 章，再读第 5、6 章。每章约一小时，读完跑一下配套代码，对照"数值实验"一节看输出。
 - **准备面试**：先看附录 C，按岗位挑出对应的类别，再顺着每道题后面的链接回到正文。
 - **快速入门**：有概率和线性代数基础的话，先读附录 A，然后直接读第 5、6 章，遇到不懂的再回到第 1–4 章对应的小节。
-- **关心工程**：第 9–17 章可以直接读，遇到数学时按链接回查第 1–6 章。
-- 代码进入 `code/` 目录后 `python3 文件名.py` 直接运行。第 1–11、13、15、16 章只依赖 numpy 或标准库；第 12 章的互操作部分需要 `pip install "mcp>=2"`（没装会自动跳过）；第 14 章需要 `pip install "langchain>=1" "langgraph>=1"`。都不需要 API key。第 17 章的 `ch17_gpu_benchmark.py` 需要 GPU（Kaggle / Colab 的免费 T4 即可）。
+- **关心工程**：第 9–18 章可以直接读，遇到数学时按链接回查第 1–6 章。
+- 代码进入 `code/` 目录后 `python3 文件名.py` 直接运行。第 1–11、13、15、16 章只依赖 numpy 或标准库；第 18 章另外可选 `pip install jieba`；第 12 章的互操作部分需要 `pip install "mcp>=2"`（没装会自动跳过）；第 14 章需要 `pip install "langchain>=1" "langgraph>=1"`。都不需要 API key。第 17 章的 `ch17_gpu_benchmark.py` 需要 GPU（Kaggle / Colab 的免费 T4 即可）。

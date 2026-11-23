@@ -64,6 +64,10 @@ PARTS = [
         ("ch17", "ch17-inference-serving.md", "17", "推理服务",
          "prefill 与 decode；KV cache 与 roofline；连续批处理、PagedAttention；投机解码；量化；排队与容量规划。"),
     ]),
+    ("第五部分 · 实战项目", [
+        ("ch18", "ch18-project-design.md", "18", "实战项目：设计",
+         "读书与面试陪练助手：架构、流式前端、模型网关、检索、面试官 agent、记忆、评测、成本与安全；用附录 C 做检索基线。"),
+    ]),
     ("附录", [
         ("appA", "appendix-a-math-quick-reference.md", "A", "数学速查",
          "一页讲完第 5、6 章要用的结论：交叉熵与 KL、最大似然、softmax、反向传播。"),
